@@ -4,6 +4,8 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import clientsRoutes from "./modules/clients/clients.routes.js";
 import servicesRoutes from "./modules/services/services.routes.js";
 import { startReminderJob } from "./modules/reminders/reminder.job.js";
+import tasksRoutes from "./modules/tasks/tasks.routes.js";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 
 const app = express();
 
@@ -13,6 +15,8 @@ startReminderJob();
 app.use("/auth", authRoutes);
 app.use("/clients", clientsRoutes);
 app.use("/services", servicesRoutes);
+app.use("/tasks", tasksRoutes);
+app.use("/dashboard", dashboardRoutes);
 app.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT NOW() as time");
