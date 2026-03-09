@@ -3,10 +3,13 @@ import pool from "./config/database.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import clientsRoutes from "./modules/clients/clients.routes.js";
 import servicesRoutes from "./modules/services/services.routes.js";
+import { startReminderJob } from "./modules/reminders/reminder.job.js";
 
 const app = express();
 
 app.use(express.json());
+
+startReminderJob();
 app.use("/auth", authRoutes);
 app.use("/clients", clientsRoutes);
 app.use("/services", servicesRoutes);
