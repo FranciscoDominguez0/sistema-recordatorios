@@ -1,6 +1,7 @@
 import pool from "../../config/database.js";
 import emailService from "../email/email.service.js";
 import { buildReminderEmail } from "../email/email.templates.js";
+import emailSettingsService from "../email_settings/email_settings.service.js";
 
 class ReminderService {
   async findServicesDueToday() {
@@ -58,6 +59,8 @@ class ReminderService {
   async processDailyReminders() {
     const servicesDue = await this.findServicesDueToday();
 
+    const smtpConfig = await emailSettingsService.getLatest();
+
     for (const service of servicesDue) {
       const serviceId = service.id;
       const clientId = service.client_id;
@@ -74,11 +77,19 @@ class ReminderService {
           expirationDate: service.expiration_date
         });
 
-        await emailService.sendMail({
-          to: service.email,
-          subject,
-          html
-        });
+        if (smtpConfig) {
+          await emailService.sendMailWithSmtpConfig(smtpConfig, {
+            to: service.email,
+            subject,
+            html
+          });
+        } else {
+          await emailService.sendMail({
+            to: service.email,
+            subject,
+            html
+          });
+        }
 
         await this.createReminderHistory(serviceId);
         await this.logEmailSent({

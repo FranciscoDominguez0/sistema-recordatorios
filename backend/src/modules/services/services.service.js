@@ -41,16 +41,42 @@ class ServicesService {
     };
   }
 
-  async getAllWithClient() {
-    const sql = `
-      SELECT s.*, c.name, c.email
+  async getAllWithClient({ page = 1, limit = 10, search } = {}) {
+    const safePage = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+    const offset = (safePage - 1) * safeLimit;
+
+    const hasSearch = Boolean(search && String(search).trim());
+    const searchValue = `%${String(search).trim()}%`;
+
+    const whereSql = hasSearch ? "WHERE s.service_name LIKE ? OR c.name LIKE ?" : "";
+    const whereParams = hasSearch ? [searchValue, searchValue] : [];
+
+    const dataSql = `
+      SELECT s.*, c.name AS client_name
       FROM services s
       JOIN clients c ON s.client_id = c.id
+      ${whereSql}
       ORDER BY expiration_date ASC
+      LIMIT ? OFFSET ?
     `;
 
-    const [rows] = await pool.query(sql);
-    return rows;
+    const countSql = `
+      SELECT COUNT(*) AS total
+      FROM services s
+      JOIN clients c ON s.client_id = c.id
+      ${whereSql}
+    `;
+
+    const [dataRows] = await pool.query(dataSql, [...whereParams, safeLimit, offset]);
+    const [countRows] = await pool.query(countSql, whereParams);
+
+    return {
+      data: dataRows,
+      total: countRows[0]?.total ?? 0,
+      page: safePage,
+      limit: safeLimit
+    };
   }
 
   async getByClientId(clientId) {

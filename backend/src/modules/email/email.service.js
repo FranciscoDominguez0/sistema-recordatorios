@@ -1,4 +1,5 @@
 import transporter from "../../config/email.js";
+import nodemailer from "nodemailer";
 
 class EmailService {
   async sendMail({ to, subject, html }) {
@@ -15,6 +16,27 @@ class EmailService {
       to,
       subject,
       html
+    });
+  }
+
+  async sendMailWithSmtpConfig(smtpConfig, { to, subject, html, text }) {
+    const secure = smtpConfig.encryption === "ssl";
+    const dynamicTransporter = nodemailer.createTransport({
+      host: smtpConfig.smtp_host,
+      port: Number(smtpConfig.smtp_port),
+      secure,
+      auth: {
+        user: smtpConfig.smtp_email,
+        pass: smtpConfig.smtp_password
+      }
+    });
+
+    return dynamicTransporter.sendMail({
+      from: smtpConfig.smtp_email,
+      to,
+      subject,
+      html,
+      text
     });
   }
 }

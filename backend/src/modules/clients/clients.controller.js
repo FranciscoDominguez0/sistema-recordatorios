@@ -13,8 +13,20 @@ class ClientsController {
  
   async getAll(req, res) {
     try {
-      const clients = await clientsService.getAll();
-      return res.json(clients);
+      const { page, limit, search } = req.query ?? {};
+      const result = await clientsService.getAll({ page, limit, search });
+
+      const totalPages = Math.ceil(result.total / result.limit);
+
+      return res.json({
+        data: result.data,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          total_pages: totalPages
+        }
+      });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

@@ -6,6 +6,8 @@ import servicesRoutes from "./modules/services/services.routes.js";
 import { startReminderJob } from "./modules/reminders/reminder.job.js";
 import tasksRoutes from "./modules/tasks/tasks.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
+import emailSettingsRoutes from "./modules/email_settings/email_settings.routes.js";
+import emailTemplatesRoutes from "./modules/email_templates/email_templates.routes.js";
 
 const app = express();
 
@@ -17,6 +19,8 @@ app.use("/clients", clientsRoutes);
 app.use("/services", servicesRoutes);
 app.use("/tasks", tasksRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/email-settings", emailSettingsRoutes);
+app.use("/email-templates", emailTemplatesRoutes);
 app.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT NOW() as time");
