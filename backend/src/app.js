@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import pool from "./config/database.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import clientsRoutes from "./modules/clients/clients.routes.js";
@@ -11,6 +12,17 @@ import emailTemplatesRoutes from "./modules/email_templates/email_templates.rout
 import activityLogsRoutes from "./modules/activity_logs/activityLogs.routes.js";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: ["http://localhost:3001", "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  })
+);
+
+app.options(/.*/, cors());
 
 app.use(express.json());
 
