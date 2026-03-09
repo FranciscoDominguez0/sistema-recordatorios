@@ -1,11 +1,13 @@
 import express from "express";
 import pool from "./config/database.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import clientsRoutes from "./modules/clients/clients.routes.js";
 
 const app = express();
 
 app.use(express.json());
 app.use("/auth", authRoutes);
+app.use("/clients", clientsRoutes);
 app.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT NOW() as time");

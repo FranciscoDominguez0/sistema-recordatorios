@@ -4,14 +4,18 @@ import jwt from "jsonwebtoken";
 dotenv.config();
 
 /**
- * Middleware de autenticación.
+ * Middleware de autenticación JWT.
  *
  * - Espera header: Authorization: Bearer <TOKEN>
  * - Si es válido, setea req.user con el payload del JWT
  * - Si falta token: 401 Token requerido
  * - Si token inválido: 401 Token inválido
+ *
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
  */
-export default function authMiddleware(req, res, next) {
+export function verifyToken(req, res, next) {
   const authHeader = req.headers?.authorization;
 
   if (!authHeader) {
