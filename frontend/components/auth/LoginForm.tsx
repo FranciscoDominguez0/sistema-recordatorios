@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 import { login } from "@/services/authService";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
     setIsLoading(true);
     try {
       await login(email.trim(), password);
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "No se pudo iniciar sesión";
       setError(message);
@@ -52,11 +52,11 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-white/5 bg-[#08112F]/45 text-[#ECEEF0] shadow-2xl shadow-black/40 backdrop-blur-xl">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-12 items-center rounded-2xl border border-neutral-200 bg-white px-3 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+            <div className="relative flex h-12 items-center rounded-2xl border border-[#323954] bg-[#08112F]/40 px-3 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/brand/logo.png"
@@ -72,14 +72,14 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
               <div
                 data-logo-fallback
                 style={{ display: "none" }}
-                className="h-7 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-50 to-neutral-100 px-3 text-sm font-semibold text-neutral-700 dark:from-neutral-900 dark:to-neutral-950 dark:text-neutral-200"
+                className="h-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#323954_0%,#3E53A0_55%,#5A77DF_100%)] px-3 text-sm font-semibold text-[#ECEEF0]"
               >
                 {initials}
               </div>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{companyName}</p>
-              <p className="text-xs text-neutral-600 dark:text-neutral-400">Accede a tu panel de control</p>
+              <p className="text-sm font-medium text-[#ECEEF0]">{companyName}</p>
+              <p className="text-xs text-[#CCD4DE]">Accede a tu panel de control</p>
             </div>
           </div>
         </div>
@@ -93,15 +93,25 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-5">
           {error ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200">
-              {error}
+            <div className="rounded-2xl border border-[#5A77DF]/20 bg-black/30 p-4 text-[#ECEEF0] shadow-sm shadow-black/30 backdrop-blur transition">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 rounded-xl bg-[#5A77DF]/12 p-2 text-[#CCD4DE]">
+                  <AlertCircle className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium leading-5">No se pudo iniciar sesión</p>
+                  <p className="mt-1 text-sm text-[#CCD4DE]">{error}</p>
+                </div>
+              </div>
             </div>
           ) : null}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-[#CCD4DE]">
+              Email
+            </Label>
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#CCD4DE]/70" />
               <Input
                 id="email"
                 type="email"
@@ -109,16 +119,18 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
                 placeholder="tu@correo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-[#323954] bg-[#08112F]/55 text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/25 focus-visible:border-[#5A77DF]"
                 disabled={isLoading}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-[#CCD4DE]">
+              Password
+            </Label>
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#CCD4DE]/70" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -126,14 +138,14 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
                 placeholder="Tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-11"
+                className="pl-10 pr-11 border-[#323954] bg-[#08112F]/55 text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/25 focus-visible:border-[#5A77DF]"
                 disabled={isLoading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
                 className={cn(
-                  "absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/10 dark:hover:bg-neutral-900 dark:hover:text-neutral-100 dark:focus-visible:ring-neutral-100/10",
+                  "absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#CCD4DE]/70 transition-colors hover:bg-[#323954]/40 hover:text-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A77DF]/25",
                   isLoading && "pointer-events-none opacity-60"
                 )}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
@@ -143,18 +155,13 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="w-full bg-[#5A77DF] text-white hover:bg-[#3E53A0] focus-visible:ring-[#5A77DF]/30"
+            disabled={isLoading}
+          >
             {isLoading ? "Entrando..." : "Entrar"}
           </Button>
-
-          <div className="flex items-center justify-between">
-            <a
-              href="#"
-              className="text-sm text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-            >
-              ¿Olvidaste tu contraseña?
-            </a>
-          </div>
         </form>
       </CardContent>
     </Card>

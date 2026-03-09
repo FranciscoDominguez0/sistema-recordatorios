@@ -30,5 +30,8 @@ export async function login(email: string, password: string): Promise<LoginRespo
   }
 
   localStorage.setItem("token", token);
+  if (response.data?.user) {
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+  }
   return response.data;
 }
