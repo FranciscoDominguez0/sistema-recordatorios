@@ -1,4 +1,5 @@
 import servicesService from "./services.service.js";
+import activityLogsService from "../activity_logs/activityLogs.service.js";
 
 class ServicesController {
   async create(req, res) {
@@ -20,6 +21,19 @@ class ServicesController {
         expiration_date,
         reminder_days
       });
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "CREATE_SERVICE",
+          entity_type: "service",
+          entity_id: service.id,
+          description: "Usuario creó un nuevo servicio",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
 
       return res.status(201).json(service);
     } catch (error) {
@@ -98,6 +112,19 @@ class ServicesController {
         return res.status(404).json({ message: "Servicio no encontrado" });
       }
 
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "UPDATE_SERVICE",
+          entity_type: "service",
+          entity_id: id,
+          description: "Usuario actualizó un servicio",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
       const service = await servicesService.getById(id);
       return res.json(service);
     } catch (error) {
@@ -112,6 +139,19 @@ class ServicesController {
 
       if (!deleted) {
         return res.status(404).json({ message: "Servicio no encontrado" });
+      }
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "DELETE_SERVICE",
+          entity_type: "service",
+          entity_id: id,
+          description: "Usuario eliminó un servicio",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
       }
 
       return res.json({ message: "Servicio eliminado" });

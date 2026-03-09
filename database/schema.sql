@@ -35,6 +35,9 @@ CREATE TABLE email_settings (
     INDEX idx_email_settings_user (user_id)
 );
 
+ALTER TABLE email_settings
+ADD COLUMN is_default BOOLEAN DEFAULT FALSE;
+
 -- =============================
 -- CLIENTS
 -- =============================
@@ -121,6 +124,33 @@ CREATE TABLE email_logs (
     INDEX idx_email_client (client_id),
     INDEX idx_email_service (service_id),
     INDEX idx_email_sent (sent_at)
+);
+
+CREATE TABLE activity_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50),
+    entity_id INT,
+    description TEXT,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+
+    INDEX idx_logs_user (user_id),
+    INDEX idx_logs_entity (entity_type, entity_id),
+    INDEX idx_logs_created (created_at)
+);
+
+CREATE TABLE email_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    subject VARCHAR(200) NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY unique_template_name (name)
 );
 
 -- =============================

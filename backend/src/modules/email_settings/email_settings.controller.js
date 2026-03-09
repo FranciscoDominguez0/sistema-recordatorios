@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import emailSettingsService from "./email_settings.service.js";
+import activityLogsService from "../activity_logs/activityLogs.service.js";
 
 class EmailSettingsController {
   async create(req, res) {
@@ -58,6 +59,19 @@ class EmailSettingsController {
         return res.status(404).json({ message: "Configuración no encontrada" });
       }
 
+      try {
+        await activityLogsService.logActivity({
+          user_id: userId,
+          action: "UPDATE_SMTP",
+          entity_type: "email_setting",
+          entity_id: id,
+          description: "Usuario actualizó configuración SMTP",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
       const settings = await emailSettingsService.getByUserId(userId);
       return res.json(settings);
     } catch (error) {
@@ -96,6 +110,40 @@ class EmailSettingsController {
       });
 
       return res.json({ message: "Correo de prueba enviado" });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  async setDefault(req, res) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "No autenticado" });
+      }
+
+      const id = Number(req.params.id);
+      const updated = await emailSettingsService.setDefault(id);
+
+      if (!updated) {
+        return res.status(404).json({ message: "Configuración no encontrada" });
+      }
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: userId,
+          action: "CHANGE_DEFAULT_SMTP",
+          entity_type: "email_setting",
+          entity_id: id,
+          description: "Usuario cambió el SMTP por defecto del sistema",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
+      const settings = await emailSettingsService.getDefault();
+      return res.json(settings);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

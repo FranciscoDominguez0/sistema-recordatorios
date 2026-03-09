@@ -1,10 +1,25 @@
 import clientsService from "./clients.service.js";
+import activityLogsService from "../activity_logs/activityLogs.service.js";
  
 class ClientsController {
   async create(req, res) {
     try {
       const { name, phone, email, notes } = req.body ?? {};
       const client = await clientsService.create({ name, phone, email, notes });
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "CREATE_CLIENT",
+          entity_type: "client",
+          entity_id: client.id,
+          description: "Usuario creó un nuevo cliente",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
       return res.status(201).json(client);
     } catch (error) {
       return res.status(500).json({ message: error.message });

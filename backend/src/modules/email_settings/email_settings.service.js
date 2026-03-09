@@ -30,13 +30,14 @@ class EmailSettingsService {
       smtp_port,
       smtp_email,
       smtp_password,
-      encryption
+      encryption,
+      is_default: false
     };
   }
 
   async getByUserId(userId) {
     const sql = `
-      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, created_at
+      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, is_default, created_at
       FROM email_settings
       WHERE user_id = ?
       ORDER BY created_at DESC
@@ -49,7 +50,7 @@ class EmailSettingsService {
 
   async getLatest() {
     const sql = `
-      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, created_at
+      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, is_default, created_at
       FROM email_settings
       ORDER BY created_at DESC
       LIMIT 1
@@ -81,6 +82,40 @@ class EmailSettingsService {
     ]);
 
     return result.affectedRows > 0;
+  }
+
+  async getDefault() {
+    const sql = `
+      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, is_default, created_at
+      FROM email_settings
+      WHERE is_default = TRUE
+      LIMIT 1
+    `;
+
+    const [rows] = await pool.query(sql);
+    return rows[0] ?? null;
+  }
+
+  async setDefault(id) {
+    const connection = await pool.getConnection();
+
+    try {
+      await connection.beginTransaction();
+
+      await connection.query("UPDATE email_settings SET is_default = FALSE");
+      const [result] = await connection.query(
+        "UPDATE email_settings SET is_default = TRUE WHERE id = ?",
+        [id]
+      );
+
+      await connection.commit();
+      return result.affectedRows > 0;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 }
 

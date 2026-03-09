@@ -1,10 +1,25 @@
 import tasksService from "./tasks.service.js";
+import activityLogsService from "../activity_logs/activityLogs.service.js";
 
 class TasksController {
   async create(req, res) {
     try {
       const { title, description, due_date } = req.body ?? {};
       const task = await tasksService.create({ title, description, due_date });
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "CREATE_TASK",
+          entity_type: "task",
+          entity_id: task.id,
+          description: "Usuario creó una tarea interna",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
       return res.status(201).json(task);
     } catch (error) {
       return res.status(500).json({ message: error.message });

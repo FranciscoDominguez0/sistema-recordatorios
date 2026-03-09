@@ -1,5 +1,6 @@
 import transporter from "../../config/email.js";
 import nodemailer from "nodemailer";
+import emailSettingsService from "../email_settings/email_settings.service.js";
 
 class EmailService {
   async sendMail({ to, subject, html }) {
@@ -38,6 +39,16 @@ class EmailService {
       html,
       text
     });
+  }
+
+  async sendSystemMail({ to, subject, html, text }) {
+    const smtpConfig = await emailSettingsService.getDefault();
+
+    if (smtpConfig) {
+      return this.sendMailWithSmtpConfig(smtpConfig, { to, subject, html, text });
+    }
+
+    return this.sendMail({ to, subject, html });
   }
 }
 
