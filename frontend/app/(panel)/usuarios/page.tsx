@@ -55,6 +55,8 @@ export default function UsuariosPage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const activeCount = useMemo(() => users.filter((u) => u.is_active).length, [users]);
+  const adminCount = useMemo(() => users.filter((u) => u.role === "admin").length, [users]);
+  const staffCount = useMemo(() => users.filter((u) => u.role === "staff").length, [users]);
 
   const fetchUsers = async (nextSearch?: string) => {
     setLoading(true);
@@ -175,96 +177,168 @@ export default function UsuariosPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle className="text-base">Usuarios</CardTitle>
-              <CardDescription>Gestiona los usuarios que acceden al sistema.</CardDescription>
-            </div>
+    <div className="space-y-6 text-[#ECEEF0]">
+      <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight text-[#ECEEF0]">Usuarios</h1>
+            <p className="mt-1 text-sm text-[#CCD4DE]">Gestiona los usuarios que acceden al sistema.</p>
+          </div>
 
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar por nombre o email"
-                className="h-11 sm:w-[260px]"
-              />
-              <Button
-                variant="secondary"
-                onClick={() => fetchUsers(search)}
-                className="w-full sm:w-auto"
-              >
-                Buscar
-              </Button>
-              <Button onClick={openCreate} className="w-full sm:w-auto">
-                <Plus className="h-4 w-4" />
-                Nuevo
-              </Button>
-            </div>
-          </CardHeader>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre o email"
+              className="h-11 border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60 sm:w-[260px]"
+            />
+            <Button variant="secondary" onClick={() => fetchUsers(search)} className="w-full sm:w-auto">
+              Buscar
+            </Button>
+            <Button onClick={openCreate} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4" />
+              Nuevo
+            </Button>
+          </div>
+        </div>
 
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Cargando usuarios...
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="rounded-2xl border border-white/10 bg-[#08112F]/70 p-4 shadow-sm shadow-black/20">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-[#CCD4DE]">Total</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#323954] text-[#ECEEF0] shadow-sm">
+                <User2 className="h-4 w-4" />
               </div>
-            ) : error ? (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-200">
-                {error}
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#ECEEF0]">{users.length}</p>
+            <p className="mt-1 text-xs text-[#CCD4DE]/75">Usuarios registrados</p>
+          </div>
+
+          <div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-4 shadow-sm shadow-black/20">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-emerald-200/80">Activos</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/25 bg-white/10 text-emerald-200">
+                <CheckCircle2 className="h-4 w-4" />
               </div>
-            ) : users.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-neutral-200 bg-white/40 p-6 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-white/5 dark:text-neutral-300">
-                No hay usuarios registrados.
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-emerald-100">{activeCount}</p>
+            <p className="mt-1 text-xs text-emerald-200/80">Con acceso habilitado</p>
+          </div>
+
+          <div className="rounded-2xl border border-[#5A77DF]/30 bg-[#3E53A0]/25 p-4 shadow-sm shadow-black/20">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-[#ECEEF0]/80">Admins</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-[#ECEEF0]">
+                <ShieldCheck className="h-4 w-4" />
               </div>
-            ) : (
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#ECEEF0]">{adminCount}</p>
+            <p className="mt-1 text-xs text-[#CCD4DE]/80">Permisos elevados</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-[#08112F]/70 p-4 shadow-sm shadow-black/20">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-[#CCD4DE]">Empleados</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#323954] text-[#ECEEF0] shadow-sm">
+                <User2 className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#ECEEF0]">{staffCount}</p>
+            <p className="mt-1 text-xs text-[#CCD4DE]/75">Rol staff</p>
+          </div>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-2">
+          <CardTitle className="text-base text-[#ECEEF0]">Listado</CardTitle>
+          <CardDescription className="text-[#CCD4DE]">Usuarios registrados en el sistema.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center gap-2 text-sm text-[#CCD4DE]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Cargando usuarios...
+            </div>
+          ) : error ? (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+              {error}
+            </div>
+          ) : users.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/10 bg-[#323954]/40 p-6 text-sm text-[#CCD4DE]">
+              No hay usuarios registrados.
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#08112F]/70 shadow-sm shadow-black/20">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-black/10 text-xs text-neutral-500 dark:border-white/10 dark:text-neutral-400">
-                      <th className="px-3 py-3">Nombre</th>
-                      <th className="px-3 py-3">Email</th>
-                      <th className="px-3 py-3">Rol</th>
-                      <th className="px-3 py-3">Estado</th>
-                      <th className="px-3 py-3 text-right">Acciones</th>
+                  <thead className="sticky top-0 z-10 bg-[#08112F]/90 text-xs text-[#CCD4DE] backdrop-blur">
+                    <tr className="border-b border-white/10">
+                      <th className="px-4 py-3 font-semibold">Nombre</th>
+                      <th className="px-4 py-3 font-semibold">Email</th>
+                      <th className="px-4 py-3 font-semibold">Rol</th>
+                      <th className="px-4 py-3 font-semibold">Estado</th>
+                      <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {users.map((u) => (
-                      <tr key={u.id} className="border-b border-black/5 last:border-0 dark:border-white/5">
-                        <td className="px-3 py-3">
+                  <tbody className="divide-y divide-white/10">
+                    {users.map((u, idx) => (
+                      <tr
+                        key={u.id}
+                        className={cn(
+                          "group transition-colors hover:bg-white/[0.04]",
+                          idx % 2 === 1 ? "bg-[#323954]/35" : "bg-transparent"
+                        )}
+                      >
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-900/5 text-neutral-900 dark:bg-white/10 dark:text-neutral-100">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#323954] text-[#ECEEF0] shadow-sm">
                               <User2 className="h-4 w-4" />
                             </div>
-                            <span className="font-medium text-neutral-900 dark:text-neutral-100">{u.name}</span>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium text-[#ECEEF0]">{u.name}</p>
+                              <p className="truncate text-xs text-[#CCD4DE]/75">ID {u.id}</p>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-3 py-3 text-neutral-600 dark:text-neutral-300">{u.email}</td>
-                        <td className="px-3 py-3">
-                          <span className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-black/5 px-3 py-1 text-xs font-medium text-neutral-800 dark:border-white/10 dark:bg-white/5 dark:text-neutral-100">
+                        <td className="px-4 py-3 text-[#CCD4DE]">
+                          <span className="font-medium text-[#ECEEF0]">{u.email}</span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
+                              u.role === "admin"
+                                ? "border-[#5A77DF]/30 bg-[#3E53A0]/25 text-[#ECEEF0]"
+                                : "border-white/15 bg-white/10 text-[#CCD4DE]"
+                            )}
+                          >
                             <ShieldCheck className="h-3.5 w-3.5" />
                             {roleLabel(u.role)}
                           </span>
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="px-4 py-3">
                           {u.is_active ? (
-                            <span className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-200">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               Activo
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-2 rounded-xl border border-neutral-500/20 bg-neutral-500/10 px-3 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-200">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-[#CCD4DE]">
                               <XCircle className="h-3.5 w-3.5" />
                               Inactivo
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(u)} aria-label="Editar">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openEdit(u)}
+                              aria-label="Editar"
+                              className="rounded-xl border border-transparent text-[#ECEEF0] group-hover:border-white/10 group-hover:bg-white/5"
+                            >
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
@@ -272,7 +346,7 @@ export default function UsuariosPage() {
                               size="icon"
                               onClick={() => onDelete(u)}
                               aria-label="Eliminar"
-                              className="text-red-600 hover:bg-red-500/10 dark:text-red-300"
+                              className="rounded-xl border border-transparent text-red-200 hover:bg-red-500/10"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -283,27 +357,10 @@ export default function UsuariosPage() {
                   </tbody>
                 </table>
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Resumen</CardTitle>
-            <CardDescription>Estado actual del módulo.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5">
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Total</p>
-              <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">{users.length}</p>
             </div>
-            <div className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5">
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">Activos</p>
-              <p className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">{activeCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className={cn(drawerOpen ? "" : "pointer-events-none")}
       >
@@ -317,17 +374,17 @@ export default function UsuariosPage() {
 
         <aside
           className={cn(
-            "fixed right-0 top-0 z-50 flex h-dvh w-[92vw] max-w-[520px] flex-col border-l border-black/10 bg-white text-neutral-900 shadow-2xl transition-transform dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-100",
+            "fixed right-0 top-0 z-50 flex h-dvh w-[92vw] max-w-[520px] flex-col border-l border-white/10 bg-[#08112F] text-[#ECEEF0] shadow-2xl shadow-black/30 transition-transform",
             drawerOpen ? "translate-x-0" : "translate-x-full"
           )}
           role="dialog"
           aria-modal="true"
           aria-label={drawerMode === "create" ? "Crear usuario" : "Editar usuario"}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-black/10 px-5 py-5 dark:border-white/10">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-5">
             <div>
               <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo usuario" : "Editar usuario"}</p>
-              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-[#CCD4DE]">
                 {drawerMode === "create"
                   ? "Completa los datos para crear un usuario."
                   : "Actualiza los datos del usuario."}
@@ -349,6 +406,7 @@ export default function UsuariosPage() {
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   required
+                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
                 />
               </div>
 
@@ -361,6 +419,7 @@ export default function UsuariosPage() {
                   value={form.email}
                   onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                   required
+                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
                 />
               </div>
 
@@ -373,6 +432,7 @@ export default function UsuariosPage() {
                   value={form.password}
                   onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                   required={drawerMode === "create"}
+                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
                 />
               </div>
 
@@ -385,6 +445,7 @@ export default function UsuariosPage() {
                   value={form.confirm_password}
                   onChange={(e) => setForm((p) => ({ ...p, confirm_password: e.target.value }))}
                   required={drawerMode === "create"}
+                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
                 />
               </div>
 
@@ -394,7 +455,7 @@ export default function UsuariosPage() {
                   id="role"
                   value={form.role}
                   onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as UserRole }))}
-                  className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-neutral-900/10 focus-visible:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 dark:focus-visible:ring-neutral-100/10"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#323954] px-3 text-sm text-[#ECEEF0] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
                 >
                   <option value="staff">Empleado</option>
                   <option value="admin">Administrador</option>
@@ -403,14 +464,14 @@ export default function UsuariosPage() {
 
               <div className="sm:col-span-1">
                 <Label>Usuario activo</Label>
-                <label className="mt-2 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm dark:border-neutral-800 dark:bg-neutral-900/40">
+                <label className="mt-2 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm">
                   <input
                     type="checkbox"
                     checked={form.is_active}
                     onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
-                    className="h-4 w-4 rounded border-neutral-300"
+                    className="h-4 w-4 rounded border-white/20"
                   />
-                  <span className="text-neutral-800 dark:text-neutral-100">
+                  <span className="text-[#ECEEF0]">
                     {form.is_active ? "Activo" : "Inactivo"}
                   </span>
                 </label>
@@ -418,7 +479,7 @@ export default function UsuariosPage() {
             </div>
 
             {formError ? (
-              <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-200">
+              <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
                 {formError}
               </div>
             ) : null}
