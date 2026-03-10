@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Activity,
@@ -75,37 +76,21 @@ export default function AppSidebar() {
 
   return (
     <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col">
-      <div className="flex items-center gap-3 px-6 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            aria-hidden="true"
-          >
-            <path
-              d="M4.2 6.2 L10.8 21.2 C11.1 21.9 12.1 21.9 12.4 21.2 L19.8 4.8"
-              stroke="#5A77DF"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M7.4 6.2 L12.0 16.8 L17.8 4.8"
-              stroke="#AFC2FF"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity="0.9"
-            />
-          </svg>
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">Vigitec Alertas</p>
-          <p className="truncate text-xs text-[#CCD4DE]/80">Panel administrativo</p>
+      <div className="px-6 py-5">
+        <div className="flex items-center justify-center">
+          <div className="relative">
+            <div className="absolute -inset-[1px] rounded-2xl bg-[linear-gradient(90deg,rgba(59,130,246,0.55),rgba(99,102,241,0.25),rgba(59,130,246,0.12))] opacity-60 blur-[10px]" />
+            <div className="relative flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <Image
+                src="/brand/logo.png"
+                alt="Vigitec"
+                width={200}
+                height={64}
+                priority
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
