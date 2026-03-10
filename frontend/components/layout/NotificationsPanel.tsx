@@ -46,51 +46,43 @@ export default function NotificationsPanel({
   onClose: () => void;
   isDark: boolean;
 }) {
-  useEffect(() => {
-    if (!open) return;
+  if (!open) return null;
 
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  }, [onClose]);
 
   useEffect(() => {
-    if (!open) return;
-
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = previousOverflow;
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [open]);
+  }, []);
 
   const surface = isDark ? "bg-[#0B1424] text-[#F1F5F9]" : "bg-white text-zinc-900";
   const border = isDark ? "border-[#1F2A44]" : "border-black/10";
   const muted = isDark ? "text-[#94A3B8]" : "text-zinc-500";
 
   return (
-    <div className={cn(open ? "" : "pointer-events-none")}>
-      <div
-        className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity",
-          open ? "opacity-100" : "opacity-0"
-        )}
-        onClick={onClose}
-      />
+    <div>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
 
       <aside
         className={cn(
-          "fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-[380px] flex-col border-l shadow-2xl transition-transform",
+          "fixed right-6 top-20 z-50 flex w-[92vw] max-w-[420px] flex-col overflow-hidden rounded-3xl border shadow-2xl",
           surface,
-          border,
-          open ? "translate-x-0" : "translate-x-full"
+          border
         )}
         role="dialog"
         aria-modal="true"
         aria-label="Notificaciones"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className={cn("flex items-center justify-between gap-3 border-b px-5 py-5", border)}>
           <div className="flex items-center gap-3">
@@ -117,7 +109,7 @@ export default function NotificationsPanel({
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
+        <div className="max-h-[60vh] overflow-auto p-4">
           <div className="space-y-3">
             {demoNotifications.map((n) => {
               const Icon = n.variant === "success" ? CheckCircle2 : Info;

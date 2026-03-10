@@ -73,7 +73,7 @@ export default function AppSidebar() {
   }, [profileName]);
 
   return (
-    <aside className="hidden h-screen w-72 shrink-0 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col">
+    <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col">
       <div className="flex items-center gap-3 px-6 py-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
           <Radar className="h-5 w-5 text-[#5A77DF]" />
