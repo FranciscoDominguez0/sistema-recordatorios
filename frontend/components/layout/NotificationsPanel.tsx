@@ -1,158 +1,259 @@
 "use client";
 
-import { useEffect } from "react";
-import { BellRing, CheckCircle2, Info, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Bell,
+  BellRing,
+  CalendarClock,
+  CheckCheck,
+  CheckCircle2,
+  Mail,
+  RefreshCw,
+  ServerCrash,
+  Trash2,
+  X
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import {
+  deleteNotification,
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type NotificationItem,
+  type NotificationType
+} from "@/services/notificationsService";
 
-type NotificationItem = {
-  id: string;
-  title: string;
-  description: string;
-  time: string;
-  variant: "info" | "success";
-};
-
-const demoNotifications: NotificationItem[] = [
-  {
-    id: "n1",
-    title: "Nuevo usuario registrado",
-    description: "Se registró un nuevo usuario.",
-    time: "Justo ahora",
-    variant: "success"
-  },
-  {
-    id: "n2",
-    title: "Tarea pendiente",
-    description: "Tienes tareas por revisar.",
-    time: "Hace 5 min",
-    variant: "info"
-  },
-  {
-    id: "n3",
-    title: "Servicios próximos",
-    description: "Hay servicios cercanos a vencer.",
-    time: "Hoy",
-    variant: "info"
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function typeIcon(type: NotificationType) {
+  switch (type) {
+    case "service_expiring": return <CalendarClock className="h-4 w-4 text-amber-500" />;
+    case "service_expired":  return <ServerCrash   className="h-4 w-4 text-red-500" />;
+    case "task_due":         return <CheckCircle2  className="h-4 w-4 text-blue-500" />;
+    case "email_sent":       return <Mail          className="h-4 w-4 text-emerald-500" />;
+    default:                 return <Bell          className="h-4 w-4 text-slate-400" />;
   }
-];
+}
 
+function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins < 1)  return "Justo ahora";
+  if (mins < 60) return `Hace ${mins} min`;
+  if (hours < 24) return `Hace ${hours} h`;
+  return `Hace ${days} día${days !== 1 ? "s" : ""}`;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function NotificationsPanel({
   open,
   onClose,
-  isDark
+  onUnreadCountChange
 }: {
   open: boolean;
   onClose: () => void;
-  isDark: boolean;
+  isDark?: boolean;
+  onUnreadCountChange?: (count: number) => void;
 }) {
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+  const [items, setItems] = useState<NotificationItem[]>([]);
+  const [unread, setUnread] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { notifications, unread_count } = await getNotifications();
+      setItems(notifications);
+      setUnread(unread_count);
+      onUnreadCountChange?.(unread_count);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al cargar");
+    } finally {
+      setLoading(false);
+    }
+  }, [onUnreadCountChange]);
+
+  useEffect(() => {
+    if (open) load();
+  }, [open, load]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
+  const handleMarkRead = async (id: number) => {
+    await markNotificationRead(id).catch(() => {});
+    setItems((prev) => prev.map((n) => n.id === id ? { ...n, is_read: true } : n));
+    setUnread((c) => Math.max(0, c - 1));
+    onUnreadCountChange?.(Math.max(0, unread - 1));
+  };
 
-  const surface = isDark ? "bg-[#0B1424] text-[#F1F5F9]" : "bg-white text-zinc-900";
-  const border = isDark ? "border-[#1F2A44]" : "border-black/10";
-  const muted = isDark ? "text-[#94A3B8]" : "text-zinc-500";
+  const handleMarkAllRead = async () => {
+    await markAllNotificationsRead().catch(() => {});
+    setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnread(0);
+    onUnreadCountChange?.(0);
+  };
+
+  const handleDelete = async (id: number) => {
+    const wasUnread = items.find((n) => n.id === id)?.is_read === false;
+    await deleteNotification(id).catch(() => {});
+    setItems((prev) => prev.filter((n) => n.id !== id));
+    if (wasUnread) {
+      setUnread((c) => Math.max(0, c - 1));
+      onUnreadCountChange?.(Math.max(0, unread - 1));
+    }
+  };
 
   return (
-    <div>
+    <>
+      {/* Backdrop */}
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
+      {/* Panel */}
       <aside
-        className={cn(
-          "fixed right-6 top-20 z-50 flex w-[92vw] max-w-[420px] flex-col overflow-hidden rounded-3xl border shadow-2xl",
-          surface,
-          border
-        )}
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Notificaciones"
         onClick={(e) => e.stopPropagation()}
+        className="fixed right-4 top-20 z-50 flex w-[92vw] max-w-[420px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl shadow-black/10 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/40"
       >
-        <div className={cn("flex items-center justify-between gap-3 border-b px-5 py-5", border)}>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
           <div className="flex items-center gap-3">
-            <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl border", border)}>
-              <BellRing className={cn("h-5 w-5", isDark ? "text-[#3B82F6]" : "text-[#3E53A0]")} />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]">
+              <BellRing className="h-4 w-4 text-[#3B82F6]" />
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">Notificaciones</p>
-              <p className={cn("truncate text-xs", muted)}>{demoNotifications.length} nuevas</p>
+            <div>
+              <p className="text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">Notificaciones</p>
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                {unread > 0 ? `${unread} sin leer` : "Todo al día"}
+              </p>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className={cn(
-              "inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-colors",
-              border,
-              isDark ? "bg-white/5 hover:bg-white/10" : "bg-white hover:bg-zinc-50"
-            )}
-            aria-label="Cerrar notificaciones"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={load}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+              title="Recargar"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+              aria-label="Cerrar"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
-        <div className="max-h-[60vh] overflow-auto p-4">
-          <div className="space-y-3">
-            {demoNotifications.map((n) => {
-              const Icon = n.variant === "success" ? CheckCircle2 : Info;
-              const iconBg = isDark ? "bg-white/5" : "bg-zinc-100";
-
-              return (
+        {/* Content */}
+        <div className="max-h-[60vh] overflow-y-auto p-3">
+          {loading ? (
+            <div className="flex items-center justify-center py-10 text-sm text-[#64748B] dark:text-[#94A3B8]">
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+            </div>
+          ) : error ? (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          ) : items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Bell className="mb-3 h-8 w-8 opacity-20 text-[#64748B] dark:text-[#94A3B8]" />
+              <p className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Sin notificaciones</p>
+              <p className="mt-1 text-xs text-[#94A3B8] dark:text-[#64748B]">Cuando haya actividad, aparecerá aquí.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {items.map((n) => (
                 <div
                   key={n.id}
                   className={cn(
-                    "rounded-2xl border p-4",
-                    border,
-                    isDark ? "bg-white/5" : "bg-white"
+                    "group relative flex items-start gap-3 rounded-2xl border p-3 transition-colors",
+                    n.is_read
+                      ? "border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]"
+                      : "border-[#3B82F6]/20 bg-[#3B82F6]/5 dark:border-[#3B82F6]/30 dark:bg-[#3B82F6]/10"
                   )}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl", iconBg)}>
-                      <Icon className={cn("h-5 w-5", n.variant === "success" ? "text-[#3B82F6]" : muted)} />
-                    </div>
+                  {/* Dot indicador */}
+                  {!n.is_read && (
+                    <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#3B82F6]" />
+                  )}
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{n.title}</p>
-                      <p className={cn("mt-1 text-sm", muted)}>{n.description}</p>
-                      <p className={cn("mt-2 text-xs", muted)}>{n.time}</p>
-                    </div>
+                  {/* Icon */}
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]">
+                    {typeIcon(n.type)}
+                  </div>
+
+                  {/* Text */}
+                  <div className="min-w-0 flex-1 pr-6">
+                    <p className="truncate text-sm font-medium text-[#0F172A] dark:text-[#F1F5F9]">
+                      {n.title}
+                    </p>
+                    {n.message && (
+                      <p className="mt-0.5 line-clamp-2 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                        {n.message}
+                      </p>
+                    )}
+                    <p className="mt-1.5 text-[10px] text-[#94A3B8] dark:text-[#64748B]">
+                      {relativeTime(n.created_at)}
+                    </p>
+                  </div>
+
+                  {/* Actions (on hover) */}
+                  <div className="absolute right-2 top-2 hidden flex-col gap-1 group-hover:flex">
+                    {!n.is_read && (
+                      <button
+                        type="button"
+                        onClick={() => handleMarkRead(n.id)}
+                        className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-[#3B82F6] hover:bg-[#3B82F6]/10 dark:border-[#1F2A44] dark:bg-[#111E35]"
+                        title="Marcar como leída"
+                      >
+                        <CheckCheck className="h-3 w-3" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(n.id)}
+                      className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-red-500 hover:bg-red-500/10 dark:border-[#1F2A44] dark:bg-[#111E35]"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className={cn("border-t p-4", border)}>
-          <button
-            type="button"
-            onClick={onClose}
-            className={cn(
-              "w-full rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors",
-              border,
-              isDark ? "bg-white/5 hover:bg-white/10" : "bg-white hover:bg-zinc-50"
-            )}
-          >
-            Marcar como leídas
-          </button>
-        </div>
+        {/* Footer */}
+        {items.length > 0 && (
+          <div className="border-t border-[#E2E8F0] p-3 dark:border-[#1F2A44]">
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={unread === 0}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-white disabled:opacity-40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
+            >
+              <CheckCheck className="h-4 w-4" />
+              Marcar todas como leídas
+            </button>
+          </div>
+        )}
       </aside>
-    </div>
+    </>
   );
 }

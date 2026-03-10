@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BellRing, LogOut, Menu, Moon, Search, SlidersHorizontal, Sun, XCircle } from "lucide-react";
 
@@ -9,6 +9,7 @@ import NotificationsPanel from "@/components/layout/NotificationsPanel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { getUnreadCount } from "@/services/notificationsService";
 
 function titleFromPath(pathname: string) {
   const map: Record<string, string> = {
@@ -44,6 +45,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
   );
 
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isDark, setIsDark] = useState(false);
   const [globalSearch, setGlobalSearch] = useState("");
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -58,6 +60,20 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
     document.documentElement.classList.toggle("dark", nextIsDark);
     document.documentElement.classList.toggle("light", !nextIsDark);
   }, []);
+
+  // Polling de notificaciones no leídas cada 60 seg
+  const fetchUnread = useCallback(async () => {
+    try {
+      const count = await getUnreadCount();
+      setUnreadCount(count);
+    } catch { /* sin auth o sin conexión */ }
+  }, []);
+
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60_000);
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
 
   useEffect(() => {
     const q = (searchParams?.get("search") ?? "").toString();
@@ -229,7 +245,11 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Notificaciones"
           >
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#3B82F6]" />
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#3B82F6] text-[9px] font-bold text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
             <BellRing className="h-4 w-4 text-[#2563EB] dark:text-[#F1F5F9]" />
           </button>
 
@@ -262,6 +282,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
           open={notificationsOpen}
           onClose={() => setNotificationsOpen(false)}
           isDark={isDark}
+          onUnreadCountChange={setUnreadCount}
         />
       ) : null}
     </header>

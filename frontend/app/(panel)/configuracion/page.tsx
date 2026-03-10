@@ -85,6 +85,9 @@ function buildEmailHtml(opts: {
     .replace(/\n/g, "<br/>")
     .replace(/\{\{cliente\}\}/g, "<strong>Cliente Ejemplo</strong>")
     .replace(/\{\{servicio\}\}/g, "<em>Servicio Premium</em>")
+    .replace(/\{\{tarea\}\}/g, "<em>Cobrar a cliente Acme Corp</em>")
+    .replace(/\{\{admin\}\}/g, "<strong>Administrador</strong>")
+    .replace(/\{\{empleado\}\}/g, "<strong>Empleado</strong>")
     .replace(/\{\{fecha_vencimiento\}\}/g, "<strong>31/03/2026</strong>")
     .replace(/\{\{logo_empresa\}\}/g, logo ? `<img src="${logo}" alt="Logo" style="max-height:50px"/>` : "")
     .replace(/\{\{firma_empresa\}\}/g, firma ? firma.replace(/\n/g, "<br/>") : "");
@@ -646,7 +649,8 @@ export default function ConfiguracionPage() {
                     /* ── Editor ── */
                     <form onSubmit={onSaveTemplate} className="space-y-4">
                       <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
-                        Variables: <strong>{"{{cliente}}"}</strong> · <strong>{"{{servicio}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
+                        <span className="font-semibold">Clientes:</span> <strong>{"{{cliente}}"}</strong> · <strong>{"{{servicio}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong><br/>
+                        <span className="font-semibold">Tareas internas:</span> <strong>{"{{admin}}"}</strong> · <strong>{"{{tarea}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
                       </div>
 
                       <div>
@@ -771,7 +775,8 @@ export default function ConfiguracionPage() {
                 </div>
               )}
               <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
-                Variables: <strong>{"{{cliente}}"}</strong> · <strong>{"{{servicio}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
+                <span className="font-semibold">Clientes:</span> <strong>{"{{cliente}}"}</strong> · <strong>{"{{servicio}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong><br/>
+                <span className="font-semibold">Tareas internas:</span> <strong>{"{{admin}}"}</strong> · <strong>{"{{tarea}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
               </div>
               <div>
                 <Label htmlFor="tpl-new-subject">Asunto</Label>
