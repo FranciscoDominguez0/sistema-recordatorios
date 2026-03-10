@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { BellRing, LogOut, Moon, Search, SlidersHorizontal, Sun, XCircle } from "lucide-react";
+import { BellRing, LogOut, Menu, Moon, Search, SlidersHorizontal, Sun, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import NotificationsPanel from "@/components/layout/NotificationsPanel";
@@ -32,7 +32,7 @@ function searchPlaceholderFromPath(pathname: string) {
   return map[pathname] ?? "Buscar";
 }
 
-export default function AppTopbar() {
+export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
   const pathname = usePathname();
   const title = useMemo(() => titleFromPath(pathname ?? "/dashboard"), [pathname]);
   const router = useRouter();
@@ -128,6 +128,15 @@ export default function AppTopbar() {
   return (
     <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-[#F8FAFC]/80 backdrop-blur dark:border-[#1F2A44] dark:bg-[#0B1424]/80">
       <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:px-6">
+        <button
+          type="button"
+          onClick={() => onOpenSidebar?.()}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844] lg:hidden"
+          aria-label="Abrir menú"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
         <div className="min-w-0">
           <h2 className="truncate text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{title}</h2>
         </div>
