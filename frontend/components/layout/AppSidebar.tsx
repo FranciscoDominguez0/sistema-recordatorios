@@ -28,7 +28,7 @@ const nav = [
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const [profileName, setProfileName] = useState<string>("Perfil");
+  const [profileName, setProfileName] = useState<string>("");
   const [profileEmail, setProfileEmail] = useState<string>("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -71,6 +71,8 @@ export default function AppSidebar() {
     const second = parts.length > 1 ? parts[1]?.[0] : parts[0]?.[1];
     return `${first}${second ?? ""}`.toUpperCase();
   }, [profileName]);
+
+  const hasProfile = Boolean(profileName || profileEmail);
 
   return (
     <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col">
@@ -120,8 +122,12 @@ export default function AppSidebar() {
             </div>
 
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-white">{profileName}</p>
-              <p className="truncate text-xs text-[#CCD4DE]/80">{profileEmail || "Acceso con token"}</p>
+              {hasProfile ? (
+                <>
+                  <p className="truncate text-xs font-semibold text-white">{profileName}</p>
+                  {profileEmail ? <p className="truncate text-xs text-[#CCD4DE]/80">{profileEmail}</p> : null}
+                </>
+              ) : null}
             </div>
           </div>
         </div>

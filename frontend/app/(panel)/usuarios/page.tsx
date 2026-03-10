@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import {
   createUser,
   deleteUser,
-  getUsers,
+  getUsersPaginated,
   updateUser,
   type UserItem,
   type UserRole
@@ -47,6 +47,15 @@ export default function UsuariosPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [activeTotal, setActiveTotal] = useState(0);
+  const [adminTotal, setAdminTotal] = useState(0);
+  const [staffTotal, setStaffTotal] = useState(0);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("create");
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
@@ -54,16 +63,31 @@ export default function UsuariosPage() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const activeCount = useMemo(() => users.filter((u) => u.is_active).length, [users]);
-  const adminCount = useMemo(() => users.filter((u) => u.role === "admin").length, [users]);
-  const staffCount = useMemo(() => users.filter((u) => u.role === "staff").length, [users]);
+  const activeCount = useMemo(() => activeTotal, [activeTotal]);
+  const adminCount = useMemo(() => adminTotal, [adminTotal]);
+  const staffCount = useMemo(() => staffTotal, [staffTotal]);
 
-  const fetchUsers = async (nextSearch?: string) => {
+  const fetchUsers = async ({ nextSearch, nextPage }: { nextSearch?: string; nextPage?: number } = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUsers(nextSearch ?? search);
-      setUsers(data);
+      const finalSearch = nextSearch ?? search;
+      const finalPage = nextPage ?? page;
+
+      const result = await getUsersPaginated({
+        page: finalPage,
+        limit,
+        search: finalSearch
+      });
+
+      setUsers(result.data);
+      setTotalUsers(result.pagination.total ?? 0);
+      setTotalPages(result.pagination.total_pages ?? 1);
+      setPage(result.pagination.page ?? finalPage);
+
+      setActiveTotal(Number(result.summary?.active ?? 0));
+      setAdminTotal(Number(result.summary?.admin ?? 0));
+      setStaffTotal(Number(result.summary?.staff ?? 0));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "No se pudo cargar usuarios");
     } finally {
@@ -192,7 +216,14 @@ export default function UsuariosPage() {
               placeholder="Buscar por nombre o email"
               className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 sm:w-[260px] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
             />
-            <Button variant="secondary" onClick={() => fetchUsers(search)} className="w-full sm:w-auto">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setPage(1);
+                fetchUsers({ nextSearch: search, nextPage: 1 });
+              }}
+              className="w-full sm:w-auto"
+            >
               Buscar
             </Button>
             <Button onClick={openCreate} className="w-full sm:w-auto">
@@ -210,7 +241,7 @@ export default function UsuariosPage() {
                 <User2 className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{users.length}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{totalUsers}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Usuarios registrados</p>
           </div>
 
@@ -356,6 +387,33 @@ export default function UsuariosPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-[#1F2A44] dark:text-[#94A3B8]">
+                <span>
+                  Página {page} de {totalPages}
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-9"
+                    disabled={loading || page <= 1}
+                    onClick={() => fetchUsers({ nextPage: Math.max(1, page - 1) })}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-9"
+                    disabled={loading || page >= totalPages}
+                    onClick={() => fetchUsers({ nextPage: Math.min(totalPages, page + 1) })}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
               </div>
             </div>
           )}

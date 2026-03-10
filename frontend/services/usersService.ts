@@ -11,6 +11,23 @@ export type UserItem = {
   created_at?: string;
 };
 
+export type PaginationInfo = {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+};
+
+export type PaginatedResponse<T> = {
+  data: T[];
+  summary?: {
+    active: number;
+    admin: number;
+    staff: number;
+  };
+  pagination: PaginationInfo;
+};
+
 type CreateUserInput = {
   name: string;
   email: string;
@@ -53,6 +70,33 @@ export async function getUsers(search?: string): Promise<UserItem[]> {
     });
 
   return response.data ?? [];
+}
+
+export async function getUsersPaginated({
+  page = 1,
+  limit = 10,
+  search
+}: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<PaginatedResponse<UserItem>> {
+  const response = await api
+    .get<PaginatedResponse<UserItem>>("/users", {
+      headers: authHeaders(),
+      params: {
+        include_pagination: 1,
+        page,
+        limit,
+        ...(search ? { search } : {})
+      }
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo cargar usuarios";
+      throw new Error(message);
+    });
+
+  return response.data;
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserItem> {

@@ -44,7 +44,11 @@ class UsersRepository {
     return rows[0] ?? null;
   }
 
-  async getAll({ search } = {}) {
+  async getAll({ page = 1, limit = 10, search } = {}) {
+    const safePage = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+    const offset = (safePage - 1) * safeLimit;
+
     const hasSearch = Boolean(search && String(search).trim());
     const searchValue = `%${String(search).trim()}%`;
 
@@ -54,21 +58,60 @@ class UsersRepository {
       ? "SELECT id, name, email, role, is_active, created_at"
       : "SELECT id, name, email, role, created_at";
 
+    const whereSql = hasSearch ? "WHERE name LIKE ? OR email LIKE ?" : "";
+    const whereParams = hasSearch ? [searchValue, searchValue] : [];
+
     const dataSql = `
       ${selectSql}
       FROM users
-      ${hasSearch ? "WHERE name LIKE ? OR email LIKE ?" : ""}
+      ${whereSql}
       ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
     `;
 
-    const params = hasSearch ? [searchValue, searchValue] : [];
-    const [rows] = await pool.query(dataSql, params);
+    const countSql = `
+      SELECT COUNT(*) AS total
+      FROM users
+      ${whereSql}
+    `;
 
-    if (!activeColumn) {
-      return rows.map((u) => ({ ...u, is_active: true }));
-    }
+    const summarySql = activeColumn
+      ? `
+        SELECT
+          SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active,
+          SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) AS admin,
+          SUM(CASE WHEN role = 'staff' THEN 1 ELSE 0 END) AS staff
+        FROM users
+        ${whereSql}
+      `
+      : `
+        SELECT
+          COUNT(*) AS active,
+          SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) AS admin,
+          SUM(CASE WHEN role = 'staff' THEN 1 ELSE 0 END) AS staff
+        FROM users
+        ${whereSql}
+      `;
 
-    return rows;
+    const [dataRows] = await pool.query(dataSql, [...whereParams, safeLimit, offset]);
+    const [countRows] = await pool.query(countSql, whereParams);
+    const [summaryRows] = await pool.query(summarySql, whereParams);
+
+    const normalizedData = activeColumn
+      ? dataRows
+      : dataRows.map((u) => ({ ...u, is_active: true }));
+
+    return {
+      data: normalizedData,
+      total: countRows[0]?.total ?? 0,
+      page: safePage,
+      limit: safeLimit,
+      summary: {
+        active: Number(summaryRows[0]?.active ?? 0),
+        admin: Number(summaryRows[0]?.admin ?? 0),
+        staff: Number(summaryRows[0]?.staff ?? 0)
+      }
+    };
   }
 
   async create({ name, email, password_hash, role, is_active }) {

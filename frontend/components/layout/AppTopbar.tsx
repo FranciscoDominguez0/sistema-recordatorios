@@ -88,11 +88,13 @@ export default function AppTopbar() {
         </div>
       </div>
 
-      <NotificationsPanel
-        open={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-        isDark={isDark}
-      />
+      {notificationsOpen ? (
+        <NotificationsPanel
+          open={notificationsOpen}
+          onClose={() => setNotificationsOpen(false)}
+          isDark={isDark}
+        />
+      ) : null}
     </header>
   );
 }

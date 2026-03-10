@@ -3,9 +3,30 @@ import usersService from "./users.service.js";
 class UsersController {
   async getAll(req, res) {
     try {
-      const { search } = req.query ?? {};
-      const users = await usersService.getAll({ search });
-      return res.json(users);
+      const { page, limit, search, include_pagination } = req.query ?? {};
+      const result = await usersService.getAll({ page, limit, search });
+
+      const wantsPagination =
+        include_pagination === "1" ||
+        include_pagination === "true" ||
+        include_pagination === true;
+
+      if (!wantsPagination) {
+        return res.json(result.data);
+      }
+
+      const totalPages = Math.ceil((result.total ?? 0) / (result.limit || 10));
+
+      return res.json({
+        data: result.data,
+        summary: result.summary,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          total_pages: totalPages
+        }
+      });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

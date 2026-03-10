@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import usersRepository from "./users.repository.js";
 
 class UsersService {
-  async getAll({ search } = {}) {
-    return usersRepository.getAll({ search });
+  async getAll({ page, limit, search } = {}) {
+    return usersRepository.getAll({ page, limit, search });
   }
 
   async create({ name, email, password, role, is_active } = {}) {

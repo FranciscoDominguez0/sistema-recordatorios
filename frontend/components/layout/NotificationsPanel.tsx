@@ -46,8 +46,6 @@ export default function NotificationsPanel({
   onClose: () => void;
   isDark: boolean;
 }) {
-  if (!open) return null;
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -59,7 +57,7 @@ export default function NotificationsPanel({
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = previousOverflow;
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
     };
