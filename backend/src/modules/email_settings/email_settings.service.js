@@ -40,12 +40,27 @@ class EmailSettingsService {
       SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, is_default, created_at
       FROM email_settings
       WHERE user_id = ?
-      ORDER BY created_at DESC
+      ORDER BY is_default DESC, created_at DESC
       LIMIT 1
     `;
 
     const [rows] = await pool.query(sql, [userId]);
     return rows[0] ?? null;
+  }
+
+  async getAll() {
+    const sql = `
+      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, is_default, created_at
+      FROM email_settings
+      ORDER BY is_default DESC, created_at DESC
+    `;
+    const [rows] = await pool.query(sql);
+    return rows;
+  }
+
+  async delete(id) {
+    const [result] = await pool.query("DELETE FROM email_settings WHERE id = ?", [id]);
+    return result.affectedRows > 0;
   }
 
   async getLatest() {

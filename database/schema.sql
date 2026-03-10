@@ -155,6 +155,60 @@ CREATE TABLE email_templates (
     UNIQUE KEY unique_template_name (name)
 );
 
+
+-- =============================
+-- NOTIFICATIONS (NOTIFICACIONES DEL SISTEMA)
+-- =============================
+
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NULL,
+    client_id INT NULL,
+    service_id INT NULL,
+    task_id INT NULL,
+
+    type ENUM(
+        'service_expiring',
+        'service_expired',
+        'task_due',
+        'email_sent'
+    ) NOT NULL,
+
+    title VARCHAR(200) NOT NULL,
+    message TEXT,
+
+    is_read BOOLEAN DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE,
+    FOREIGN KEY (task_id) REFERENCES internal_tasks(id) ON DELETE CASCADE,
+
+    INDEX idx_notifications_user (user_id),
+    INDEX idx_notifications_service (service_id),
+    INDEX idx_notifications_task (task_id),
+    INDEX idx_notifications_read (is_read),
+    INDEX idx_notifications_created (created_at)
+);
+
+-- =============================
+-- COMPANY SETTINGS (IDENTIDAD DE EMPRESA)
+-- =============================
+
+CREATE TABLE IF NOT EXISTS company_settings (
+    id INT PRIMARY KEY DEFAULT 1,       -- siempre 1 sola fila global
+    company_name VARCHAR(150) DEFAULT NULL,
+    firma TEXT DEFAULT NULL,
+    logo_base64 LONGTEXT DEFAULT NULL,  -- imagen PNG/JPG en base64
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Fila inicial vacía
+INSERT IGNORE INTO company_settings (id) VALUES (1);
+
 -- =============================
 -- CONSULTA RECORDATORIOS
 -- servicios que vencen en X dias

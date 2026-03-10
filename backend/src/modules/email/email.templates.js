@@ -1,4 +1,5 @@
 import pool from "../../config/database.js";
+import companyService from "../company/company.service.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cargar plantilla desde la base de datos
@@ -19,14 +20,37 @@ function interpolate(text, vars) {
   return text.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
 }
 
+// Devuelve la URL más apropiada del logo para emails:
+// - En producción (BACKEND_URL configurado) usa URL pública → Gmail lo carga sin problemas
+// - En local usa base64 como fallback → funciona en Outlook/Thunderbird, no en Gmail
+function getLogoSrc(company) {
+  if (!company?.logo_base64) return "";
+  const backendUrl = (process.env.BACKEND_URL || "").trim();
+  if (backendUrl) {
+    return `${backendUrl.replace(/\/$/, "")}/company/logo`;
+  }
+  return ""; // sin URL pública → se muestra el nombre de la empresa en texto
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HTML wrapper profesional
 // ─────────────────────────────────────────────────────────────────────────────
-function wrapInHtml({ subject, bodyText, companyName = "Sistema de recordatorios" }) {
+function wrapInHtml({ subject, bodyText, companyName = "Sistema de recordatorios", logo = "", firma = "" }) {
   const paragraphs = bodyText
     .split("\n")
     .map((line) => (line.trim() === "" ? "<br/>" : `<p style="margin:0 0 10px;">${line}</p>`))
     .join("\n");
+
+  const headerContent = logo
+    ? `<img src="${logo}" alt="" style="max-height:48px;max-width:200px;object-fit:contain;display:block;"/>`
+    : `<span style="color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.5px;">${companyName}</span>`;
+
+  const firmaSection = firma
+    ? `<tr><td style="background:#F8FAFC;border-top:1px solid #E2E8F0;padding:24px 32px;">
+        <p style="margin:0 0 4px;color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Firma</p>
+        <div style="color:#334155;font-size:13px;line-height:1.6;">${firma.replace(/\n/g, "<br/>")}</div>
+       </td></tr>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -44,9 +68,7 @@ function wrapInHtml({ subject, bodyText, companyName = "Sistema de recordatorios
           <td style="background:linear-gradient(135deg,#08112F 0%,#1a2f6e 100%);padding:28px 32px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td>
-                  <span style="color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.5px;">${companyName}</span>
-                </td>
+                <td>${headerContent}</td>
                 <td align="right">
                   <span style="color:rgba(255,255,255,0.55);font-size:11px;">Notificación automática</span>
                 </td>
@@ -78,6 +100,8 @@ function wrapInHtml({ subject, bodyText, companyName = "Sistema de recordatorios
           </td>
         </tr>
 
+        ${firmaSection}
+
         <!-- FOOTER -->
         <tr>
           <td style="background:#F8FAFC;padding:16px 32px;border-bottom-left-radius:16px;border-bottom-right-radius:16px;">
@@ -98,7 +122,10 @@ function wrapInHtml({ subject, bodyText, companyName = "Sistema de recordatorios
 // Builder: recordatorio al CLIENTE
 // ─────────────────────────────────────────────────────────────────────────────
 export async function buildClientReminderEmail({ clientName, serviceName, expirationDate }) {
-  const template = await getTemplateByName("cliente_recordatorio");
+  const [template, company] = await Promise.all([
+    getTemplateByName("cliente_recordatorio"),
+    companyService.get().catch(() => null)
+  ]);
 
   const vars = {
     cliente: clientName,
@@ -114,16 +141,25 @@ export async function buildClientReminderEmail({ clientName, serviceName, expira
     ? interpolate(template.body, vars)
     : `Estimado/a ${clientName},\n\nLe recordamos que el servicio "${serviceName}" vence el ${formatDate(expirationDate)}.\n\nGracias por confiar en nosotros.`;
 
-  const html = wrapInHtml({ subject, bodyText });
+  const html = wrapInHtml({
+    subject,
+    bodyText,
+    companyName: company?.company_name || "Sistema de recordatorios",
+    logo: getLogoSrc(company),
+    firma: company?.firma || ""
+  });
 
-  return { subject, html };
+  return { subject, html, attachments: [] };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Builder: aviso al ADMINISTRADOR
 // ─────────────────────────────────────────────────────────────────────────────
 export async function buildAdminReminderEmail({ adminName, clientName, serviceName, expirationDate }) {
-  const template = await getTemplateByName("admin_reminder");
+  const [template, company] = await Promise.all([
+    getTemplateByName("admin_reminder"),
+    companyService.get().catch(() => null)
+  ]);
 
   const vars = {
     admin: adminName,
@@ -140,9 +176,15 @@ export async function buildAdminReminderEmail({ adminName, clientName, serviceNa
     ? interpolate(template.body, vars)
     : `Hola ${adminName},\n\nEl servicio "${serviceName}" del cliente ${clientName} vence el ${formatDate(expirationDate)}.\n\nRevisa el panel para más detalles.`;
 
-  const html = wrapInHtml({ subject, bodyText });
+  const html = wrapInHtml({
+    subject,
+    bodyText,
+    companyName: company?.company_name || "Sistema de recordatorios",
+    logo: getLogoSrc(company),
+    firma: company?.firma || ""
+  });
 
-  return { subject, html };
+  return { subject, html, attachments: [] };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -158,6 +200,40 @@ export function buildReminderEmail({ clientName, serviceName, expirationDate }) 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Builder: tarea interna al ADMINISTRADOR
+// ─────────────────────────────────────────────────────────────────────────────
+export async function buildTaskReminderEmail({ adminName, taskTitle, taskDescription, dueDate }) {
+  const [template, company] = await Promise.all([
+    getTemplateByName("interno_tarea"),
+    companyService.get().catch(() => null)
+  ]);
+
+  const vars = {
+    admin: adminName,
+    tarea: taskTitle,
+    fecha_vencimiento: formatDate(dueDate)
+  };
+
+  const subject = template
+    ? interpolate(template.subject, vars)
+    : `Recordatorio de tarea: ${taskTitle}`;
+
+  const bodyText = template
+    ? interpolate(template.body, vars)
+    : `Hola ${adminName},\n\nEste es un recordatorio sobre la tarea interna: "${taskTitle}".\n\n${taskDescription ? `Descripción: ${taskDescription}\n\n` : ""}Fecha límite: ${formatDate(dueDate)}\n\nPor favor, asegúrate de completarla antes de la fecha indicada.`;
+
+  const html = wrapInHtml({
+    subject,
+    bodyText,
+    companyName: company?.company_name || "Sistema de recordatorios",
+    logo: getLogoSrc(company),
+    firma: company?.firma || ""
+  });
+
+  return { subject, html, attachments: [] };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 function formatDate(date) {
@@ -169,3 +245,4 @@ function formatDate(date) {
     return String(date);
   }
 }
+

@@ -3,7 +3,8 @@ import emailService from "../email/email.service.js";
 import notificationsService from "../notifications/notifications.service.js";
 import {
   buildClientReminderEmail,
-  buildAdminReminderEmail
+  buildAdminReminderEmail,
+  buildTaskReminderEmail
 } from "../email/email.templates.js";
 
 class ReminderService {
@@ -99,8 +100,8 @@ class ReminderService {
 
       // ── Email al cliente ──
       try {
-        const { subject, html } = await buildClientReminderEmail({ clientName, serviceName, expirationDate });
-        await emailService.sendSystemMail({ to: clientEmail, subject, html });
+        const { subject, html, attachments } = await buildClientReminderEmail({ clientName, serviceName, expirationDate });
+        await emailService.sendSystemMail({ to: clientEmail, subject, html, attachments });
         await this.logEmailSent({ clientId, serviceId, email: clientEmail, subject });
         clientOk = true;
         sent++;
@@ -128,8 +129,8 @@ class ReminderService {
       // ── Email a cada admin ──
       for (const admin of admins) {
         try {
-          const { subject, html } = await buildAdminReminderEmail({ adminName: admin.name, clientName, serviceName, expirationDate });
-          await emailService.sendSystemMail({ to: admin.email, subject, html });
+          const { subject, html, attachments } = await buildAdminReminderEmail({ adminName: admin.name, clientName, serviceName, expirationDate });
+          await emailService.sendSystemMail({ to: admin.email, subject, html, attachments });
           await this.logEmailSent({ clientId: null, serviceId, email: admin.email, subject });
           console.log(`  [OK] Email admin: ${admin.email}`);
         } catch (err) {
@@ -183,12 +184,14 @@ class ReminderService {
   // ─────────────────────────────────────────────────────────────────────────
   async processTasksDueToday() {
     const tasks = await this.findTasksDueToday();
+    const admins = await this.getAdmins();
     let notified = 0;
 
     for (const task of tasks) {
       const already = await notificationsService.hasTaskNotificationToday(task.id);
       if (already) continue;
 
+      // ── Notificación in-app ──
       await notificationsService.broadcastToAdmins({
         client_id: null,
         service_id: null,
@@ -197,8 +200,28 @@ class ReminderService {
         title: `Tarea vence hoy: ${task.title}`,
         message: task.description || `La tarea "${task.title}" tiene fecha límite hoy.`
       });
+
+      // ── Email a cada admin ──
+      for (const admin of admins) {
+        try {
+          const { subject, html, attachments } = await buildTaskReminderEmail({
+            adminName: admin.name,
+            taskTitle: task.title,
+            taskDescription: task.description,
+            dueDate: task.due_date
+          });
+          await emailService.sendSystemMail({ to: admin.email, subject, html, attachments });
+          await this.logEmailSent({ clientId: null, serviceId: null, email: admin.email, subject });
+          console.log(`  [TAREA EMAIL] Admin: ${admin.email} — ${task.title}`);
+        } catch (err) {
+          console.error(`  [TAREA FAIL] Admin ${admin.email}:`, err.message);
+          const fallbackSubject = `Tarea vence hoy: ${task.title}`;
+          await this.logEmailFailed({ clientId: null, serviceId: null, email: admin.email, subject: fallbackSubject, errorMessage: err.message }).catch(() => {});
+        }
+      }
+
       notified++;
-      console.log(`  [TAREA] Notificación creada para: ${task.title}`);
+      console.log(`  [TAREA] Notificación + email creados para: ${task.title}`);
     }
 
     return { tasks_found: tasks.length, notified };

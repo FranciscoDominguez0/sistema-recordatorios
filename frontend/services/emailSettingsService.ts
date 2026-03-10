@@ -34,12 +34,22 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/** Devuelve TODOS los SMTP configurados */
+export async function getAllEmailSettings(): Promise<EmailSettingItem[]> {
+  const response = await api
+    .get<EmailSettingItem[]>("/email-settings/all", { headers: authHeaders() })
+    .catch((error) => {
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo cargar configuraciones SMTP");
+    });
+  return response.data ?? [];
+}
+
+/** Devuelve el SMTP del usuario actual (compatibilidad) */
 export async function getEmailSetting(): Promise<EmailSettingItem | null> {
   const response = await api
     .get<EmailSettingItem | null>("/email-settings", { headers: authHeaders() })
     .catch((error) => {
-      const message = error?.response?.data?.message || error?.message || "No se pudo cargar configuración SMTP";
-      throw new Error(message);
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo cargar configuración SMTP");
     });
   return response.data ?? null;
 }
@@ -48,28 +58,33 @@ export async function createEmailSetting(input: CreateEmailSettingInput): Promis
   const response = await api
     .post<EmailSettingItem>("/email-settings", input, { headers: authHeaders() })
     .catch((error) => {
-      const message = error?.response?.data?.message || error?.message || "No se pudo crear configuración SMTP";
-      throw new Error(message);
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo crear configuración SMTP");
     });
   return response.data;
 }
 
-export async function updateEmailSetting(id: number, input: UpdateEmailSettingInput): Promise<EmailSettingItem[]> {
+export async function updateEmailSetting(id: number, input: UpdateEmailSettingInput): Promise<EmailSettingItem> {
   const response = await api
-    .put<EmailSettingItem[]>(`/email-settings/${id}`, input, { headers: authHeaders() })
+    .put<EmailSettingItem>(`/email-settings/${id}`, input, { headers: authHeaders() })
     .catch((error) => {
-      const message = error?.response?.data?.message || error?.message || "No se pudo actualizar configuración SMTP";
-      throw new Error(message);
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo actualizar configuración SMTP");
     });
   return response.data;
+}
+
+export async function deleteEmailSetting(id: number): Promise<void> {
+  await api
+    .delete(`/email-settings/${id}`, { headers: authHeaders() })
+    .catch((error) => {
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo eliminar configuración SMTP");
+    });
 }
 
 export async function setDefaultEmailSetting(id: number): Promise<EmailSettingItem> {
   const response = await api
     .put<EmailSettingItem>(`/email-settings/${id}/default`, {}, { headers: authHeaders() })
     .catch((error) => {
-      const message = error?.response?.data?.message || error?.message || "No se pudo cambiar SMTP principal";
-      throw new Error(message);
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo cambiar SMTP principal");
     });
   return response.data;
 }
@@ -78,8 +93,7 @@ export async function testEmailSetting(): Promise<{ message: string }> {
   const response = await api
     .post<{ message: string }>("/email-settings/test", {}, { headers: authHeaders() })
     .catch((error) => {
-      const message = error?.response?.data?.message || error?.message || "No se pudo enviar correo de prueba";
-      throw new Error(message);
+      throw new Error(error?.response?.data?.message || error?.message || "No se pudo enviar correo de prueba");
     });
   return response.data;
 }

@@ -25,12 +25,19 @@ class EmailSettingsController {
     }
   }
 
+  async getAll(req, res) {
+    try {
+      const settings = await emailSettingsService.getAll();
+      return res.json(settings);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
   async get(req, res) {
     try {
       const userId = req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "No autenticado" });
-      }
+      if (!userId) return res.status(401).json({ message: "No autenticado" });
       const settings = await emailSettingsService.getByUserId(userId);
       return res.json(settings);
     } catch (error) {
@@ -144,6 +151,16 @@ class EmailSettingsController {
 
       const settings = await emailSettingsService.getDefault();
       return res.json(settings);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+  async destroy(req, res) {
+    try {
+      const id = Number(req.params.id);
+      const ok = await emailSettingsService.delete(id);
+      if (!ok) return res.status(404).json({ message: "Configuración no encontrada" });
+      return res.json({ message: "Configuración SMTP eliminada" });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

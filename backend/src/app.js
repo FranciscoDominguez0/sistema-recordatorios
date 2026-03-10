@@ -14,6 +14,7 @@ import emailTemplatesRoutes from "./modules/email_templates/email_templates.rout
 import activityLogsRoutes from "./modules/activity_logs/activityLogs.routes.js";
 import usersRoutes from "./modules/users/users.routes.js";
 import notificationsRoutes from "./modules/notifications/notifications.routes.js";
+import companyRoutes from "./modules/company/company.routes.js";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/email-templates", emailTemplatesRoutes);
 app.use("/activity-logs", activityLogsRoutes);
 app.use("/users", usersRoutes);
 app.use("/notifications", notificationsRoutes);
+app.use("/company", companyRoutes);
 app.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT NOW() as time");

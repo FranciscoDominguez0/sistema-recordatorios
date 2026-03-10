@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import emailSettingsService from "../email_settings/email_settings.service.js";
 
 class EmailService {
-  async sendMail({ to, subject, html }) {
+  async sendMail({ to, subject, html, attachments = [] }) {
     const from = process.env.EMAIL_FROM ?? process.env.EMAIL_USER;
 
     if (!from) {
@@ -12,15 +12,10 @@ class EmailService {
       throw error;
     }
 
-    return transporter.sendMail({
-      from,
-      to,
-      subject,
-      html
-    });
+    return transporter.sendMail({ from, to, subject, html, attachments });
   }
 
-  async sendMailWithSmtpConfig(smtpConfig, { to, subject, html, text }) {
+  async sendMailWithSmtpConfig(smtpConfig, { to, subject, html, text, attachments = [] }) {
     const secure = smtpConfig.encryption === "ssl";
     const dynamicTransporter = nodemailer.createTransport({
       host: smtpConfig.smtp_host,
@@ -37,18 +32,19 @@ class EmailService {
       to,
       subject,
       html,
-      text
+      text,
+      attachments
     });
   }
 
-  async sendSystemMail({ to, subject, html, text }) {
+  async sendSystemMail({ to, subject, html, text, attachments = [] }) {
     const smtpConfig = await emailSettingsService.getDefault();
 
     if (smtpConfig) {
-      return this.sendMailWithSmtpConfig(smtpConfig, { to, subject, html, text });
+      return this.sendMailWithSmtpConfig(smtpConfig, { to, subject, html, text, attachments });
     }
 
-    return this.sendMail({ to, subject, html });
+    return this.sendMail({ to, subject, html, attachments });
   }
 }
 
