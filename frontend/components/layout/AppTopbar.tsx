@@ -217,23 +217,23 @@ export default function AppTopbar() {
           <button
             type="button"
             onClick={() => setNotificationsOpen(true)}
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C7D2FE] bg-[#EEF2FF] transition-colors hover:bg-[#E0E7FF] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Notificaciones"
           >
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
-            <BellRing className="h-4 w-4 text-[#4F46E5] dark:text-[#F1F5F9]" />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#3B82F6]" />
+            <BellRing className="h-4 w-4 text-[#2563EB] dark:text-[#F1F5F9]" />
           </button>
 
           <button
             type="button"
             onClick={toggleDark}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 transition-colors hover:bg-amber-100 dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Cambiar modo oscuro"
           >
             {isDark ? (
               <Sun className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
             ) : (
-              <Moon className="h-4 w-4 text-amber-700 dark:text-[#F1F5F9]" />
+              <Moon className="h-4 w-4 text-[#2563EB] dark:text-[#F1F5F9]" />
             )}
           </button>
 

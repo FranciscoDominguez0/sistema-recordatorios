@@ -81,12 +81,12 @@ function statusLabel(status?: ServiceStatus) {
 
 function statusClasses(status?: ServiceStatus) {
   if (status === "vencido") {
-    return "border-amber-500/30 bg-amber-500/10 text-amber-200";
+    return "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200";
   }
   if (status === "completado") {
-    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200";
   }
-  return "border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#BFDBFE]";
+  return "border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#1D4ED8] dark:text-[#BFDBFE]";
 }
 
 export default function ServiciosPage() {
@@ -356,20 +356,42 @@ export default function ServiciosPage() {
               </div>
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{totalAll}</p>
-            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{pendingSoon} vencen en 7 días</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                Distribución
+              </span>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                  pendingSoon > 0
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-200"
+                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+                )}
+              >
+                {pendingSoon} vencen en 7 días
+              </span>
+            </div>
 
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <div className="rounded-xl border border-[#E2E8F0] bg-white/70 p-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                <p className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8]">Activos</p>
-                <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{activos}</p>
+            <div className="mt-3 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+              <div className="flex h-2 w-full">
+                <div className="h-2 bg-[#3B82F6]" style={{ width: `${pct(activos)}%` }} />
+                <div className="h-2 bg-amber-500" style={{ width: `${pct(vencidos)}%` }} />
+                <div className="h-2 bg-emerald-500" style={{ width: `${pct(completados)}%` }} />
               </div>
-              <div className="rounded-xl border border-[#E2E8F0] bg-white/70 p-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                <p className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8]">Vencidos</p>
-                <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{vencidos}</p>
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] font-semibold">
+              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#3B82F6]" />
+                <span className="min-w-0 truncate">{pct(activos)}% activos</span>
               </div>
-              <div className="rounded-xl border border-[#E2E8F0] bg-white/70 p-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                <p className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8]">Complet.</p>
-                <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{completados}</p>
+              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                <span className="min-w-0 truncate">{pct(vencidos)}% vencidos</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                <span className="min-w-0 truncate">{pct(completados)}% complet.</span>
               </div>
             </div>
           </div>
