@@ -43,12 +43,27 @@ class ClientsService {
       ${whereSql}
     `;
 
+    const summarySql = `
+      SELECT
+        SUM(CASE WHEN email IS NOT NULL AND TRIM(email) <> '' THEN 1 ELSE 0 END) AS with_email,
+        SUM(CASE WHEN phone IS NOT NULL AND TRIM(phone) <> '' THEN 1 ELSE 0 END) AS with_phone,
+        SUM(CASE WHEN notes IS NOT NULL AND TRIM(notes) <> '' THEN 1 ELSE 0 END) AS with_notes
+      FROM clients
+      ${whereSql}
+    `;
+
     const [dataRows] = await pool.query(dataSql, [...whereParams, safeLimit, offset]);
     const [countRows] = await pool.query(countSql, whereParams);
+    const [summaryRows] = await pool.query(summarySql, whereParams);
 
     return {
       data: dataRows,
       total: countRows[0]?.total ?? 0,
+      summary: {
+        with_email: Number(summaryRows[0]?.with_email ?? 0),
+        with_phone: Number(summaryRows[0]?.with_phone ?? 0),
+        with_notes: Number(summaryRows[0]?.with_notes ?? 0)
+      },
       page: safePage,
       limit: safeLimit
     };

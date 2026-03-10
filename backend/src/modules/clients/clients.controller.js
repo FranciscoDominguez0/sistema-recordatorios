@@ -35,6 +35,7 @@ class ClientsController {
 
       return res.json({
         data: result.data,
+        summary: result.summary,
         pagination: {
           page: result.page,
           limit: result.limit,
