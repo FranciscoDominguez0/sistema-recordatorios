@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, Pencil, Plus, ShieldCheck, Trash2, User2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ function roleLabel(role: UserRole) {
 }
 
 export default function UsuariosPage() {
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +101,14 @@ export default function UsuariosPage() {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const q = (searchParams?.get("search") ?? "").toString();
+    setSearch(q);
+    setPage(1);
+    fetchUsers({ nextSearch: q, nextPage: 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const openCreate = () => {
     setDrawerMode("create");
@@ -210,22 +220,6 @@ export default function UsuariosPage() {
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nombre o email"
-              className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 sm:w-[260px] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
-            />
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setPage(1);
-                fetchUsers({ nextSearch: search, nextPage: 1 });
-              }}
-              className="w-full sm:w-auto"
-            >
-              Buscar
-            </Button>
             <Button onClick={openCreate} className="w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Nuevo

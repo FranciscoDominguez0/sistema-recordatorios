@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   CalendarClock,
   CheckCircle2,
@@ -8,7 +9,6 @@ import {
   Loader2,
   Pencil,
   Plus,
-  Search,
   ShieldAlert,
   Trash2,
   XCircle
@@ -77,6 +77,9 @@ function statusClasses(status?: ServiceStatus) {
 }
 
 export default function ServiciosPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,6 +146,27 @@ export default function ServiciosPage() {
     fetchServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const q = (searchParams?.get("search") ?? "").toString();
+    const st = (searchParams?.get("status") ?? "").toString() as ServiceStatus | "";
+    const nextStatus = (st || "all") as ServiceStatus | "all";
+
+    setSearch(q);
+    setStatusFilter(nextStatus);
+    setPage(1);
+    fetchServices({ nextSearch: q, nextPage: 1, nextStatus });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const applyStatusToUrl = (value: ServiceStatus | "all") => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (value === "all") params.delete("status");
+    else params.set("status", value);
+
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : `${pathname}`);
+  };
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -297,27 +321,6 @@ export default function ServiciosPage() {
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
-            <div className="relative w-full sm:w-[320px]">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B] dark:text-[#94A3B8]" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar por servicio o cliente"
-                className="h-11 pl-10 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
-              />
-            </div>
-
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setPage(1);
-                fetchServices({ nextSearch: search, nextPage: 1, nextStatus: statusFilter });
-              }}
-              className="w-full sm:w-auto"
-            >
-              Buscar
-            </Button>
-
             <Button onClick={openCreate} className="w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Nuevo servicio
@@ -341,9 +344,7 @@ export default function ServiciosPage() {
             type="button"
             onClick={() => {
               const next = statusFilter === "activo" ? "all" : "activo";
-              setStatusFilter(next);
-              setPage(1);
-              fetchServices({ nextPage: 1, nextStatus: next });
+              applyStatusToUrl(next);
             }}
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
@@ -364,9 +365,7 @@ export default function ServiciosPage() {
             type="button"
             onClick={() => {
               const next = statusFilter === "vencido" ? "all" : "vencido";
-              setStatusFilter(next);
-              setPage(1);
-              fetchServices({ nextPage: 1, nextStatus: next });
+              applyStatusToUrl(next);
             }}
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
@@ -387,9 +386,7 @@ export default function ServiciosPage() {
             type="button"
             onClick={() => {
               const next = statusFilter === "completado" ? "all" : "completado";
-              setStatusFilter(next);
-              setPage(1);
-              fetchServices({ nextPage: 1, nextStatus: next });
+              applyStatusToUrl(next);
             }}
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
