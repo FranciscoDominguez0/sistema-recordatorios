@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { getClientsPaginated, type ClientItem } from "@/services/clientsService";
 import {
@@ -93,6 +95,7 @@ export default function ServiciosPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +118,10 @@ export default function ServiciosPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingService, setDeletingService] = useState<ServiceItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [clientQuery, setClientQuery] = useState("");
   const [clientLoading, setClientLoading] = useState(false);
@@ -263,25 +270,43 @@ export default function ServiciosPage() {
         await updateService(editingService.id, payload);
       }
 
+      toast({
+        title: drawerMode === "create" ? "Servicio creado" : "Servicio actualizado",
+        variant: "success"
+      });
+
       setDrawerOpen(false);
       await fetchServices({ nextPage: page });
     } catch (e: unknown) {
-      setFormError(e instanceof Error ? e.message : "No se pudo guardar servicio");
+      const message = e instanceof Error ? e.message : "No se pudo guardar servicio";
+      setFormError(message);
+      toast({ title: "Error", description: message, variant: "error" });
     } finally {
       setSaving(false);
     }
   };
 
-  const onDelete = async (service: ServiceItem) => {
-    const ok = window.confirm(`¿Eliminar servicio ${service.service_name}?`);
-    if (!ok) return;
+  const onDelete = (service: ServiceItem) => {
+    setDeletingService(service);
+    setDeleteOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!deletingService) return;
+    setDeleting(true);
     setError(null);
     try {
-      await deleteService(service.id);
+      await deleteService(deletingService.id);
+      toast({ title: "Servicio eliminado", variant: "success" });
+      setDeleteOpen(false);
+      setDeletingService(null);
       await fetchServices({ nextPage: page });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "No se pudo eliminar servicio");
+      const message = e instanceof Error ? e.message : "No se pudo eliminar servicio";
+      setError(message);
+      toast({ title: "Error", description: message, variant: "error" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -330,6 +355,21 @@ export default function ServiciosPage() {
 
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
+      <ConfirmDialog
+        open={deleteOpen}
+        title="Eliminar servicio"
+        description={deletingService ? `¿Seguro que deseas eliminar el servicio ${deletingService.service_name}?` : ""}
+        confirmText={deleting ? "Eliminando..." : "Eliminar"}
+        cancelText="Cancelar"
+        loading={deleting}
+        variant="danger"
+        onConfirm={confirmDelete}
+        onOpenChange={(open) => {
+          if (deleting) return;
+          setDeleteOpen(open);
+          if (!open) setDeletingService(null);
+        }}
+      />
       <div className="rounded-[28px] border border-[#E2E8F0] bg-white p-5 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

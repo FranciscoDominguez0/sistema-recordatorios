@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
   createUser,
@@ -44,6 +46,7 @@ function roleLabel(role: UserRole) {
 
 export default function UsuariosPage() {
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +67,10 @@ export default function UsuariosPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<UserItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const activeCount = useMemo(() => activeTotal, [activeTotal]);
   const adminCount = useMemo(() => adminTotal, [adminTotal]);
@@ -187,31 +194,64 @@ export default function UsuariosPage() {
         });
       }
 
+      toast({
+        title: drawerMode === "create" ? "Usuario creado" : "Usuario actualizado",
+        variant: "success"
+      });
+
       setDrawerOpen(false);
       setForm(initialForm);
       setEditingUser(null);
       await fetchUsers();
     } catch (e: unknown) {
-      setFormError(e instanceof Error ? e.message : "No se pudo guardar usuario");
+      const message = e instanceof Error ? e.message : "No se pudo guardar usuario";
+      setFormError(message);
+      toast({ title: "Error", description: message, variant: "error" });
     } finally {
       setSaving(false);
     }
   };
 
-  const onDelete = async (user: UserItem) => {
-    const ok = window.confirm(`¿Eliminar el usuario ${user.name}?`);
-    if (!ok) return;
+  const onDelete = (user: UserItem) => {
+    setDeletingUser(user);
+    setDeleteOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!deletingUser) return;
+    setDeleting(true);
     try {
-      await deleteUser(user.id);
+      await deleteUser(deletingUser.id);
+      toast({ title: "Usuario eliminado", variant: "success" });
+      setDeleteOpen(false);
+      setDeletingUser(null);
       await fetchUsers();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "No se pudo eliminar usuario");
+      const message = e instanceof Error ? e.message : "No se pudo eliminar usuario";
+      setError(message);
+      toast({ title: "Error", description: message, variant: "error" });
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
+      <ConfirmDialog
+        open={deleteOpen}
+        title="Eliminar usuario"
+        description={deletingUser ? `¿Seguro que deseas eliminar el usuario ${deletingUser.name}?` : ""}
+        confirmText={deleting ? "Eliminando..." : "Eliminar"}
+        cancelText="Cancelar"
+        loading={deleting}
+        variant="danger"
+        onConfirm={confirmDelete}
+        onOpenChange={(open) => {
+          if (deleting) return;
+          setDeleteOpen(open);
+          if (!open) setDeletingUser(null);
+        }}
+      />
       <div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
   createClient,
@@ -35,6 +37,7 @@ const initialForm: FormState = {
 
 export default function ClientesPage() {
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const [clients, setClients] = useState<ClientItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +58,10 @@ export default function ClientesPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingClient, setDeletingClient] = useState<ClientItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchClients = async ({ nextSearch, nextPage }: { nextSearch?: string; nextPage?: number } = {}) => {
     setLoading(true);
@@ -154,25 +161,43 @@ export default function ClientesPage() {
         await updateClient(editingClient.id, payload);
       }
 
+      toast({
+        title: drawerMode === "create" ? "Cliente creado" : "Cliente actualizado",
+        variant: "success"
+      });
+
       setDrawerOpen(false);
       await fetchClients({ nextPage: page });
     } catch (e: unknown) {
-      setFormError(e instanceof Error ? e.message : "No se pudo guardar cliente");
+      const message = e instanceof Error ? e.message : "No se pudo guardar cliente";
+      setFormError(message);
+      toast({ title: "Error", description: message, variant: "error" });
     } finally {
       setSaving(false);
     }
   };
 
-  const onDelete = async (client: ClientItem) => {
-    const ok = window.confirm(`¿Eliminar cliente ${client.name}?`);
-    if (!ok) return;
+  const onDelete = (client: ClientItem) => {
+    setDeletingClient(client);
+    setDeleteOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!deletingClient) return;
+    setDeleting(true);
     setError(null);
     try {
-      await deleteClient(client.id);
+      await deleteClient(deletingClient.id);
+      toast({ title: "Cliente eliminado", variant: "success" });
+      setDeleteOpen(false);
+      setDeletingClient(null);
       await fetchClients({ nextPage: page });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "No se pudo eliminar cliente");
+      const message = e instanceof Error ? e.message : "No se pudo eliminar cliente";
+      setError(message);
+      toast({ title: "Error", description: message, variant: "error" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -183,6 +208,21 @@ export default function ClientesPage() {
 
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
+      <ConfirmDialog
+        open={deleteOpen}
+        title="Eliminar cliente"
+        description={deletingClient ? `¿Seguro que deseas eliminar el cliente ${deletingClient.name}?` : ""}
+        confirmText={deleting ? "Eliminando..." : "Eliminar"}
+        cancelText="Cancelar"
+        loading={deleting}
+        variant="danger"
+        onConfirm={confirmDelete}
+        onOpenChange={(open) => {
+          if (deleting) return;
+          setDeleteOpen(open);
+          if (!open) setDeletingClient(null);
+        }}
+      />
       <div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

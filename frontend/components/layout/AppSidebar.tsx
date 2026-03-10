@@ -82,7 +82,7 @@ export default function AppSidebar(props: AppSidebarProps) {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col">
+      <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col xl:w-80">
         <div className="px-6 py-5">
           <div className="flex items-center justify-center">
             <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3">

@@ -127,7 +127,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
 
   return (
     <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-[#F8FAFC]/80 backdrop-blur dark:border-[#1F2A44] dark:bg-[#0B1424]/80">
-      <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-3 px-4 sm:px-6 2xl:max-w-[1800px] 2xl:px-8">
         <button
           type="button"
           onClick={() => onOpenSidebar?.()}

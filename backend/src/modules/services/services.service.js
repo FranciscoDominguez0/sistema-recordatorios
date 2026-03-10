@@ -94,7 +94,7 @@ class ServicesService {
       FROM services s
       JOIN clients c ON s.client_id = c.id
       ${whereSql}
-      ORDER BY expiration_date ASC
+      ORDER BY s.created_at DESC, s.id DESC
       LIMIT ? OFFSET ?
     `;
 
