@@ -7,7 +7,8 @@ class ServicesService {
     description,
     start_date,
     expiration_date,
-    reminder_days
+    reminder_days,
+    status
   }) {
     const sql = `
       INSERT INTO services (
@@ -16,9 +17,10 @@ class ServicesService {
         description,
         start_date,
         expiration_date,
-        reminder_days
+        reminder_days,
+        status
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await pool.query(sql, [
@@ -27,7 +29,8 @@ class ServicesService {
       description,
       start_date,
       expiration_date,
-      reminder_days
+      reminder_days,
+      status ?? "activo"
     ]);
 
     return {
@@ -37,11 +40,12 @@ class ServicesService {
       description,
       start_date,
       expiration_date,
-      reminder_days
+      reminder_days,
+      status: status ?? "activo"
     };
   }
 
-  async getAllWithClient({ page = 1, limit = 10, search } = {}) {
+  async getAllWithClient({ page = 1, limit = 10, search, status } = {}) {
     const safePage = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
     const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
     const offset = (safePage - 1) * safeLimit;
@@ -49,8 +53,27 @@ class ServicesService {
     const hasSearch = Boolean(search && String(search).trim());
     const searchValue = `%${String(search).trim()}%`;
 
-    const whereSql = hasSearch ? "WHERE s.service_name LIKE ? OR c.name LIKE ?" : "";
-    const whereParams = hasSearch ? [searchValue, searchValue] : [];
+    const hasStatus = Boolean(status && String(status).trim());
+    const safeStatus = String(status).trim();
+
+    const whereSearchChunks = [];
+    const whereSearchParams = [];
+
+    if (hasSearch) {
+      whereSearchChunks.push("(s.service_name LIKE ? OR c.name LIKE ?)");
+      whereSearchParams.push(searchValue, searchValue);
+    }
+
+    const whereDataChunks = [...whereSearchChunks];
+    const whereDataParams = [...whereSearchParams];
+
+    if (hasStatus) {
+      whereDataChunks.push("s.status = ?");
+      whereDataParams.push(safeStatus);
+    }
+
+    const whereSql = whereDataChunks.length ? `WHERE ${whereDataChunks.join(" AND ")}` : "";
+    const whereSqlSearchOnly = whereSearchChunks.length ? `WHERE ${whereSearchChunks.join(" AND ")}` : "";
 
     const dataSql = `
       SELECT s.*, c.name AS client_name
@@ -68,12 +91,28 @@ class ServicesService {
       ${whereSql}
     `;
 
-    const [dataRows] = await pool.query(dataSql, [...whereParams, safeLimit, offset]);
-    const [countRows] = await pool.query(countSql, whereParams);
+    const summarySql = `
+      SELECT
+        SUM(CASE WHEN s.status = 'activo' THEN 1 ELSE 0 END) AS activos,
+        SUM(CASE WHEN s.status = 'vencido' THEN 1 ELSE 0 END) AS vencidos,
+        SUM(CASE WHEN s.status = 'completado' THEN 1 ELSE 0 END) AS completados
+      FROM services s
+      JOIN clients c ON s.client_id = c.id
+      ${whereSqlSearchOnly}
+    `;
+
+    const [dataRows] = await pool.query(dataSql, [...whereDataParams, safeLimit, offset]);
+    const [countRows] = await pool.query(countSql, whereDataParams);
+    const [summaryRows] = await pool.query(summarySql, whereSearchParams);
 
     return {
       data: dataRows,
       total: countRows[0]?.total ?? 0,
+      summary: {
+        activos: Number(summaryRows[0]?.activos ?? 0),
+        vencidos: Number(summaryRows[0]?.vencidos ?? 0),
+        completados: Number(summaryRows[0]?.completados ?? 0)
+      },
       page: safePage,
       limit: safeLimit
     };
@@ -111,7 +150,8 @@ class ServicesService {
     description,
     start_date,
     expiration_date,
-    reminder_days
+    reminder_days,
+    status
   }) {
     const sql = `
       UPDATE services
@@ -120,7 +160,8 @@ class ServicesService {
           description = ?,
           start_date = ?,
           expiration_date = ?,
-          reminder_days = ?
+          reminder_days = ?,
+          status = ?
       WHERE id = ?
     `;
 
@@ -131,6 +172,7 @@ class ServicesService {
       start_date,
       expiration_date,
       reminder_days,
+      status ?? "activo",
       id
     ]);
 

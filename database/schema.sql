@@ -66,12 +66,14 @@ CREATE TABLE services (
     start_date DATE,
     expiration_date DATE NOT NULL,
     reminder_days INT DEFAULT 5,
+    status ENUM('activo','vencido','completado') DEFAULT 'activo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
 
     INDEX idx_services_client (client_id),
-    INDEX idx_services_expiration (expiration_date)
+    INDEX idx_services_expiration (expiration_date),
+    INDEX idx_services_status (status)
 );
 
 -- =============================

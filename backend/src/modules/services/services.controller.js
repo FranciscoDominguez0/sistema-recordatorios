@@ -10,7 +10,8 @@ class ServicesController {
         description,
         start_date,
         expiration_date,
-        reminder_days
+        reminder_days,
+        status
       } = req.body ?? {};
 
       const service = await servicesService.create({
@@ -19,7 +20,8 @@ class ServicesController {
         description,
         start_date,
         expiration_date,
-        reminder_days
+        reminder_days,
+        status
       });
 
       try {
@@ -43,13 +45,14 @@ class ServicesController {
 
   async getAll(req, res) {
     try {
-      const { page, limit, search } = req.query ?? {};
-      const result = await servicesService.getAllWithClient({ page, limit, search });
+      const { page, limit, search, status } = req.query ?? {};
+      const result = await servicesService.getAllWithClient({ page, limit, search, status });
 
       const totalPages = Math.ceil(result.total / result.limit);
 
       return res.json({
         data: result.data,
+        summary: result.summary,
         pagination: {
           page: result.page,
           limit: result.limit,
@@ -96,7 +99,8 @@ class ServicesController {
         description,
         start_date,
         expiration_date,
-        reminder_days
+        reminder_days,
+        status
       } = req.body ?? {};
 
       const updated = await servicesService.update(id, {
@@ -105,7 +109,8 @@ class ServicesController {
         description,
         start_date,
         expiration_date,
-        reminder_days
+        reminder_days,
+        status
       });
 
       if (!updated) {

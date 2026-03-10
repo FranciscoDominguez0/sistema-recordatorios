@@ -1,8 +1,725 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CalendarClock,
+  CheckCircle2,
+  ChevronDown,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  ShieldAlert,
+  Trash2,
+  XCircle
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { getClientsPaginated, type ClientItem } from "@/services/clientsService";
+import {
+  createService,
+  deleteService,
+  getServicesPaginated,
+  updateService,
+  type ServiceItem,
+  type ServiceStatus
+} from "@/services/servicesService";
+
+type DrawerMode = "create" | "edit";
+
+type FormState = {
+  client_id: number | null;
+  client_label: string;
+  service_name: string;
+  description: string;
+  start_date: string;
+  expiration_date: string;
+  reminder_days: string;
+  status: ServiceStatus;
+};
+
+const initialForm: FormState = {
+  client_id: null,
+  client_label: "",
+  service_name: "",
+  description: "",
+  start_date: "",
+  expiration_date: "",
+  reminder_days: "5",
+  status: "activo"
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString();
+}
+
+function statusLabel(status?: ServiceStatus) {
+  if (status === "vencido") return "Vencido";
+  if (status === "completado") return "Completado";
+  return "Activo";
+}
+
+function statusClasses(status?: ServiceStatus) {
+  if (status === "vencido") {
+    return "border-amber-500/30 bg-amber-500/10 text-amber-200";
+  }
+  if (status === "completado") {
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+  }
+  return "border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#BFDBFE]";
+}
+
 export default function ServiciosPage() {
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ServiceStatus | "all">("all");
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalServices, setTotalServices] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [activos, setActivos] = useState(0);
+  const [vencidos, setVencidos] = useState(0);
+  const [completados, setCompletados] = useState(0);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<DrawerMode>("create");
+  const [editingService, setEditingService] = useState<ServiceItem | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const [clientQuery, setClientQuery] = useState("");
+  const [clientLoading, setClientLoading] = useState(false);
+  const [clientOptions, setClientOptions] = useState<ClientItem[]>([]);
+  const [clientOpen, setClientOpen] = useState(false);
+  const clientFetchTimeout = useRef<number | null>(null);
+  const clientBoxRef = useRef<HTMLDivElement | null>(null);
+
+  const fetchServices = async (
+    opts: { nextSearch?: string; nextPage?: number; nextStatus?: ServiceStatus | "all" } = {}
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const finalSearch = opts.nextSearch ?? search;
+      const finalPage = opts.nextPage ?? page;
+      const finalStatus = opts.nextStatus ?? statusFilter;
+
+      const result = await getServicesPaginated({
+        page: finalPage,
+        limit,
+        search: finalSearch,
+        status: finalStatus === "all" ? undefined : finalStatus
+      });
+
+      setServices(result.data);
+      setTotalServices(result.pagination.total ?? 0);
+      setTotalPages(result.pagination.total_pages ?? 1);
+      setPage(result.pagination.page ?? finalPage);
+
+      setActivos(Number(result.summary?.activos ?? 0));
+      setVencidos(Number(result.summary?.vencidos ?? 0));
+      setCompletados(Number(result.summary?.completados ?? 0));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "No se pudo cargar servicios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!clientBoxRef.current) return;
+      if (!clientBoxRef.current.contains(e.target as Node)) setClientOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const openCreate = () => {
+    setDrawerMode("create");
+    setEditingService(null);
+    setForm(initialForm);
+    setClientQuery("");
+    setClientOptions([]);
+    setClientOpen(false);
+    setFormError(null);
+    setDrawerOpen(true);
+  };
+
+  const openEdit = (service: ServiceItem) => {
+    setDrawerMode("edit");
+    setEditingService(service);
+    setForm({
+      client_id: service.client_id ?? null,
+      client_label: service.client_name ?? "",
+      service_name: service.service_name ?? "",
+      description: service.description ?? "",
+      start_date: service.start_date ?? "",
+      expiration_date: service.expiration_date ?? "",
+      reminder_days: String(service.reminder_days ?? 5),
+      status: (service.status ?? "activo") as ServiceStatus
+    });
+    setClientQuery(service.client_name ?? "");
+    setClientOptions([]);
+    setClientOpen(false);
+    setFormError(null);
+    setDrawerOpen(true);
+  };
+
+  const validate = () => {
+    if (!form.client_id) return "Selecciona un cliente";
+    if (!form.service_name.trim()) return "Nombre del servicio requerido";
+    if (!form.expiration_date.trim()) return "Fecha de expiración requerida";
+    return null;
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+
+    const message = validate();
+    if (message) {
+      setFormError(message);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        client_id: form.client_id as number,
+        service_name: form.service_name.trim(),
+        description: form.description.trim() || undefined,
+        start_date: form.start_date.trim() || undefined,
+        expiration_date: form.expiration_date.trim(),
+        reminder_days: Number(form.reminder_days || 5),
+        status: form.status
+      };
+
+      if (drawerMode === "create") {
+        await createService(payload);
+      } else {
+        if (!editingService) throw new Error("Servicio no seleccionado");
+        await updateService(editingService.id, payload);
+      }
+
+      setDrawerOpen(false);
+      await fetchServices({ nextPage: page });
+    } catch (e: unknown) {
+      setFormError(e instanceof Error ? e.message : "No se pudo guardar servicio");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onDelete = async (service: ServiceItem) => {
+    const ok = window.confirm(`¿Eliminar servicio ${service.service_name}?`);
+    if (!ok) return;
+
+    setError(null);
+    try {
+      await deleteService(service.id);
+      await fetchServices({ nextPage: page });
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "No se pudo eliminar servicio");
+    }
+  };
+
+  const pendingSoon = useMemo(() => {
+    const now = Date.now();
+    const soon = 1000 * 60 * 60 * 24 * 7;
+    return services.filter((s) => {
+      if ((s.status ?? "activo") !== "activo") return false;
+      const t = new Date(s.expiration_date).getTime();
+      if (Number.isNaN(t)) return false;
+      return t >= now && t <= now + soon;
+    }).length;
+  }, [services]);
+
+  const onClientSearch = (value: string) => {
+    setClientQuery(value);
+    setClientOpen(true);
+
+    if (clientFetchTimeout.current) window.clearTimeout(clientFetchTimeout.current);
+
+    clientFetchTimeout.current = window.setTimeout(async () => {
+      const q = value.trim();
+      if (q.length < 2) {
+        setClientOptions([]);
+        setClientLoading(false);
+        return;
+      }
+
+      setClientLoading(true);
+      try {
+        const result = await getClientsPaginated({ page: 1, limit: 5, search: q });
+        setClientOptions(result.data);
+      } catch {
+        setClientOptions([]);
+      } finally {
+        setClientLoading(false);
+      }
+    }, 250);
+  };
+
+  const selectClient = (client: ClientItem) => {
+    setForm((p) => ({ ...p, client_id: client.id, client_label: client.name }));
+    setClientQuery(client.name);
+    setClientOpen(false);
+  };
+
   return (
-    <div className="rounded-2xl border border-black/5 bg-white p-6 shadow-sm">
-      <h1 className="text-lg font-semibold text-zinc-900">Servicios</h1>
-      <p className="mt-2 text-sm text-zinc-600">Módulo en construcción.</p>
+    <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
+      <div className="rounded-[28px] border border-[#E2E8F0] bg-white p-5 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">Servicios</h1>
+            <p className="mt-1 text-sm text-[#64748B] dark:text-[#94A3B8]">
+              Monitorea vencimientos, estados y recordatorios.
+            </p>
+          </div>
+
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
+            <div className="relative w-full sm:w-[320px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B] dark:text-[#94A3B8]" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por servicio o cliente"
+                className="h-11 pl-10 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+              />
+            </div>
+
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setPage(1);
+                fetchServices({ nextSearch: search, nextPage: 1, nextStatus: statusFilter });
+              }}
+              className="w-full sm:w-auto"
+            >
+              Buscar
+            </Button>
+
+            <Button onClick={openCreate} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4" />
+              Nuevo servicio
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+          <div className="col-span-2 rounded-2xl border border-[#E2E8F0] bg-[radial-gradient(120%_140%_at_20%_0%,rgba(59,130,246,0.18)_0%,rgba(255,255,255,0)_55%)] p-4 dark:border-[#1F2A44] dark:bg-[radial-gradient(120%_140%_at_20%_0%,rgba(59,130,246,0.18)_0%,rgba(5,11,22,0)_60%)]">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Total</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                <CalendarClock className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">{totalServices}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{pendingSoon} vencen en 7 días</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const next = statusFilter === "activo" ? "all" : "activo";
+              setStatusFilter(next);
+              setPage(1);
+              fetchServices({ nextPage: 1, nextStatus: next });
+            }}
+            className={cn(
+              "rounded-2xl border p-4 text-left transition-colors",
+              statusFilter === "activo"
+                ? "border-[#3B82F6]/40 bg-[#3B82F6]/10"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Activos</p>
+              <ChevronDown className={cn("h-4 w-4", statusFilter === "activo" ? "rotate-180 text-[#3B82F6]" : "text-[#94A3B8]")} />
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">{activos}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">En seguimiento</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const next = statusFilter === "vencido" ? "all" : "vencido";
+              setStatusFilter(next);
+              setPage(1);
+              fetchServices({ nextPage: 1, nextStatus: next });
+            }}
+            className={cn(
+              "rounded-2xl border p-4 text-left transition-colors",
+              statusFilter === "vencido"
+                ? "border-amber-500/40 bg-amber-500/10"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Vencidos</p>
+              <ShieldAlert className={cn("h-4 w-4", statusFilter === "vencido" ? "text-amber-300" : "text-[#94A3B8]")} />
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">{vencidos}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Requieren acción</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const next = statusFilter === "completado" ? "all" : "completado";
+              setStatusFilter(next);
+              setPage(1);
+              fetchServices({ nextPage: 1, nextStatus: next });
+            }}
+            className={cn(
+              "rounded-2xl border p-4 text-left transition-colors",
+              statusFilter === "completado"
+                ? "border-emerald-500/40 bg-emerald-500/10"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Completados</p>
+              <CheckCircle2 className={cn("h-4 w-4", statusFilter === "completado" ? "text-emerald-200" : "text-[#94A3B8]")} />
+            </div>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">{completados}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Finalizados</p>
+          </button>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-2">
+          <CardTitle className="text-base text-[#0F172A] dark:text-[#F1F5F9]">Agenda de servicios</CardTitle>
+          <CardDescription className="text-[#64748B] dark:text-[#94A3B8]">
+            Vista rápida por vencimiento con estado.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Cargando servicios...
+            </div>
+          ) : error ? (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>
+          ) : services.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+              No hay servicios para mostrar.
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
+                    <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
+                      <th className="px-4 py-3 font-semibold">Servicio</th>
+                      <th className="px-4 py-3 font-semibold">Cliente</th>
+                      <th className="px-4 py-3 font-semibold">Vence</th>
+                      <th className="px-4 py-3 font-semibold">Estado</th>
+                      <th className="px-4 py-3 text-right font-semibold">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
+                    {services.map((s, idx) => (
+                      <tr
+                        key={s.id}
+                        className={cn(
+                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
+                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
+                        )}
+                      >
+                        <td className="px-4 py-3">
+                          <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{s.service_name}</p>
+                          {s.description ? (
+                            <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{s.description}</p>
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{s.client_name ?? "-"}</p>
+                          <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">ID: {s.client_id}</p>
+                        </td>
+                        <td className="px-4 py-3 text-[#64748B] dark:text-[#94A3B8]">{formatDate(s.expiration_date)}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold",
+                              statusClasses((s.status ?? "activo") as ServiceStatus)
+                            )}
+                          >
+                            {statusLabel((s.status ?? "activo") as ServiceStatus)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openEdit(s)}
+                              aria-label="Editar"
+                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onDelete(s)}
+                              aria-label="Eliminar"
+                              className="rounded-xl border border-transparent text-red-600 hover:bg-red-500/10 dark:text-red-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-[#1F2A44] dark:text-[#94A3B8]">
+                <span>
+                  Página {page} de {totalPages}
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-9"
+                    disabled={loading || page <= 1}
+                    onClick={() => fetchServices({ nextPage: Math.max(1, page - 1) })}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-9"
+                    disabled={loading || page >= totalPages}
+                    onClick={() => fetchServices({ nextPage: Math.min(totalPages, page + 1) })}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className={cn("fixed inset-0 z-40", drawerOpen ? "" : "pointer-events-none")}>
+        <div
+          className={cn(
+            "absolute inset-0 bg-black/50 transition-opacity",
+            drawerOpen ? "opacity-100" : "opacity-0"
+          )}
+          onClick={() => setDrawerOpen(false)}
+        />
+
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center p-4 transition-opacity",
+            drawerOpen ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <aside
+            className={cn(
+              "relative z-50 flex w-full max-w-[620px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              drawerOpen ? "scale-100" : "scale-95"
+            )}
+            role="dialog"
+            aria-modal="true"
+            aria-label={drawerMode === "create" ? "Crear servicio" : "Editar servicio"}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+              <div>
+                <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo servicio" : "Editar servicio"}</p>
+                <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                  Selecciona el cliente por búsqueda y define vencimiento + estado.
+                </p>
+              </div>
+
+              <Button variant="ghost" size="icon" onClick={() => setDrawerOpen(false)} className="rounded-xl">
+                <XCircle className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <form onSubmit={onSubmit} className="max-h-[calc(100dvh-10rem)] flex-1 overflow-auto p-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2" ref={clientBoxRef}>
+                  <Label>Cliente</Label>
+                  <div className="relative">
+                    <Input
+                      value={clientQuery}
+                      onChange={(e) => {
+                        onClientSearch(e.target.value);
+                        setForm((p) => ({ ...p, client_id: null, client_label: "" }));
+                      }}
+                      onFocus={() => setClientOpen(true)}
+                      placeholder="Escribe para buscar cliente (mín. 2 letras)"
+                      className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    />
+                    {clientLoading ? (
+                      <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#94A3B8]" />
+                    ) : null}
+                  </div>
+
+                  {clientOpen ? (
+                    <div className="mt-2 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-lg shadow-black/10 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/30">
+                      {clientQuery.trim().length < 2 ? (
+                        <div className="px-4 py-3 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                          Escribe al menos 2 letras para buscar.
+                        </div>
+                      ) : clientOptions.length === 0 ? (
+                        <div className="px-4 py-3 text-xs text-[#64748B] dark:text-[#94A3B8]">Sin resultados.</div>
+                      ) : (
+                        <div className="max-h-56 overflow-auto">
+                          {clientOptions.map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => selectClient(c)}
+                              className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]"
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</span>
+                                <span className="block truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{c.email}</span>
+                              </span>
+                              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">#{c.id}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {form.client_id ? (
+                    <p className="mt-2 text-xs text-emerald-700 dark:text-emerald-200">
+                      Cliente seleccionado: {form.client_label} (ID {form.client_id})
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="sm:col-span-2">
+                  <Label htmlFor="service_name">Nombre del servicio</Label>
+                  <Input
+                    id="service_name"
+                    value={form.service_name}
+                    onChange={(e) => setForm((p) => ({ ...p, service_name: e.target.value }))}
+                    placeholder="Ej. Dominio, Hosting, Mantenimiento"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <Label htmlFor="description">Descripción</Label>
+                  <Input
+                    id="description"
+                    value={form.description}
+                    onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                    placeholder="Opcional"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="start_date">Inicio</Label>
+                  <Input
+                    id="start_date"
+                    type="date"
+                    value={form.start_date}
+                    onChange={(e) => setForm((p) => ({ ...p, start_date: e.target.value }))}
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="expiration_date">Expiración *</Label>
+                  <Input
+                    id="expiration_date"
+                    type="date"
+                    value={form.expiration_date}
+                    onChange={(e) => setForm((p) => ({ ...p, expiration_date: e.target.value }))}
+                    required
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="reminder_days">Recordatorio (días)</Label>
+                  <Input
+                    id="reminder_days"
+                    type="number"
+                    min={0}
+                    value={form.reminder_days}
+                    onChange={(e) => setForm((p) => ({ ...p, reminder_days: e.target.value }))}
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="status">Estado</Label>
+                  <select
+                    id="status"
+                    value={form.status}
+                    onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as ServiceStatus }))}
+                    className="h-11 w-full rounded-md border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] shadow-sm outline-none transition-colors focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus:border-[#3B82F6]/60 dark:focus:ring-[#3B82F6]/40"
+                  >
+                    <option value="activo">activo</option>
+                    <option value="vencido">vencido</option>
+                    <option value="completado">completado</option>
+                  </select>
+                </div>
+              </div>
+
+              {formError ? (
+                <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{formError}</div>
+              ) : null}
+
+              <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    setFormError(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+
+                <Button type="submit" disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Guardar
+                </Button>
+              </div>
+            </form>
+          </aside>
+        </div>
+      </div>
     </div>
   );
 }
