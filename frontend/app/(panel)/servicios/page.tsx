@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Loader2,
+  Sparkles,
   Pencil,
   Plus,
   ShieldAlert,
@@ -58,6 +59,18 @@ function formatDate(value?: string | null) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleDateString();
+}
+
+function toDateInputValue(value?: string | null) {
+  if (!value) return "";
+  const raw = String(value);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "";
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 function statusLabel(status?: ServiceStatus) {
@@ -142,6 +155,12 @@ export default function ServiciosPage() {
     }
   };
 
+  const totalAll = useMemo(() => activos + vencidos + completados, [activos, vencidos, completados]);
+  const pct = (value: number) => {
+    if (!totalAll) return 0;
+    return Math.min(100, Math.max(0, Math.round((value / totalAll) * 100)));
+  };
+
   useEffect(() => {
     fetchServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,10 +215,10 @@ export default function ServiciosPage() {
       client_label: service.client_name ?? "",
       service_name: service.service_name ?? "",
       description: service.description ?? "",
-      start_date: service.start_date ?? "",
-      expiration_date: service.expiration_date ?? "",
+      start_date: toDateInputValue(service.start_date),
+      expiration_date: toDateInputValue(service.expiration_date),
       reminder_days: String(service.reminder_days ?? 5),
-      status: (service.status ?? "activo") as ServiceStatus
+      status: ((service.status as ServiceStatus) ?? "activo") as ServiceStatus
     });
     setClientQuery(service.client_name ?? "");
     setClientOptions([]);
@@ -234,7 +253,7 @@ export default function ServiciosPage() {
         start_date: form.start_date.trim() || undefined,
         expiration_date: form.expiration_date.trim(),
         reminder_days: Number(form.reminder_days || 5),
-        status: form.status
+        status: (form.status || "activo") as ServiceStatus
       };
 
       if (drawerMode === "create") {
@@ -329,15 +348,30 @@ export default function ServiciosPage() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <div className="col-span-2 rounded-2xl border border-[#E2E8F0] bg-[radial-gradient(120%_140%_at_20%_0%,rgba(59,130,246,0.18)_0%,rgba(255,255,255,0)_55%)] p-4 dark:border-[#1F2A44] dark:bg-[radial-gradient(120%_140%_at_20%_0%,rgba(59,130,246,0.18)_0%,rgba(5,11,22,0)_60%)]">
+          <div className="col-span-2 rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(135deg,rgba(59,130,246,0.14)_0%,rgba(99,102,241,0.08)_40%,rgba(255,255,255,0)_75%)] p-4 dark:border-[#1F2A44] dark:bg-[linear-gradient(135deg,rgba(59,130,246,0.18)_0%,rgba(16,185,129,0.05)_55%,rgba(5,11,22,0)_78%)]">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Total</p>
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Panorama</p>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                <CalendarClock className="h-4 w-4" />
+                <Sparkles className="h-4 w-4 text-blue-600 dark:text-[#BFDBFE]" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">{totalServices}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">{totalAll}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{pendingSoon} vencen en 7 días</p>
+
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <div className="rounded-xl border border-[#E2E8F0] bg-white/70 p-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                <p className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8]">Activos</p>
+                <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{activos}</p>
+              </div>
+              <div className="rounded-xl border border-[#E2E8F0] bg-white/70 p-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                <p className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8]">Vencidos</p>
+                <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{vencidos}</p>
+              </div>
+              <div className="rounded-xl border border-[#E2E8F0] bg-white/70 p-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                <p className="text-[10px] font-semibold text-[#64748B] dark:text-[#94A3B8]">Complet.</p>
+                <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{completados}</p>
+              </div>
+            </div>
           </div>
 
           <button
@@ -349,7 +383,7 @@ export default function ServiciosPage() {
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
               statusFilter === "activo"
-                ? "border-[#3B82F6]/40 bg-[#3B82F6]/10"
+                ? "border-[#3B82F6]/40 bg-[linear-gradient(135deg,rgba(59,130,246,0.18)_0%,rgba(255,255,255,0)_65%)]"
                 : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
             )}
           >
@@ -359,6 +393,9 @@ export default function ServiciosPage() {
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{activos}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">En seguimiento</p>
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+              <div className="h-1.5 rounded-full bg-[#3B82F6]" style={{ width: `${pct(activos)}%` }} />
+            </div>
           </button>
 
           <button
@@ -370,7 +407,7 @@ export default function ServiciosPage() {
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
               statusFilter === "vencido"
-                ? "border-amber-500/40 bg-amber-500/10"
+                ? "border-amber-500/40 bg-[linear-gradient(135deg,rgba(245,158,11,0.20)_0%,rgba(255,255,255,0)_65%)]"
                 : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
             )}
           >
@@ -380,6 +417,9 @@ export default function ServiciosPage() {
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{vencidos}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Requieren acción</p>
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+              <div className="h-1.5 rounded-full bg-amber-500" style={{ width: `${pct(vencidos)}%` }} />
+            </div>
           </button>
 
           <button
@@ -391,7 +431,7 @@ export default function ServiciosPage() {
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
               statusFilter === "completado"
-                ? "border-emerald-500/40 bg-emerald-500/10"
+                ? "border-emerald-500/40 bg-[linear-gradient(135deg,rgba(16,185,129,0.18)_0%,rgba(255,255,255,0)_65%)]"
                 : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
             )}
           >
@@ -401,6 +441,9 @@ export default function ServiciosPage() {
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{completados}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Finalizados</p>
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+              <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${pct(completados)}%` }} />
+            </div>
           </button>
         </div>
       </div>

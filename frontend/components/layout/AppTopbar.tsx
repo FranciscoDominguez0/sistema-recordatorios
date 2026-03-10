@@ -126,7 +126,7 @@ export default function AppTopbar() {
   }, [globalSearch, pathname]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-white/80 backdrop-blur dark:border-[#1F2A44] dark:bg-[#0B1424]/80">
+    <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-[#F8FAFC]/80 backdrop-blur dark:border-[#1F2A44] dark:bg-[#0B1424]/80">
       <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:px-6">
         <div className="min-w-0">
           <h2 className="truncate text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{title}</h2>
@@ -144,7 +144,7 @@ export default function AppTopbar() {
                 setGlobalSearch(e.target.value);
               }}
               placeholder={placeholder}
-              className="relative h-10 w-full rounded-full border-[#E2E8F0] bg-white/90 pl-10 pr-20 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm shadow-black/5 backdrop-blur focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35]/80 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:shadow-black/20 dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+              className="relative h-10 w-full rounded-full border-[#E2E8F0] bg-white/95 pl-10 pr-20 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm shadow-black/5 backdrop-blur focus-visible:ring-[#4F46E5]/15 focus-visible:border-[#4F46E5]/35 dark:border-[#1F2A44] dark:bg-[#111E35]/80 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:shadow-black/20 dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
             />
 
             <div className="absolute inset-y-0 right-2 flex items-center gap-1">
@@ -217,26 +217,31 @@ export default function AppTopbar() {
           <button
             type="button"
             onClick={() => setNotificationsOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C7D2FE] bg-[#EEF2FF] transition-colors hover:bg-[#E0E7FF] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Notificaciones"
           >
-            <BellRing className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
+            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
+            <BellRing className="h-4 w-4 text-[#4F46E5] dark:text-[#F1F5F9]" />
           </button>
 
           <button
             type="button"
             onClick={toggleDark}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 transition-colors hover:bg-amber-100 dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Cambiar modo oscuro"
           >
             {isDark ? (
               <Sun className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
             ) : (
-              <Moon className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
+              <Moon className="h-4 w-4 text-amber-700 dark:text-[#F1F5F9]" />
             )}
           </button>
 
-          <Button variant="secondary" onClick={onLogout} className="rounded-xl">
+          <Button
+            variant="secondary"
+            onClick={onLogout}
+            className="rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
+          >
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Cerrar Sesión</span>
           </Button>

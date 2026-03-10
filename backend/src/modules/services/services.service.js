@@ -1,5 +1,14 @@
 import pool from "../../config/database.js";
 
+const ALLOWED_STATUSES = new Set(["activo", "vencido", "completado"]);
+
+function normalizeStatus(value) {
+  if (value === undefined || value === null) return null;
+  const normalized = String(value).trim().toLowerCase();
+  if (!normalized) return null;
+  return normalized;
+}
+
 class ServicesService {
   async create({
     client_id,
@@ -10,6 +19,11 @@ class ServicesService {
     reminder_days,
     status
   }) {
+    const normalizedStatus = normalizeStatus(status) ?? "activo";
+    if (!ALLOWED_STATUSES.has(normalizedStatus)) {
+      throw new Error("Estado inválido");
+    }
+
     const sql = `
       INSERT INTO services (
         client_id,
@@ -30,7 +44,7 @@ class ServicesService {
       start_date,
       expiration_date,
       reminder_days,
-      status ?? "activo"
+      normalizedStatus
     ]);
 
     return {
@@ -41,7 +55,7 @@ class ServicesService {
       start_date,
       expiration_date,
       reminder_days,
-      status: status ?? "activo"
+      status: normalizedStatus
     };
   }
 
@@ -153,6 +167,18 @@ class ServicesService {
     reminder_days,
     status
   }) {
+    const normalizedStatus = normalizeStatus(status);
+    if (normalizedStatus && !ALLOWED_STATUSES.has(normalizedStatus)) {
+      throw new Error("Estado inválido");
+    }
+
+    let nextStatus = normalizedStatus;
+    if (!nextStatus) {
+      const existing = await this.getById(id);
+      if (!existing) return false;
+      nextStatus = normalizeStatus(existing.status) ?? "activo";
+    }
+
     const sql = `
       UPDATE services
       SET client_id = ?,
@@ -172,7 +198,7 @@ class ServicesService {
       start_date,
       expiration_date,
       reminder_days,
-      status ?? "activo",
+      nextStatus,
       id
     ]);
 
