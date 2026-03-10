@@ -18,7 +18,8 @@ class ReminderService {
       FROM services s
       JOIN clients c ON s.client_id = c.id
       WHERE s.status = 'activo'
-        AND DATE_SUB(s.expiration_date, INTERVAL s.reminder_days DAY) = CURDATE()
+        AND s.expiration_date >= CURDATE()
+        AND DATE_SUB(s.expiration_date, INTERVAL s.reminder_days DAY) <= CURDATE()
     `);
     return rows;
   }
@@ -28,9 +29,10 @@ class ReminderService {
     return rows;
   }
 
+  // Verifica si YA se envió el recordatorio en cualquier fecha anterior (no solo hoy)
   async hasReminderAlreadySentToday(serviceId) {
     const [[row]] = await pool.query(
-      "SELECT id FROM reminder_history WHERE service_id = ? AND reminder_date = CURDATE() LIMIT 1",
+      "SELECT id FROM reminder_history WHERE service_id = ? LIMIT 1",
       [serviceId]
     );
     return Boolean(row);
