@@ -67,9 +67,9 @@ export default function NotificationsPanel({
     };
   }, [open]);
 
-  const surface = isDark ? "bg-[#050B1E] text-[#ECEEF0]" : "bg-white text-zinc-900";
-  const border = isDark ? "border-white/10" : "border-black/10";
-  const muted = isDark ? "text-[#CCD4DE]/80" : "text-zinc-500";
+  const surface = isDark ? "bg-[#0B1424] text-[#F1F5F9]" : "bg-white text-zinc-900";
+  const border = isDark ? "border-[#1F2A44]" : "border-black/10";
+  const muted = isDark ? "text-[#94A3B8]" : "text-zinc-500";
 
   return (
     <div className={cn(open ? "" : "pointer-events-none")}>
@@ -95,7 +95,7 @@ export default function NotificationsPanel({
         <div className={cn("flex items-center justify-between gap-3 border-b px-5 py-5", border)}>
           <div className="flex items-center gap-3">
             <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl border", border)}>
-              <BellRing className={cn("h-5 w-5", isDark ? "text-[#5A77DF]" : "text-[#3E53A0]")} />
+              <BellRing className={cn("h-5 w-5", isDark ? "text-[#3B82F6]" : "text-[#3E53A0]")} />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">Notificaciones</p>
@@ -134,7 +134,7 @@ export default function NotificationsPanel({
                 >
                   <div className="flex items-start gap-3">
                     <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl", iconBg)}>
-                      <Icon className={cn("h-5 w-5", n.variant === "success" ? "text-[#5A77DF]" : muted)} />
+                      <Icon className={cn("h-5 w-5", n.variant === "success" ? "text-[#3B82F6]" : muted)} />
                     </div>
 
                     <div className="min-w-0 flex-1">

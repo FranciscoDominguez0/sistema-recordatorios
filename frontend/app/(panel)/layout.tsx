@@ -5,14 +5,14 @@ import AuthGuard from "@/components/auth/AuthGuard";
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-[#5A77DF]">
+      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] dark:bg-[#050B16] dark:text-[#F1F5F9]">
         <div className="flex">
           <AppSidebar />
 
           <div className="min-w-0 flex-1">
             <AppTopbar />
             <main className="mx-auto w-full max-w-[1400px] p-6">
-              <div className="rounded-[32px] border border-white/10 bg-[#08112F]/95 p-6 text-[#ECEEF0] shadow-2xl shadow-black/20">
+              <div className="rounded-[32px] border border-[#E2E8F0] bg-white p-6 shadow-2xl shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
                 {children}
               </div>
             </main>

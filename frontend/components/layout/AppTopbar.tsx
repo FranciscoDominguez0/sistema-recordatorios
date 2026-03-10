@@ -31,6 +31,7 @@ export default function AppTopbar() {
     const nextIsDark = saved ? saved === "dark" : false;
     setIsDark(nextIsDark);
     document.documentElement.classList.toggle("dark", nextIsDark);
+    document.documentElement.classList.toggle("light", !nextIsDark);
   }, []);
 
   const toggleDark = () => {
@@ -38,6 +39,7 @@ export default function AppTopbar() {
       const next = !prev;
       localStorage.setItem("theme", next ? "dark" : "light");
       document.documentElement.classList.toggle("dark", next);
+      document.documentElement.classList.toggle("light", !next);
       return next;
     });
   };
@@ -49,38 +51,42 @@ export default function AppTopbar() {
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-[#08112F]/70 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-white/80 backdrop-blur dark:border-[#1F2A44] dark:bg-[#0B1424]/80">
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6">
         <div>
-          <p className="text-sm text-[#CCD4DE]">Bienvenido</p>
-          <h2 className="text-lg font-semibold tracking-tight text-[#ECEEF0]">{title}</h2>
+          <p className="text-sm text-[#64748B] dark:text-[#94A3B8]">Bienvenido</p>
+          <h2 className="text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{title}</h2>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 transition-colors hover:bg-white/10"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Centro de alertas"
           >
-            <Radar className="h-4 w-4 text-[#ECEEF0]" />
+            <Radar className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
           </button>
 
           <button
             type="button"
             onClick={() => setNotificationsOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 transition-colors hover:bg-white/10"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Notificaciones"
           >
-            <BellRing className="h-4 w-4 text-[#ECEEF0]" />
+            <BellRing className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
           </button>
 
           <button
             type="button"
             onClick={toggleDark}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 transition-colors hover:bg-white/10"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
             aria-label="Cambiar modo oscuro"
           >
-            {isDark ? <Sun className="h-4 w-4 text-[#ECEEF0]" /> : <Moon className="h-4 w-4 text-[#ECEEF0]" />}
+            {isDark ? (
+              <Sun className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
+            ) : (
+              <Moon className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
+            )}
           </button>
 
           <Button variant="secondary" onClick={onLogout} className="rounded-xl">

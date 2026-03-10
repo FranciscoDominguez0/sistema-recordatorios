@@ -6,12 +6,12 @@ function StatCard({ title, value, subtitle, icon: Icon }: { title: string; value
   return (
     <Card className="rounded-2xl shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-sm font-medium text-zinc-600">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-[#3E53A0]" />
+        <CardTitle className="text-sm font-medium text-zinc-600 dark:text-[#94A3B8]">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-[#3E53A0] dark:text-[#3B82F6]" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold text-zinc-900">{value}</div>
-        <p className="mt-1 text-xs text-zinc-500">{subtitle}</p>
+        <div className="text-2xl font-semibold text-zinc-900 dark:text-[#F1F5F9]">{value}</div>
+        <p className="mt-1 text-xs text-zinc-500 dark:text-[#94A3B8]">{subtitle}</p>
       </CardContent>
     </Card>
   );
@@ -30,10 +30,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">Servicios Próximos a Vencer</CardTitle>
+            <CardTitle className="text-base dark:text-[#F1F5F9]">Servicios Próximos a Vencer</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-xl border border-dashed border-black/10 bg-white/40 p-6 text-sm text-zinc-600">
+            <div className="rounded-xl border border-dashed border-black/10 bg-white/40 p-6 text-sm text-zinc-600 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
               No hay servicios próximos a vencer
             </div>
           </CardContent>
@@ -41,10 +41,10 @@ export default function DashboardPage() {
 
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">Tus Tareas Pendientes</CardTitle>
+            <CardTitle className="text-base dark:text-[#F1F5F9]">Tus Tareas Pendientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-xl border border-dashed border-black/10 bg-white/40 p-6 text-sm text-zinc-600">
+            <div className="rounded-xl border border-dashed border-black/10 bg-white/40 p-6 text-sm text-zinc-600 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
               No tienes tareas pendientes
             </div>
           </CardContent>

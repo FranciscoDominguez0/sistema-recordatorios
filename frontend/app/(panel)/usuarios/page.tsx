@@ -177,12 +177,12 @@ export default function UsuariosPage() {
   };
 
   return (
-    <div className="space-y-6 text-[#ECEEF0]">
+    <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
       <div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight text-[#ECEEF0]">Usuarios</h1>
-            <p className="mt-1 text-sm text-[#CCD4DE]">Gestiona los usuarios que acceden al sistema.</p>
+            <h1 className="text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">Usuarios</h1>
+            <p className="mt-1 text-sm text-[#64748B] dark:text-[#94A3B8]">Gestiona los usuarios que acceden al sistema.</p>
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -190,7 +190,7 @@ export default function UsuariosPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por nombre o email"
-              className="h-11 border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60 sm:w-[260px]"
+              className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 sm:w-[260px] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
             />
             <Button variant="secondary" onClick={() => fetchUsers(search)} className="w-full sm:w-auto">
               Buscar
@@ -203,15 +203,15 @@ export default function UsuariosPage() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="rounded-2xl border border-white/10 bg-[#08112F]/70 p-4 shadow-sm shadow-black/20">
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-[#CCD4DE]">Total</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#323954] text-[#ECEEF0] shadow-sm">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Total</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                 <User2 className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#ECEEF0]">{users.length}</p>
-            <p className="mt-1 text-xs text-[#CCD4DE]/75">Usuarios registrados</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{users.length}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Usuarios registrados</p>
           </div>
 
           <div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-4 shadow-sm shadow-black/20">
@@ -225,38 +225,38 @@ export default function UsuariosPage() {
             <p className="mt-1 text-xs text-emerald-200/80">Con acceso habilitado</p>
           </div>
 
-          <div className="rounded-2xl border border-[#5A77DF]/30 bg-[#3E53A0]/25 p-4 shadow-sm shadow-black/20">
+          <div className="rounded-2xl border border-[#3B82F6]/25 bg-[#3B82F6]/10 p-4 shadow-sm shadow-black/5 dark:border-[#3B82F6]/30 dark:shadow-black/20">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-[#ECEEF0]/80">Admins</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-[#ECEEF0]">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Admins</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                 <ShieldCheck className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#ECEEF0]">{adminCount}</p>
-            <p className="mt-1 text-xs text-[#CCD4DE]/80">Permisos elevados</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{adminCount}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Permisos elevados</p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#08112F]/70 p-4 shadow-sm shadow-black/20">
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-[#CCD4DE]">Empleados</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#323954] text-[#ECEEF0] shadow-sm">
+              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Empleados</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                 <User2 className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#ECEEF0]">{staffCount}</p>
-            <p className="mt-1 text-xs text-[#CCD4DE]/75">Rol staff</p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{staffCount}</p>
+            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Rol staff</p>
           </div>
         </div>
       </div>
 
       <Card>
         <CardHeader className="flex flex-col gap-2">
-          <CardTitle className="text-base text-[#ECEEF0]">Listado</CardTitle>
-          <CardDescription className="text-[#CCD4DE]">Usuarios registrados en el sistema.</CardDescription>
+          <CardTitle className="text-base text-[#0F172A] dark:text-[#F1F5F9]">Listado</CardTitle>
+          <CardDescription className="text-[#64748B] dark:text-[#94A3B8]">Usuarios registrados en el sistema.</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center gap-2 text-sm text-[#CCD4DE]">
+            <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
               <Loader2 className="h-4 w-4 animate-spin" />
               Cargando usuarios...
             </div>
@@ -265,15 +265,15 @@ export default function UsuariosPage() {
               {error}
             </div>
           ) : users.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 bg-[#323954]/40 p-6 text-sm text-[#CCD4DE]">
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
               No hay usuarios registrados.
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#08112F]/70 shadow-sm shadow-black/20">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 z-10 bg-[#08112F]/90 text-xs text-[#CCD4DE] backdrop-blur">
-                    <tr className="border-b border-white/10">
+                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
+                    <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
                       <th className="px-4 py-3 font-semibold">Nombre</th>
                       <th className="px-4 py-3 font-semibold">Email</th>
                       <th className="px-4 py-3 font-semibold">Rol</th>
@@ -281,36 +281,36 @@ export default function UsuariosPage() {
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10">
+                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
                     {users.map((u, idx) => (
                       <tr
                         key={u.id}
                         className={cn(
-                          "group transition-colors hover:bg-white/[0.04]",
-                          idx % 2 === 1 ? "bg-[#323954]/35" : "bg-transparent"
+                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
+                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
                         )}
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#323954] text-[#ECEEF0] shadow-sm">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                               <User2 className="h-4 w-4" />
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate font-medium text-[#ECEEF0]">{u.name}</p>
-                              <p className="truncate text-xs text-[#CCD4DE]/75">ID {u.id}</p>
+                              <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{u.name}</p>
+                              <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">ID {u.id}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-[#CCD4DE]">
-                          <span className="font-medium text-[#ECEEF0]">{u.email}</span>
+                        <td className="px-4 py-3 text-[#64748B] dark:text-[#94A3B8]">
+                          <span className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{u.email}</span>
                         </td>
                         <td className="px-4 py-3">
                           <span
                             className={cn(
                               "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
                               u.role === "admin"
-                                ? "border-[#5A77DF]/30 bg-[#3E53A0]/25 text-[#ECEEF0]"
-                                : "border-white/15 bg-white/10 text-[#CCD4DE]"
+                                ? "border-[#3B82F6]/25 bg-[#3B82F6]/10 text-[#0F172A] dark:border-[#3B82F6]/30 dark:text-[#F1F5F9]"
+                                : "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]"
                             )}
                           >
                             <ShieldCheck className="h-3.5 w-3.5" />
@@ -319,12 +319,12 @@ export default function UsuariosPage() {
                         </td>
                         <td className="px-4 py-3">
                           {u.is_active ? (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               Activo
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-[#CCD4DE]">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-xs font-semibold text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
                               <XCircle className="h-3.5 w-3.5" />
                               Inactivo
                             </span>
@@ -337,7 +337,7 @@ export default function UsuariosPage() {
                               size="icon"
                               onClick={() => openEdit(u)}
                               aria-label="Editar"
-                              className="rounded-xl border border-transparent text-[#ECEEF0] group-hover:border-white/10 group-hover:bg-white/5"
+                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -374,17 +374,17 @@ export default function UsuariosPage() {
 
         <aside
           className={cn(
-            "fixed right-0 top-0 z-50 flex h-dvh w-[92vw] max-w-[520px] flex-col border-l border-white/10 bg-[#08112F] text-[#ECEEF0] shadow-2xl shadow-black/30 transition-transform",
+            "fixed right-0 top-0 z-50 flex h-dvh w-[92vw] max-w-[520px] flex-col border-l border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
             drawerOpen ? "translate-x-0" : "translate-x-full"
           )}
           role="dialog"
           aria-modal="true"
           aria-label={drawerMode === "create" ? "Crear usuario" : "Editar usuario"}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-5">
+          <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
             <div>
               <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo usuario" : "Editar usuario"}</p>
-              <p className="mt-1 text-xs text-[#CCD4DE]">
+              <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
                 {drawerMode === "create"
                   ? "Completa los datos para crear un usuario."
                   : "Actualiza los datos del usuario."}
@@ -406,7 +406,7 @@ export default function UsuariosPage() {
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   required
-                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
                 />
               </div>
 
@@ -419,7 +419,7 @@ export default function UsuariosPage() {
                   value={form.email}
                   onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                   required
-                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
                 />
               </div>
 
@@ -432,7 +432,7 @@ export default function UsuariosPage() {
                   value={form.password}
                   onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                   required={drawerMode === "create"}
-                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
                 />
               </div>
 
@@ -445,7 +445,7 @@ export default function UsuariosPage() {
                   value={form.confirm_password}
                   onChange={(e) => setForm((p) => ({ ...p, confirm_password: e.target.value }))}
                   required={drawerMode === "create"}
-                  className="border-white/10 bg-[#323954] text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
                 />
               </div>
 
@@ -455,7 +455,7 @@ export default function UsuariosPage() {
                   id="role"
                   value={form.role}
                   onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as UserRole }))}
-                  className="h-11 w-full rounded-xl border border-white/10 bg-[#323954] px-3 text-sm text-[#ECEEF0] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#5A77DF]/40 focus-visible:border-[#5A77DF]/60"
+                  className="h-11 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
                 >
                   <option value="staff">Empleado</option>
                   <option value="admin">Administrador</option>
@@ -464,14 +464,14 @@ export default function UsuariosPage() {
 
               <div className="sm:col-span-1">
                 <Label>Usuario activo</Label>
-                <label className="mt-2 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm">
+                <label className="mt-2 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
                   <input
                     type="checkbox"
                     checked={form.is_active}
                     onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
                     className="h-4 w-4 rounded border-white/20"
                   />
-                  <span className="text-[#ECEEF0]">
+                  <span className="text-[#0F172A] dark:text-[#F1F5F9]">
                     {form.is_active ? "Activo" : "Inactivo"}
                   </span>
                 </label>
