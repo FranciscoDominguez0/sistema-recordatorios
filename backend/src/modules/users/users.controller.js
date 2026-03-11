@@ -89,6 +89,20 @@ class UsersController {
       return res.status(500).json({ message: error.message });
     }
   }
+  async updateAvatar(req, res) {
+    try {
+      const { id } = req.params ?? {};
+      const { avatar_base64 } = req.body ?? {};
+
+      const user = await usersService.updateAvatar(id, avatar_base64);
+      return res.json(user);
+    } catch (error) {
+      if (error?.statusCode) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 export default new UsersController();

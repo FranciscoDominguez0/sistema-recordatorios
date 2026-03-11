@@ -617,17 +617,20 @@ export default function UsuariosPage() {
                 <div className="sm:col-span-2">
                   <Label>Notificaciones por correo</Label>
                   <p className="mb-2 text-xs text-[#94A3B8]">Si está desactivado, este usuario NO recibirá correos de avisos de tareas ni servicios.</p>
-                  <label className="inline-flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors
-                    {form.receive_notifications
-                      ? 'border-[#3B82F6]/30 bg-[#3B82F6]/5 dark:bg-[#3B82F6]/10'
-                      : 'border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]'}
-                  ">
-                    <div className={`relative h-5 w-9 rounded-full transition-colors ${
-                      form.receive_notifications ? 'bg-[#3B82F6]' : 'bg-[#94A3B8]/40'
-                    }`}>
-                      <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                        form.receive_notifications ? 'translate-x-4' : 'translate-x-0.5'
-                      }`} />
+                  <label className={cn(
+                    "inline-flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors",
+                    form.receive_notifications
+                      ? "border-[#3B82F6]/30 bg-[#3B82F6]/5 dark:bg-[#3B82F6]/10"
+                      : "border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]"
+                  )}>
+                    <div className={cn(
+                      "relative h-5 w-9 rounded-full transition-colors",
+                      form.receive_notifications ? "bg-[#3B82F6]" : "bg-[#94A3B8]/40"
+                    )}>
+                      <div className={cn(
+                        "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform",
+                        form.receive_notifications ? "translate-x-4" : "translate-x-0.5"
+                      )} />
                       <input
                         type="checkbox"
                         className="sr-only"

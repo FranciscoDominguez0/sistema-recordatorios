@@ -9,6 +9,7 @@ export type UserItem = {
   role: UserRole;
   is_active: boolean;
   receive_notifications?: boolean;
+  avatar_url?: string | null;
   created_at?: string;
 };
 
@@ -137,4 +138,17 @@ export async function deleteUser(id: number): Promise<void> {
       const message = error?.response?.data?.message || error?.message || "No se pudo eliminar usuario";
       throw new Error(message);
     });
+}
+
+export async function uploadAvatar(userId: number, avatarBase64: string): Promise<UserItem> {
+  const response = await api
+    .put<UserItem>(`/users/${userId}/avatar`, { avatar_base64: avatarBase64 }, {
+      headers: authHeaders()
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo actualizar el avatar";
+      throw new Error(message);
+    });
+
+  return response.data;
 }

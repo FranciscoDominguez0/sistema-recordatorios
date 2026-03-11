@@ -7,6 +7,7 @@ const router = Router();
 router.get("/", verifyToken, (req, res) => usersController.getAll(req, res));
 router.post("/", verifyToken, (req, res) => usersController.create(req, res));
 router.put("/:id", verifyToken, (req, res) => usersController.update(req, res));
+router.put("/:id/avatar", verifyToken, (req, res) => usersController.updateAvatar(req, res));
 router.delete("/:id", verifyToken, (req, res) => usersController.remove(req, res));
 
 export default router;

@@ -16,13 +16,15 @@ CREATE TABLE users (
     INDEX idx_users_email (email)
 );
 
--- Columnas agregadas después del despliegue inicial
+-- 1. Habilitar/deshabilitar usuarios
 ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1;
-ALTER TABLE users ADD COLUMN receive_notifications TINYINT(1) NOT NULL DEFAULT 1;
 
 -- Agregado en v1.x — Notificaciones de correo por usuario
 ALTER TABLE users
   ADD COLUMN receive_notifications TINYINT(1) NOT NULL DEFAULT 1;
+
+-- Agregado en v1.x — Avatar de usuario (base64)
+ALTER TABLE users ADD COLUMN avatar_url LONGTEXT DEFAULT NULL;
 
 
 -- =============================

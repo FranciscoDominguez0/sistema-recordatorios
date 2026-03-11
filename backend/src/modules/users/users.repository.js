@@ -2,6 +2,7 @@ import pool from "../../config/database.js";
 
 let hasActiveColumnCache;
 let hasNotifColumnCache;
+let hasAvatarColumnCache;
 
 async function hasIsActiveColumn() {
   if (typeof hasActiveColumnCache === "boolean") return hasActiveColumnCache;
@@ -17,14 +18,23 @@ async function hasReceiveNotificationsColumn() {
   return hasNotifColumnCache;
 }
 
+async function hasAvatarUrlColumn() {
+  if (typeof hasAvatarColumnCache === "boolean") return hasAvatarColumnCache;
+  const [rows] = await pool.query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
+  hasAvatarColumnCache = Array.isArray(rows) && rows.length > 0;
+  return hasAvatarColumnCache;
+}
+
 class UsersRepository {
   async findById(id) {
     const activeColumn = await hasIsActiveColumn();
     const notifColumn  = await hasReceiveNotificationsColumn();
+    const avatarColumn = await hasAvatarUrlColumn();
 
     const cols = ["id", "name", "email", "role"];
     if (activeColumn) cols.push("is_active");
     if (notifColumn)  cols.push("receive_notifications");
+    if (avatarColumn) cols.push("avatar_url");
     cols.push("created_at");
 
     const sql = `SELECT ${cols.join(", ")} FROM users WHERE id = ? LIMIT 1`;
@@ -33,6 +43,7 @@ class UsersRepository {
     if (!user) return null;
     if (!activeColumn) user.is_active = true;
     if (!notifColumn)  user.receive_notifications = true;
+    if (!avatarColumn) user.avatar_url = null;
     return user;
   }
 
@@ -57,10 +68,12 @@ class UsersRepository {
 
     const activeColumn = await hasIsActiveColumn();
     const notifColumn  = await hasReceiveNotificationsColumn();
+    const avatarColumn = await hasAvatarUrlColumn();
 
     const cols = ["id", "name", "email", "role"];
     if (activeColumn) cols.push("is_active");
     if (notifColumn)  cols.push("receive_notifications");
+    if (avatarColumn) cols.push("avatar_url");
     cols.push("created_at");
     const selectSql = `SELECT ${cols.join(", ")}`;
 
@@ -80,7 +93,8 @@ class UsersRepository {
     const normalizedData = dataRows.map((u) => ({
       ...u,
       is_active: activeColumn ? Boolean(u.is_active) : true,
-      receive_notifications: notifColumn ? Boolean(u.receive_notifications) : true
+      receive_notifications: notifColumn ? Boolean(u.receive_notifications) : true,
+      avatar_url: avatarColumn ? (u.avatar_url || null) : null
     }));
 
     return {
@@ -119,10 +133,12 @@ class UsersRepository {
   async updateById(id, patch = {}) {
     const activeColumn = await hasIsActiveColumn();
     const notifColumn  = await hasReceiveNotificationsColumn();
+    const avatarColumn = await hasAvatarUrlColumn();
 
     const entries = Object.entries(patch)
       .filter(([key]) => key !== "is_active" || activeColumn)
       .filter(([key]) => key !== "receive_notifications" || notifColumn)
+      .filter(([key]) => key !== "avatar_url" || avatarColumn)
       .filter(([, value]) => value !== undefined);
 
     if (entries.length === 0) return;

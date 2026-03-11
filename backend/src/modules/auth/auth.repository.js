@@ -18,7 +18,7 @@ class AuthRepository {
    */
   async findUserByEmail(email) {
     const sql = `
-      SELECT id, name, email, password_hash, role
+      SELECT id, name, email, password_hash, role, avatar_url
       FROM users
       WHERE email = ?
       LIMIT 1

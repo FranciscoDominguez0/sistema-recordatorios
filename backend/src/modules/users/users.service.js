@@ -124,6 +124,26 @@ class UsersService {
       throw error;
     }
   }
+  async updateAvatar(id, avatarBase64) {
+    const numericId = Number.parseInt(String(id), 10);
+    if (!Number.isFinite(numericId) || numericId <= 0) {
+      const error = new Error("ID inválido");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const existing = await usersRepository.findById(numericId);
+    if (!existing) {
+      const error = new Error("Usuario no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const avatar = typeof avatarBase64 === "string" && avatarBase64.trim() ? avatarBase64.trim() : null;
+
+    await usersRepository.updateById(numericId, { avatar_url: avatar });
+    return usersRepository.findById(numericId);
+  }
 }
 
 export default new UsersService();
