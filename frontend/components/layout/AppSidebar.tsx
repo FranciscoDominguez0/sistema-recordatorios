@@ -23,7 +23,7 @@ const nav = [
   { href: "/servicios", label: "Servicios", icon: ShieldCheck },
   { href: "/tareas", label: "Tareas", icon: ClipboardList },
   { href: "/configuracion", label: "Configuración", icon: Settings },
-  { href: "/auditoria", label: "Auditoría", icon: Activity }
+  { href: "/auditorias", label: "Auditorías", icon: Activity }
 ] as const;
 
 type AppSidebarProps = {

@@ -38,6 +38,24 @@ class ActivityLogsController {
       return res.status(500).json({ message: error.message });
     }
   }
+  async chart(req, res) {
+    try {
+      const { days } = req.query ?? {};
+      const data = await activityLogsService.getActivityChart(days);
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  async getActionTypes(req, res) {
+    try {
+      const types = await activityLogsService.getActionTypes();
+      return res.json(types);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 export default new ActivityLogsController();

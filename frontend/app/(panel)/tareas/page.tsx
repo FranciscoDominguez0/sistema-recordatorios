@@ -69,6 +69,8 @@ export default function TareasPage() {
   const [deleting, setDeleting] = useState(false);
 
   const [completingId, setCompletingId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const TASKS_PER_PAGE = 10;
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -176,6 +178,9 @@ export default function TareasPage() {
     if (filter === "completed") return t.status === "completed";
     return true;
   });
+
+  const totalPages = Math.ceil(filteredTasks.length / TASKS_PER_PAGE);
+  const pagedTasks = filteredTasks.slice((page - 1) * TASKS_PER_PAGE, page * TASKS_PER_PAGE);
 
   const urgencyConfig = {
     overdue: {
@@ -320,7 +325,7 @@ export default function TareasPage() {
             {(["all", "pending", "completed"] as const).map((f) => (
               <button
                 key={f}
-                onClick={() => setFilter(f)}
+            onClick={() => { setFilter(f); setPage(1); }}
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                   filter === f
@@ -356,7 +361,7 @@ export default function TareasPage() {
           ) : (
             <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
               <div className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
-                {filteredTasks.map((task) => {
+                {pagedTasks.map((task) => {
                   const urgency = task.status === "completed" ? null : getTaskUrgency(task.due_date);
                   const urgencyCfg = urgency ? urgencyConfig[urgency] : null;
                   const isCompleting = completingId === task.id;
@@ -453,6 +458,50 @@ export default function TareasPage() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Paginación */}
+          {!loading && !error && totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                Página {page} de {totalPages} · {filteredTasks.length} tareas
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] disabled:opacity-40 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#94A3B8] dark:hover:bg-[#111E35]"
+                >
+                  ‹
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                  const p = start + i;
+                  if (p > totalPages) return null;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={cn(
+                        "h-8 w-8 rounded-xl text-xs font-medium transition-colors",
+                        p === page
+                          ? "bg-[#0F172A] text-white dark:bg-[#3B82F6]"
+                          : "border border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#94A3B8] dark:hover:bg-[#111E35]"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] disabled:opacity-40 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#94A3B8] dark:hover:bg-[#111E35]"
+                >
+                  ›
+                </button>
               </div>
             </div>
           )}

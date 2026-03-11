@@ -19,7 +19,7 @@ function titleFromPath(pathname: string) {
     "/servicios": "Servicios",
     "/tareas": "Tareas",
     "/configuracion": "Configuración",
-    "/auditoria": "Auditoría"
+    "/auditorias": "Auditorías"
   };
   return map[pathname] ?? "Panel";
 }
@@ -28,7 +28,8 @@ function searchPlaceholderFromPath(pathname: string) {
   const map: Record<string, string> = {
     "/usuarios": "Buscar por nombre o email",
     "/clientes": "Buscar por nombre o email",
-    "/servicios": "Buscar por servicio o cliente"
+    "/servicios": "Buscar por servicio o cliente",
+    "/auditorias": "Buscar por usuario, acción o descripción"
   };
   return map[pathname] ?? "Buscar";
 }

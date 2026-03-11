@@ -129,6 +129,46 @@ class ActivityLogsService {
       top_users: topUsersRows
     };
   }
+  async getActivityChart(days = 30) {
+    const safeDays = Math.min(Math.max(Number(days) || 30, 7), 90);
+
+    const [dailyRows] = await pool.query(`
+      SELECT
+        DATE(created_at) AS date,
+        COUNT(*) AS total
+      FROM activity_logs
+      WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `, [safeDays]);
+
+    const [byActionRows] = await pool.query(`
+      SELECT action, COUNT(*) AS total
+      FROM activity_logs
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+      GROUP BY action
+      ORDER BY total DESC
+      LIMIT 10
+    `, [safeDays]);
+
+    const [byEntityRows] = await pool.query(`
+      SELECT entity_type, COUNT(*) AS total
+      FROM activity_logs
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND entity_type IS NOT NULL
+      GROUP BY entity_type
+      ORDER BY total DESC
+    `, [safeDays]);
+
+    return { daily: dailyRows, by_action: byActionRows, by_entity: byEntityRows };
+  }
+
+  async getActionTypes() {
+    const [rows] = await pool.query(
+      "SELECT DISTINCT action FROM activity_logs ORDER BY action ASC"
+    );
+    return rows.map((r) => r.action);
+  }
 }
 
 export default new ActivityLogsService();
