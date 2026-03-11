@@ -75,6 +75,19 @@ class EmailSettingsService {
     return rows[0] ?? null;
   }
 
+  async getSecondary() {
+    const sql = `
+      SELECT id, user_id, smtp_host, smtp_port, smtp_email, smtp_password, encryption, is_default, created_at
+      FROM email_settings
+      WHERE is_default = FALSE
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    const [rows] = await pool.query(sql);
+    return rows[0] ?? null;
+  }
+
   async update(id, userId, { smtp_host, smtp_port, smtp_email, smtp_password, encryption }) {
     const sql = `
       UPDATE email_settings

@@ -364,10 +364,10 @@ export default function UsuariosPage() {
                   <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
                     <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
                       <th className="px-4 py-3 font-semibold">Nombre</th>
-                      <th className="px-4 py-3 font-semibold">Email</th>
-                      <th className="px-4 py-3 font-semibold">Rol</th>
-                      <th className="px-4 py-3 font-semibold">Estado</th>
-                      <th className="px-4 py-3 font-semibold">Notif. correo</th>
+                      <th className="hidden px-4 py-3 font-semibold sm:table-cell">Email</th>
+                      <th className="hidden px-4 py-3 font-semibold md:table-cell">Rol</th>
+                      <th className="hidden px-4 py-3 font-semibold md:table-cell">Estado</th>
+                      <th className="hidden px-4 py-3 font-semibold lg:table-cell">Notif. correo</th>
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
@@ -382,19 +382,20 @@ export default function UsuariosPage() {
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                               <User2 className="h-4 w-4" />
                             </div>
                             <div className="min-w-0">
                               <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{u.name}</p>
+                              <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8] sm:hidden">{u.email}</p>
                               <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">ID {u.id}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-[#64748B] dark:text-[#94A3B8]">
+                        <td className="hidden px-4 py-3 text-[#64748B] dark:text-[#94A3B8] sm:table-cell">
                           <span className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{u.email}</span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 md:table-cell">
                           <span
                             className={cn(
                               "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
@@ -407,7 +408,7 @@ export default function UsuariosPage() {
                             {roleLabel(u.role)}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 md:table-cell">
                           {u.is_active ? (
                             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
                               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -420,7 +421,7 @@ export default function UsuariosPage() {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 lg:table-cell">
                           {u.receive_notifications !== false ? (
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3B82F6]/25 bg-[#3B82F6]/10 px-2.5 py-1 text-xs font-semibold text-[#3B82F6]">
                               <Bell className="h-3 w-3" />

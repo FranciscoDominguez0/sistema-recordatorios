@@ -16,6 +16,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import {
+  clearAllNotifications,
   deleteNotification,
   getNotifications,
   markAllNotificationsRead,
@@ -33,6 +34,13 @@ function typeIcon(type: NotificationType) {
     case "email_sent":       return <Mail          className="h-4 w-4 text-emerald-500" />;
     default:                 return <Bell          className="h-4 w-4 text-slate-400" />;
   }
+}
+
+function summarize(message: string | null | undefined) {
+  if (!message) return "";
+  const clean = String(message).replace(/\s+/g, " ").trim();
+  if (!clean) return "";
+  return clean.length > 90 ? `${clean.slice(0, 90)}…` : clean;
 }
 
 function relativeTime(dateStr: string): string {
@@ -96,10 +104,15 @@ export default function NotificationsPanel({
   };
 
   const handleMarkAllRead = async () => {
-    await markAllNotificationsRead().catch(() => {});
-    setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnread(0);
-    onUnreadCountChange?.(0);
+    setError(null);
+    try {
+      await markAllNotificationsRead();
+      await clearAllNotifications();
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudieron limpiar las notificaciones");
+      await load().catch(() => {});
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -245,11 +258,11 @@ export default function NotificationsPanel({
             <button
               type="button"
               onClick={handleMarkAllRead}
-              disabled={unread === 0}
+              disabled={items.length === 0}
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-white disabled:opacity-40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
             >
               <CheckCheck className="h-4 w-4" />
-              Marcar todas como leídas
+              Marcar y limpiar
             </button>
           </div>
         )}

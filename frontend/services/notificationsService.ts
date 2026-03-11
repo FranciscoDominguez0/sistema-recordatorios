@@ -65,6 +65,10 @@ export async function markAllNotificationsRead(): Promise<void> {
   await request("/notifications/read-all", { method: "PUT" });
 }
 
+export async function clearAllNotifications(): Promise<void> {
+  await request("/notifications", { method: "DELETE" });
+}
+
 export async function deleteNotification(id: number): Promise<void> {
   await request(`/notifications/${id}`, { method: "DELETE" });
 }

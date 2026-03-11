@@ -11,6 +11,7 @@ router.get("/client/:clientId", verifyToken, (req, res) =>
 );
 router.get("/:id", verifyToken, (req, res) => servicesController.getById(req, res));
 router.put("/:id", verifyToken, (req, res) => servicesController.update(req, res));
+router.post("/:id/renew", verifyToken, (req, res) => servicesController.renew(req, res));
 router.delete("/:id", verifyToken, (req, res) => servicesController.delete(req, res));
 
 export default router;

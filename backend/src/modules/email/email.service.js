@@ -32,7 +32,7 @@ class EmailService {
       to,
       subject,
       html,
-      text,
+      ...(text ? { text } : {}),
       attachments
     });
   }

@@ -164,6 +164,49 @@ class ServicesController {
       return res.status(500).json({ message: error.message });
     }
   }
+  async renew(req, res) {
+    try {
+      const id = Number(req.params.id);
+      const { new_expiration_date } = req.body ?? {};
+
+      const service = await servicesService.renew(id, { new_expiration_date });
+
+      if (!service) {
+        return res.status(404).json({ message: "Servicio no encontrado" });
+      }
+
+      // Notify admins of the renewal
+      try {
+        const notificationsService = (await import("../notifications/notifications.service.js")).default;
+        await notificationsService.broadcastToAdmins({
+          service_id: id,
+          client_id: service.client_id ?? null,
+          type: "service_expiring",
+          title: `Servicio renovado: ${service.service_name}`,
+          message: `Nueva fecha de vencimiento: ${service.expiration_date}`
+        });
+      } catch (notifErr) {
+        console.error("Notification error:", notifErr.message);
+      }
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "RENEW_SERVICE",
+          entity_type: "service",
+          entity_id: id,
+          description: `Servicio renovado hasta ${service.expiration_date}`,
+          ip_address: req.ip
+        });
+      } catch (logErr) {
+        console.error("Activity log error:", logErr.message);
+      }
+
+      return res.json(service);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 export default new ServicesController();

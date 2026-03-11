@@ -134,9 +134,15 @@ CREATE TABLE email_logs (
     error_message TEXT,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    retry_count INT NOT NULL DEFAULT 0,
+    next_retry_at TIMESTAMP NULL DEFAULT NULL,
+    last_attempt_at TIMESTAMP NULL DEFAULT NULL,
+
     INDEX idx_email_client (client_id),
     INDEX idx_email_service (service_id),
-    INDEX idx_email_sent (sent_at)
+    INDEX idx_email_sent (sent_at),
+    INDEX idx_email_retry_due (status, next_retry_at),
+    INDEX idx_email_retry_count (retry_count)
 );
 
 CREATE TABLE activity_logs (

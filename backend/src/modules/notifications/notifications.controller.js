@@ -54,6 +54,16 @@ class NotificationsController {
       return res.status(500).json({ message: err.message });
     }
   }
+
+  /** DELETE /notifications (clear all) */
+  async clearAll(req, res) {
+    try {
+      const deleted = await notificationsService.deleteAll(req.user.id);
+      return res.json({ message: "Notificaciones eliminadas", deleted });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }
 
 export default new NotificationsController();

@@ -125,3 +125,15 @@ export async function deleteService(id: number): Promise<void> {
       throw new Error(message);
     });
 }
+export async function renewService(id: number, new_expiration_date?: string): Promise<ServiceItem> {
+  const response = await api
+    .post<ServiceItem>(`/services/${id}/renew`, { new_expiration_date }, {
+      headers: authHeaders()
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo renovar servicio";
+      throw new Error(message);
+    });
+
+  return response.data;
+}

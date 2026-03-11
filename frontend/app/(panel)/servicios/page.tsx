@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Loader2,
+  RotateCcw,
   Sparkles,
   Pencil,
   Plus,
@@ -27,6 +28,7 @@ import {
   createService,
   deleteService,
   getServicesPaginated,
+  renewService,
   updateService,
   type ServiceItem,
   type ServiceStatus
@@ -122,6 +124,13 @@ export default function ServiciosPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingService, setDeletingService] = useState<ServiceItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // ── Renewal state ─────────────────────────────────────────────────────────
+  const [renewOpen, setRenewOpen] = useState(false);
+  const [renewingService, setRenewingService] = useState<ServiceItem | null>(null);
+  const [renewDate, setRenewDate] = useState("");
+  const [renewing, setRenewing] = useState(false);
+  const [renewError, setRenewError] = useState<string | null>(null);
 
   const [clientQuery, setClientQuery] = useState("");
   const [clientLoading, setClientLoading] = useState(false);
@@ -267,7 +276,11 @@ export default function ServiciosPage() {
         await createService(payload);
       } else {
         if (!editingService) throw new Error("Servicio no seleccionado");
-        await updateService(editingService.id, payload);
+        const serviceId = Number((editingService as unknown as { id?: unknown })?.id);
+        if (!Number.isFinite(serviceId)) {
+          throw new Error("ID de servicio inválido");
+        }
+        await updateService(serviceId, payload);
       }
 
       toast({
@@ -289,6 +302,40 @@ export default function ServiciosPage() {
   const onDelete = (service: ServiceItem) => {
     setDeletingService(service);
     setDeleteOpen(true);
+  };
+
+  // ── Renewal handler ───────────────────────────────────────────────────────
+  const openRenew = (service: ServiceItem) => {
+    setRenewingService(service);
+    // Default: +1 month from current expiration
+    const old = new Date(service.expiration_date);
+    old.setMonth(old.getMonth() + 1);
+
+    const yyyy = old.getFullYear();
+    const mm = String(old.getMonth() + 1).padStart(2, "0");
+    const dd = String(old.getDate()).padStart(2, "0");
+    setRenewDate(`${yyyy}-${mm}-${dd}`);
+    setRenewError(null);
+    setRenewOpen(true);
+  };
+
+  const confirmRenew = async () => {
+    if (!renewingService) return;
+    setRenewing(true);
+    setRenewError(null);
+    try {
+      await renewService(renewingService.id, renewDate || undefined);
+      toast({ title: "Servicio renovado", variant: "success" });
+      setRenewOpen(false);
+      setRenewingService(null);
+      await fetchServices({ nextPage: page });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "No se pudo renovar";
+      setRenewError(msg);
+      toast({ title: "Error", description: msg, variant: "error" });
+    } finally {
+      setRenewing(false);
+    }
   };
 
   const confirmDelete = async () => {
@@ -370,6 +417,83 @@ export default function ServiciosPage() {
           if (!open) setDeletingService(null);
         }}
       />
+
+      {/* ── Renewal Modal ──────────────────────────────────────────────────── */}
+      <div className={cn("fixed inset-0 z-40", renewOpen ? "" : "pointer-events-none")}>
+        <div
+          className={cn("absolute inset-0 bg-black/50 transition-opacity", renewOpen ? "opacity-100" : "opacity-0")}
+          onClick={() => { if (!renewing) { setRenewOpen(false); setRenewingService(null); }}}
+        />
+        <div className={cn("absolute inset-0 flex items-center justify-center p-4 transition-opacity", renewOpen ? "opacity-100" : "opacity-0")}>
+          <aside
+            className={cn(
+              "relative z-50 flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9]",
+              renewOpen ? "scale-100" : "scale-95"
+            )}
+            role="dialog" aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+                  <RotateCcw className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Renovar servicio</p>
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate max-w-[200px]">{renewingService?.service_name}</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => { if (!renewing) { setRenewOpen(false); setRenewingService(null); }}} className="rounded-xl p-1.5 text-[#64748B] hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:hover:bg-[#111E35]">
+                <XCircle className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {renewingService && (
+                <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vencimiento actual</p>
+                  <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
+                    <CalendarClock className="h-4 w-4 text-amber-500" />
+                    {new Date(renewingService.expiration_date).toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="renew-date">Nueva fecha de vencimiento</Label>
+                <Input
+                  id="renew-date"
+                  type="date"
+                  value={renewDate}
+                  onChange={(e) => setRenewDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="mt-1 h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]"
+                />
+                <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Por defecto: +1 mes desde la fecha de vencimiento anterior.</p>
+              </div>
+
+              {renewError && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{renewError}</div>
+              )}
+
+              <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
+                <Button type="button" variant="secondary" onClick={() => { if (!renewing) { setRenewOpen(false); setRenewingService(null); }}} disabled={renewing}>
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  onClick={confirmRenew}
+                  disabled={renewing || !renewDate}
+                  className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  {renewing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                  {renewing ? "Renovando..." : "Confirmar renovación"}
+                </Button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
       <div className="rounded-[28px] border border-[#E2E8F0] bg-white p-5 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -420,18 +544,18 @@ export default function ServiciosPage() {
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-3 gap-2 text-[11px] font-semibold">
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
               <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#3B82F6]" />
-                <span className="min-w-0 truncate">{pct(activos)}% activos</span>
+                <span>{pct(activos)}% activos</span>
               </div>
               <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                <span className="min-w-0 truncate">{pct(vencidos)}% vencidos</span>
+                <span>{pct(vencidos)}% vencidos</span>
               </div>
               <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                <span className="min-w-0 truncate">{pct(completados)}% complet.</span>
+                <span>{pct(completados)}% completados</span>
               </div>
             </div>
           </div>
@@ -574,6 +698,22 @@ export default function ServiciosPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
+                            {/* Renovar: emerald when expired, subtle otherwise */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openRenew(s)}
+                              aria-label="Renovar"
+                              title="Renovar servicio"
+                              className={cn(
+                                "rounded-xl border",
+                                s.status === "vencido"
+                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:border-emerald-400/25 dark:text-emerald-300"
+                                  : "border-transparent text-[#64748B] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
+                              )}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"

@@ -289,8 +289,8 @@ export default function ClientesPage() {
                   <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
                     <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
                       <th className="px-4 py-3 font-semibold">Nombre</th>
-                      <th className="px-4 py-3 font-semibold">Email</th>
-                      <th className="px-4 py-3 font-semibold">Teléfono</th>
+                      <th className="hidden px-4 py-3 font-semibold sm:table-cell">Email</th>
+                      <th className="hidden px-4 py-3 font-semibold md:table-cell">Teléfono</th>
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
@@ -304,13 +304,15 @@ export default function ClientesPage() {
                         )}
                       >
                         <td className="px-4 py-3">
-                          <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</p>
+                          <p className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</p>
                           {c.notes ? <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{c.notes}</p> : null}
+                          {/* Email visible only on mobile (shown inline under name) */}
+                          <p className="mt-0.5 truncate text-xs text-[#64748B] dark:text-[#94A3B8] sm:hidden">{c.email}</p>
                         </td>
-                        <td className="px-4 py-3 text-[#64748B] dark:text-[#94A3B8]">
+                        <td className="hidden px-4 py-3 text-[#64748B] dark:text-[#94A3B8] sm:table-cell">
                           <span className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.email}</span>
                         </td>
-                        <td className="px-4 py-3 text-[#64748B] dark:text-[#94A3B8]">{c.phone || "-"}</td>
+                        <td className="hidden px-4 py-3 text-[#64748B] dark:text-[#94A3B8] md:table-cell">{c.phone || "-"}</td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
                             <Button

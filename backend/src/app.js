@@ -5,6 +5,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import clientsRoutes from "./modules/clients/clients.routes.js";
 import servicesRoutes from "./modules/services/services.routes.js";
 import { startReminderJob } from "./modules/reminders/reminder.job.js";
+import { startEmailRetryJob } from "./modules/email_logs/emailRetry.job.js";
 import remindersRoutes from "./modules/reminders/reminder.routes.js";
 import { seedDefaultTemplates } from "./config/seedTemplates.js";
 import tasksRoutes from "./modules/tasks/tasks.routes.js";
@@ -33,6 +34,7 @@ app.options(/.*/, cors());
 app.use(express.json({ limit: "5mb" }));
 
 startReminderJob();
+startEmailRetryJob();
 seedDefaultTemplates();
 app.use("/auth", authRoutes);
 app.use("/clients", clientsRoutes);

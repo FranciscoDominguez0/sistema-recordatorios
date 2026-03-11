@@ -68,6 +68,15 @@ class NotificationsService {
     return result.affectedRows > 0;
   }
 
+  /** Eliminar todas las notificaciones del usuario */
+  async deleteAll(userId) {
+    const [result] = await pool.query(
+      "DELETE FROM notifications WHERE user_id = ?",
+      [userId]
+    );
+    return result.affectedRows;
+  }
+
   /** ¿Ya hay notificación de tarea hoy? (evitar duplicados del cron) */
   async hasTaskNotificationToday(taskId) {
     const [[row]] = await pool.query(

@@ -8,6 +8,20 @@ import {
 } from "../email/email.templates.js";
 
 class ReminderService {
+  _emailLogRetryCols = null;
+
+  async hasEmailLogRetryColumns() {
+    if (this._emailLogRetryCols !== null) return this._emailLogRetryCols;
+    try {
+      const [colsRetry] = await pool.query("SHOW COLUMNS FROM email_logs LIKE 'retry_count'");
+      const [colsNext] = await pool.query("SHOW COLUMNS FROM email_logs LIKE 'next_retry_at'");
+      this._emailLogRetryCols = (Array.isArray(colsRetry) && colsRetry.length > 0) && (Array.isArray(colsNext) && colsNext.length > 0);
+      return this._emailLogRetryCols;
+    } catch {
+      this._emailLogRetryCols = false;
+      return false;
+    }
+  }
   // ─────────────────────────────────────────────────────────────────────────
   // DB Queries
   // ─────────────────────────────────────────────────────────────────────────
@@ -54,6 +68,16 @@ class ReminderService {
   }
 
   async logEmailSent({ clientId, serviceId, email, subject }) {
+    const hasRetry = await this.hasEmailLogRetryColumns();
+    if (hasRetry) {
+      await pool.query(
+        `INSERT INTO email_logs (client_id, service_id, email, subject, status, retry_count, next_retry_at, last_attempt_at)
+         VALUES (?, ?, ?, ?, 'sent', 0, NULL, NOW())`,
+        [clientId, serviceId, email, subject]
+      );
+      return;
+    }
+
     await pool.query(
       `INSERT INTO email_logs (client_id, service_id, email, subject, status) VALUES (?, ?, ?, ?, 'sent')`,
       [clientId, serviceId, email, subject]
@@ -61,6 +85,25 @@ class ReminderService {
   }
 
   async logEmailFailed({ clientId, serviceId, email, subject, errorMessage }) {
+    const hasRetry = await this.hasEmailLogRetryColumns();
+    if (hasRetry) {
+      await pool.query(
+        `INSERT INTO email_logs (
+          client_id,
+          service_id,
+          email,
+          subject,
+          status,
+          error_message,
+          retry_count,
+          next_retry_at,
+          last_attempt_at
+        ) VALUES (?, ?, ?, ?, 'failed', ?, 0, DATE_ADD(NOW(), INTERVAL 10 MINUTE), NOW())`,
+        [clientId, serviceId, email, subject, errorMessage]
+      );
+      return;
+    }
+
     await pool.query(
       `INSERT INTO email_logs (client_id, service_id, email, subject, status, error_message) VALUES (?, ?, ?, ?, 'failed', ?)`,
       [clientId, serviceId, email, subject, errorMessage]

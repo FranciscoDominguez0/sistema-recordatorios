@@ -205,6 +205,33 @@ class ServicesService {
     return result.affectedRows > 0;
   }
 
+  /** Renew a service: reset status to activo + set new expiration date */
+  async renew(id, { new_expiration_date } = {}) {
+    const existing = await this.getById(id);
+    if (!existing) return null;
+
+    // Calculate new expiration: provided date OR +1 year from old expiration
+    let nextDate = new_expiration_date;
+    if (!nextDate) {
+      const old = new Date(existing.expiration_date);
+      old.setFullYear(old.getFullYear() + 1);
+      const yyyy = old.getFullYear();
+      const mm   = String(old.getMonth() + 1).padStart(2, "0");
+      const dd   = String(old.getDate()).padStart(2, "0");
+      nextDate = `${yyyy}-${mm}-${dd}`;
+    }
+
+    await pool.query(
+      `UPDATE services SET expiration_date = ?, status = 'activo' WHERE id = ?`,
+      [nextDate, id]
+    );
+
+    // Clear reminder history so the service can receive new reminders
+    await pool.query(`DELETE FROM reminder_history WHERE service_id = ?`, [id]);
+
+    return this.getById(id);
+  }
+
   async delete(id) {
     const sql = `DELETE FROM services WHERE id = ?`;
     const [result] = await pool.query(sql, [id]);
