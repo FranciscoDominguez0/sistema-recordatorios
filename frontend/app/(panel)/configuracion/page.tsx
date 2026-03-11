@@ -207,7 +207,7 @@ export default function ConfiguracionPage() {
   const [tplForm, setTplForm] = useState({ name: "", subject: "", content: "", card_content: "" });
   const [tplError, setTplError] = useState<string | null>(null);
   const [tplSaving, setTplSaving] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
   const [createForm, setCreateForm] = useState({ templateKey: "cliente_recordatorio", name: "cliente_recordatorio", subject: "", content: "" });
   const [createSaving, setCreateSaving] = useState(false);
@@ -244,7 +244,7 @@ export default function ConfiguracionPage() {
     setSelected(t);
     setTplForm({ name: t.name, subject: t.subject, content: t.content, card_content: t.card_content ?? "" });
     setTplError(null);
-    setPreviewMode(false);
+    setPreviewOpen(false);
   };
 
 
@@ -457,9 +457,9 @@ export default function ConfiguracionPage() {
 
       {/* ══════════════ TAB PLANTILLAS ══════════════ */}
       {tab === "plantillas" && (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[260px_1fr]">
+        <div className="grid grid-cols-1 gap-4 lg:h-[calc(100vh-240px)] lg:overflow-hidden lg:grid-cols-[280px_1fr] 2xl:grid-cols-[320px_1fr]">
           {/* Lista */}
-          <div className="space-y-3">
+          <div className="space-y-3 lg:self-start">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B] dark:text-[#94A3B8]">Plantillas</p>
               <Button size="icon" onClick={() => { setCreateForm({ templateKey: "cliente_recordatorio", name: "cliente_recordatorio", subject: "", content: "" }); setCreateError(null); setCreateDrawerOpen(true); }} className="h-7 w-7 rounded-lg"><Plus className="h-3.5 w-3.5" /></Button>
@@ -489,7 +489,7 @@ export default function ConfiguracionPage() {
           </div>
 
           {/* Editor */}
-          <div>
+          <div className="lg:overflow-auto lg:pr-1">
             {!selected ? (
               <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
                 <div className="text-center"><FileText className="mx-auto mb-3 h-8 w-8 opacity-40" />Selecciona una plantilla para editarla.</div>
@@ -499,56 +499,67 @@ export default function ConfiguracionPage() {
                 <CardHeader className="flex flex-row items-start justify-between gap-3">
                   <div><CardTitle className="text-base">{tplLabel(selected.name)}</CardTitle><CardDescription>{tplDesc(selected.name) || selected.name}</CardDescription></div>
                   <div className="flex shrink-0 gap-2">
-                    <Button variant="secondary" size="icon" onClick={() => setPreviewMode((p) => !p)} className="h-9 w-9 rounded-xl" title={previewMode ? "Editar" : "Vista previa"}>
-                      {previewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <Button variant="secondary" size="icon" onClick={() => setPreviewOpen(true)} className="h-9 w-9 rounded-xl" title="Vista previa">
+                      <Eye className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => { setDeletingTpl(selected); setDeleteOpen(true); }} className="h-9 w-9 rounded-xl text-red-600 hover:bg-red-500/10 dark:text-red-400"><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {previewMode ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                        <Mail className="h-4 w-4 shrink-0 text-[#64748B] dark:text-[#94A3B8]" />
-                        <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Asunto:</span>
-                        <span className="text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">{tplForm.subject || "—"}</span>
-                      </div>
-                      <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] shadow-sm dark:border-[#1F2A44]">
-                        <iframe srcDoc={emailPreviewHtml} className="h-[540px] w-full" title="Vista previa del correo" sandbox="allow-same-origin" />
-                      </div>
-                      <p className="text-center text-[10px] text-[#64748B] dark:text-[#94A3B8]">Vista previa con datos de ejemplo</p>
+                  <form onSubmit={onSaveTemplate} className="space-y-4">
+                    <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
+                      <span className="font-semibold">Clientes:</span> <strong>{"{{cliente}}"}</strong> · <strong>{"{{servicio}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong><br/>
+                      <span className="font-semibold">Tareas internas:</span> <strong>{"{{admin}}"}</strong> · <strong>{"{{tarea}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
                     </div>
-                  ) : (
-                    <form onSubmit={onSaveTemplate} className="space-y-4">
-                      <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
-                        <span className="font-semibold">Clientes:</span> <strong>{"{{cliente}}"}</strong> · <strong>{"{{servicio}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong><br/>
-                        <span className="font-semibold">Tareas internas:</span> <strong>{"{{admin}}"}</strong> · <strong>{"{{tarea}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
-                      </div>
-                      <div><Label htmlFor="tpl-subject">Asunto</Label><Input id="tpl-subject" placeholder="Recordatorio de vencimiento - {{servicio}}" value={tplForm.subject} onChange={(e) => setTplForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
-                      <div>
-                        <div className="mb-1 flex items-center justify-between"><Label htmlFor="tpl-body">Cuerpo del correo</Label><button type="button" onClick={() => setPreviewMode(true)} className="flex items-center gap-1 text-xs text-[#3B82F6] hover:underline"><Eye className="h-3 w-3" /> Vista previa</button></div>
-                        <textarea id="tpl-body" rows={14} placeholder="Estimado {{cliente}},..." value={tplForm.content} onChange={(e) => setTplForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" />
+                    <div><Label htmlFor="tpl-subject">Asunto</Label><Input id="tpl-subject" placeholder="Recordatorio de vencimiento - {{servicio}}" value={tplForm.subject} onChange={(e) => setTplForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
+                    <div>
+                      <div className="mb-1 flex items-center justify-between"><Label htmlFor="tpl-body">Cuerpo del correo</Label><button type="button" onClick={() => setPreviewOpen(true)} className="flex items-center gap-1 text-xs text-[#3B82F6] hover:underline"><Eye className="h-3 w-3" /> Vista previa</button></div>
+                      <textarea id="tpl-body" rows={12} placeholder="Estimado {{cliente}},..." value={tplForm.content} onChange={(e) => setTplForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" />
 
-                      </div>
-                      <div>
-                        <Label htmlFor="tpl-card">Bloque final (tarjeta)</Label>
-                        <textarea
-                          id="tpl-card"
-                          rows={6}
-                          placeholder={"Servicio|{{servicio}}\nFecha de vencimiento|{{fecha_vencimiento}}"}
-                          value={tplForm.card_content}
-                          onChange={(e) => setTplForm((p) => ({ ...p, card_content: e.target.value }))}
-                          className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
-                        />
-                        <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Formato: una línea por fila. Usa <strong>Etiqueta|Valor</strong> y variables como <strong>{"{{servicio}}"}</strong>.</p>
-                      </div>
-                      {tplError ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{tplError}</div> : null}
-                      <div className="flex justify-end"><Button type="submit" disabled={tplSaving}>{tplSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Guardar plantilla</Button></div>
-                    </form>
-                  )}
+                    </div>
+                    <div>
+                      <Label htmlFor="tpl-card">Bloque final (tarjeta)</Label>
+                      <textarea
+                        id="tpl-card"
+                        rows={5}
+                        placeholder={"Servicio|{{servicio}}\nFecha de vencimiento|{{fecha_vencimiento}}"}
+                        value={tplForm.card_content}
+                        onChange={(e) => setTplForm((p) => ({ ...p, card_content: e.target.value }))}
+                        className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
+                      />
+                      <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Formato: una línea por fila. Usa <strong>Etiqueta|Valor</strong> y variables como <strong>{"{{servicio}}"}</strong>.</p>
+                    </div>
+                    {tplError ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{tplError}</div> : null}
+                    <div className="flex justify-end"><Button type="submit" disabled={tplSaving}>{tplSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Guardar plantilla</Button></div>
+                  </form>
                 </CardContent>
               </Card>
             )}
+          </div>
+        </div>
+      )}
+
+      {tab === "plantillas" && previewOpen && selected && (
+        <div className="fixed inset-0 z-50">
+          <button type="button" className="absolute inset-0 bg-black/50" onClick={() => setPreviewOpen(false)} aria-label="Cerrar" />
+          <div className="relative mx-auto mt-8 w-[min(980px,calc(100vw-24px))]">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-[#1F2A44] dark:bg-[#0b1220]">
+              <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">Vista previa: {tplLabel(selected.name)}</p>
+                  <p className="truncate text-[11px] text-[#64748B] dark:text-[#94A3B8]">Asunto: {tplForm.subject || "—"}</p>
+                </div>
+                <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setPreviewOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="p-4">
+                <div className="overflow-hidden rounded-xl border border-[#E2E8F0] shadow-sm dark:border-[#1F2A44]">
+                  <iframe srcDoc={emailPreviewHtml} className="h-[75vh] max-h-[720px] min-h-[420px] w-full" title="Vista previa del correo" sandbox="allow-same-origin" />
+                </div>
+                <p className="mt-2 text-center text-[10px] text-[#64748B] dark:text-[#94A3B8]">Vista previa con datos de ejemplo</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -618,7 +629,7 @@ export default function ConfiguracionPage() {
                         <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vista previa del encabezado y firma</span>
                       </div>
                       <iframe
-                        srcDoc={buildEmailHtml({ logo: companyForm.logo_base64, firma: companyForm.firma, companyName: companyForm.company_name, subject: "Ejemplo de correo", body: "Este es el contenido del correo..." })}
+                        srcDoc={buildEmailHtml({ logo: companyForm.logo_base64, firma: companyForm.firma, companyName: companyForm.company_name, subject: "Ejemplo de correo", bodyText: "Este es el contenido del correo..." })}
                         className="h-60 w-full"
                         title="Vista previa"
                         sandbox="allow-same-origin"
