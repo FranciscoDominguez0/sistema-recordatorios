@@ -4,14 +4,18 @@ export type EmailTemplateItem = {
   id: number;
   name: string;
   subject: string;
-  body: string;
+  content: string;
+  card_content?: string;
+  template_type?: string;
   created_at?: string;
 };
 
 type TemplateInput = {
   name: string;
   subject: string;
-  body: string;
+  content: string;
+  card_content?: string;
+  template_type?: string;
 };
 
 const resolvedBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim() || "http://localhost:3000";

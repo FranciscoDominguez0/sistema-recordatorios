@@ -70,9 +70,9 @@ const TEMPLATE_DEFS = [
 // ─────────────────────────────────────────────────────────────────────────────
 // Email HTML preview renderer
 // ─────────────────────────────────────────────────────────────────────────────
-function buildEmailHtml(opts: { logo: string; firma: string; companyName: string; subject: string; body: string }) {
-  const { logo, firma, companyName, subject, body } = opts;
-  const bodyHtml = body
+function buildEmailHtml(opts: { logo: string; firma: string; companyName: string; subject: string; bodyText: string; cardHtml?: string }) {
+  const { logo, firma, companyName, subject, bodyText, cardHtml } = opts;
+  const contentHtml = (bodyText ?? "")
     .replace(/\n/g, "<br/>")
     .replace(/\{\{cliente\}\}/g, "<strong>Cliente Ejemplo</strong>")
     .replace(/\{\{servicio\}\}/g, "<em>Servicio Premium</em>")
@@ -81,6 +81,8 @@ function buildEmailHtml(opts: { logo: string; firma: string; companyName: string
     .replace(/\{\{fecha_vencimiento\}\}/g, "<strong>31/03/2026</strong>")
     .replace(/\{\{logo_empresa\}\}/g, logo ? `<img src="${logo}" alt="Logo" style="max-height:50px"/>` : "")
     .replace(/\{\{firma_empresa\}\}/g, firma ? firma.replace(/\n/g, "<br/>") : "");
+
+  const bodyHtml = contentHtml + (cardHtml ?? "");
 
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/></head>
 <body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -98,6 +100,35 @@ function buildEmailHtml(opts: { logo: string; firma: string; companyName: string
     <tr><td style="background:#08112F;padding:16px 32px;"><p style="margin:0;color:rgba(255,255,255,0.4);font-size:11px;text-align:center;">Mensaje generado automáticamente · ${companyName || "Sistema de recordatorios"}</p></td></tr>
   </table></td></tr></table>
 </body></html>`;
+}
+
+function buildPreviewCard(cardContent: string) {
+  const raw = (cardContent ?? "").trim();
+  if (!raw) return "";
+  const lines = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return "";
+
+  const rows = lines.map((line) => {
+    const idxPipe = line.indexOf("|");
+    const idxColon = line.indexOf(":");
+    const idx = idxPipe >= 0 ? idxPipe : idxColon;
+    if (idx < 0) return { label: "", value: line };
+    return { label: line.slice(0, idx).trim(), value: line.slice(idx + 1).trim() };
+  });
+
+  const htmlRows = rows
+    .map((r, i) => {
+      const top = i === 0 ? "" : "border-top:1px solid #dbeafe;";
+      const label = r.label;
+      const value = r.value;
+      return `<tr><td style="padding:5px 0;width:40%;${top}">${label ? `<span style=\"color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;\">${label}</span>` : ""}</td><td style="padding:5px 0;${top}"><span style="color:#0f172a;font-size:14px;font-weight:600;">${value}</span></td></tr>`;
+    })
+    .join("");
+
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f7ff;border-left:4px solid #3b82f6;border-radius:6px;margin:16px 0 20px;"><tr><td style="padding:16px 20px;"><table width="100%" cellpadding="0" cellspacing="0" border="0">${htmlRows}</table></td></tr></table>`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,7 +175,13 @@ export default function ConfiguracionPage() {
     if (!editingSmtp && !smtpForm.smtp_password.trim()) return setSmtpFormError("Contraseña requerida");
     setSmtpSaving(true);
     try {
-      const payload = { smtp_host: smtpForm.smtp_host.trim(), smtp_port: Number(smtpForm.smtp_port), smtp_email: smtpForm.smtp_email.trim(), smtp_password: smtpForm.smtp_password.trim(), encryption: smtpForm.encryption };
+      const payload = {
+        smtp_host: smtpForm.smtp_host.trim(),
+        smtp_port: Number(smtpForm.smtp_port),
+        smtp_email: smtpForm.smtp_email.trim(),
+        smtp_password: smtpForm.smtp_password.trim(),
+        encryption: smtpForm.encryption
+      };
       editingSmtp ? await updateEmailSetting(editingSmtp.id, payload) : await createEmailSetting(payload);
       toast({ title: editingSmtp ? "SMTP actualizado" : "SMTP agregado", variant: "success" });
       setSmtpDrawerOpen(false); await fetchSmtp();
@@ -167,12 +204,12 @@ export default function ConfiguracionPage() {
   const [templates, setTemplates] = useState<EmailTemplateItem[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
   const [selected, setSelected] = useState<EmailTemplateItem | null>(null);
-  const [tplForm, setTplForm] = useState({ name: "", subject: "", body: "" });
+  const [tplForm, setTplForm] = useState({ name: "", subject: "", content: "", card_content: "" });
   const [tplError, setTplError] = useState<string | null>(null);
   const [tplSaving, setTplSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
-  const [createForm, setCreateForm] = useState({ templateKey: "cliente_recordatorio", name: "cliente_recordatorio", subject: "", body: "" });
+  const [createForm, setCreateForm] = useState({ templateKey: "cliente_recordatorio", name: "cliente_recordatorio", subject: "", content: "" });
   const [createSaving, setCreateSaving] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -187,21 +224,47 @@ export default function ConfiguracionPage() {
     try {
       const result = await getAllTemplates();
       setTemplates(result);
-      if (!selected && result.length > 0) { setSelected(result[0]); setTplForm({ name: result[0].name, subject: result[0].subject, body: result[0].body }); }
+      if (!selected && result.length > 0) {
+        setSelected(result[0]);
+        setTplForm({
+          name: result[0].name,
+          subject: result[0].subject,
+          content: result[0].content,
+          card_content: result[0].card_content ?? ""
+        });
+      }
+
     } catch { /* silent */ }
     finally { setTemplatesLoading(false); }
   };
 
   useEffect(() => { if (tab === "plantillas") { fetchTemplates(); getCompanySettings().then(setCompanyCached).catch(() => {}); } /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [tab]);
 
-  const selectTemplate = (t: EmailTemplateItem) => { setSelected(t); setTplForm({ name: t.name, subject: t.subject, body: t.body }); setTplError(null); setPreviewMode(false); };
+  const selectTemplate = (t: EmailTemplateItem) => {
+    setSelected(t);
+    setTplForm({ name: t.name, subject: t.subject, content: t.content, card_content: t.card_content ?? "" });
+    setTplError(null);
+    setPreviewMode(false);
+  };
+
 
   const onSaveTemplate = async (e: React.FormEvent) => {
     e.preventDefault(); if (!selected) return;
     if (!tplForm.subject.trim()) return setTplError("El asunto es requerido");
-    if (!tplForm.body.trim()) return setTplError("El cuerpo es requerido");
+    if (!tplForm.content.trim()) return setTplError("El cuerpo es requerido");
+
     setTplSaving(true);
-    try { await updateTemplate(selected.id, tplForm); toast({ title: "Plantilla guardada", variant: "success" }); await fetchTemplates(); }
+    try {
+      await updateTemplate(selected.id, {
+        name: tplForm.name,
+        subject: tplForm.subject,
+        content: tplForm.content,
+        card_content: tplForm.card_content
+      });
+      toast({ title: "Plantilla guardada", variant: "success" });
+      await fetchTemplates();
+    }
+
     catch (e: unknown) { setTplError(e instanceof Error ? e.message : "Error al guardar"); }
     finally { setTplSaving(false); }
   };
@@ -209,9 +272,11 @@ export default function ConfiguracionPage() {
   const onCreateTemplate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!createForm.subject.trim()) return setCreateError("El asunto es requerido");
-    if (!createForm.body.trim()) return setCreateError("El cuerpo es requerido");
+    if (!createForm.content.trim()) return setCreateError("El cuerpo es requerido");
+
     setCreateSaving(true);
-    try { await createTemplate({ name: createForm.name.trim(), subject: createForm.subject.trim(), body: createForm.body.trim() }); toast({ title: "Plantilla creada", variant: "success" }); setCreateDrawerOpen(false); await fetchTemplates(); }
+    try { await createTemplate({ name: createForm.name.trim(), subject: createForm.subject.trim(), content: createForm.content.trim() }); toast({ title: "Plantilla creada", variant: "success" }); setCreateDrawerOpen(false); await fetchTemplates(); }
+
     catch (e: unknown) { setCreateError(e instanceof Error ? e.message : "Error al crear"); }
     finally { setCreateSaving(false); }
   };
@@ -222,7 +287,8 @@ export default function ConfiguracionPage() {
     try {
       await deleteTemplate(deletingTpl.id);
       toast({ title: "Plantilla eliminada", variant: "success" });
-      if (selected?.id === deletingTpl.id) { setSelected(null); setTplForm({ name: "", subject: "", body: "" }); }
+      if (selected?.id === deletingTpl.id) { setSelected(null); setTplForm({ name: "", subject: "", content: "", card_content: "" }); }
+
       setDeleteOpen(false); setDeletingTpl(null); await fetchTemplates();
     } catch (e: unknown) { toast({ title: "Error", description: e instanceof Error ? e.message : "", variant: "error" }); }
     finally { setDeletingLoading(false); }
@@ -236,7 +302,15 @@ export default function ConfiguracionPage() {
     firma: companyCached?.firma ?? "",
     companyName: companyCached?.company_name ?? "",
     subject: tplForm.subject,
-    body: tplForm.body
+    bodyText: tplForm.content,
+    cardHtml: buildPreviewCard(
+      (tplForm.card_content ?? "")
+        .replace(/\{\{cliente\}\}/g, "Cliente Ejemplo")
+        .replace(/\{\{servicio\}\}/g, "Servicio Premium")
+        .replace(/\{\{tarea\}\}/g, "Cobrar a cliente Acme Corp")
+        .replace(/\{\{admin\}\}/g, "Administrador")
+        .replace(/\{\{fecha_vencimiento\}\}/g, "31/03/2026")
+    )
   });
 
   // ── EMPRESA ─────────────────────────────────────────────────────────────────
@@ -388,7 +462,8 @@ export default function ConfiguracionPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-[#64748B] dark:text-[#94A3B8]">Plantillas</p>
-              <Button size="icon" onClick={() => { setCreateForm({ templateKey: "cliente_recordatorio", name: "cliente_recordatorio", subject: "", body: "" }); setCreateError(null); setCreateDrawerOpen(true); }} className="h-7 w-7 rounded-lg"><Plus className="h-3.5 w-3.5" /></Button>
+              <Button size="icon" onClick={() => { setCreateForm({ templateKey: "cliente_recordatorio", name: "cliente_recordatorio", subject: "", content: "" }); setCreateError(null); setCreateDrawerOpen(true); }} className="h-7 w-7 rounded-lg"><Plus className="h-3.5 w-3.5" /></Button>
+
             </div>
             {templatesLoading ? (
               <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]"><Loader2 className="h-4 w-4 animate-spin" /> Cargando...</div>
@@ -452,7 +527,20 @@ export default function ConfiguracionPage() {
                       <div><Label htmlFor="tpl-subject">Asunto</Label><Input id="tpl-subject" placeholder="Recordatorio de vencimiento - {{servicio}}" value={tplForm.subject} onChange={(e) => setTplForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
                       <div>
                         <div className="mb-1 flex items-center justify-between"><Label htmlFor="tpl-body">Cuerpo del correo</Label><button type="button" onClick={() => setPreviewMode(true)} className="flex items-center gap-1 text-xs text-[#3B82F6] hover:underline"><Eye className="h-3 w-3" /> Vista previa</button></div>
-                        <textarea id="tpl-body" rows={14} placeholder="Estimado {{cliente}},..." value={tplForm.body} onChange={(e) => setTplForm((p) => ({ ...p, body: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" />
+                        <textarea id="tpl-body" rows={14} placeholder="Estimado {{cliente}},..." value={tplForm.content} onChange={(e) => setTplForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" />
+
+                      </div>
+                      <div>
+                        <Label htmlFor="tpl-card">Bloque final (tarjeta)</Label>
+                        <textarea
+                          id="tpl-card"
+                          rows={6}
+                          placeholder={"Servicio|{{servicio}}\nFecha de vencimiento|{{fecha_vencimiento}}"}
+                          value={tplForm.card_content}
+                          onChange={(e) => setTplForm((p) => ({ ...p, card_content: e.target.value }))}
+                          className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
+                        />
+                        <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Formato: una línea por fila. Usa <strong>Etiqueta|Valor</strong> y variables como <strong>{"{{servicio}}"}</strong>.</p>
                       </div>
                       {tplError ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{tplError}</div> : null}
                       <div className="flex justify-end"><Button type="submit" disabled={tplSaving}>{tplSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Guardar plantilla</Button></div>
@@ -620,7 +708,8 @@ export default function ConfiguracionPage() {
                 <span className="font-semibold">Tareas internas:</span> <strong>{"{{admin}}"}</strong> · <strong>{"{{tarea}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
               </div>
               <div><Label htmlFor="tpl-new-subject">Asunto</Label><Input id="tpl-new-subject" placeholder="Asunto del correo" value={createForm.subject} onChange={(e) => setCreateForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
-              <div><Label htmlFor="tpl-new-body">Cuerpo del correo</Label><textarea id="tpl-new-body" rows={10} placeholder="Estimado {{cliente}},..." value={createForm.body} onChange={(e) => setCreateForm((p) => ({ ...p, body: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" /></div>
+              <div><Label htmlFor="tpl-new-body">Cuerpo del correo</Label><textarea id="tpl-new-body" rows={10} placeholder="Estimado {{cliente}},..." value={createForm.content} onChange={(e) => setCreateForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" /></div>
+
               {createError ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{createError}</div> : null}
               <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="secondary" onClick={() => setCreateDrawerOpen(false)}>Cancelar</Button>
