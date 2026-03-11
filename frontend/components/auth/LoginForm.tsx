@@ -1,13 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { AlertCircle, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Lock, Loader2, Mail } from "lucide-react";
 
 import { login } from "@/services/authService";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -52,101 +48,80 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
   };
 
   return (
-    <Card className="w-full max-w-md border-white/5 bg-[#08112F]/45 text-[#ECEEF0] shadow-2xl shadow-black/40 backdrop-blur-xl">
-      <CardHeader className="space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-12 items-center rounded-2xl border border-[#323954] bg-[#08112F]/40 px-3 shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/logo.png"
-                alt={`${companyName} logo`}
-                className="h-7 w-auto object-contain"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  target.style.display = "none";
-                  const placeholder = target.parentElement?.querySelector<HTMLDivElement>("[data-logo-fallback]");
-                  if (placeholder) placeholder.style.display = "flex";
-                }}
-              />
-              <div
-                data-logo-fallback
-                style={{ display: "none" }}
-                className="h-7 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#323954_0%,#3E53A0_55%,#5A77DF_100%)] px-3 text-sm font-semibold text-[#ECEEF0]"
-              >
-                {initials}
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-[#ECEEF0]">{companyName}</p>
-              <p className="text-xs text-[#CCD4DE]">Accede a tu panel de control</p>
-            </div>
-          </div>
-        </div>
+    <div className="w-full max-w-md">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold tracking-tight text-white">
+          Bienvenido de vuelta
+        </h2>
+        <p className="mt-2 text-sm text-[#64748B]">
+          Ingresa con tu cuenta para continuar
+        </p>
+      </div>
 
-        <div>
-          <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
-          <CardDescription>Accede a tu panel de control</CardDescription>
-        </div>
-      </CardHeader>
-
-      <CardContent>
+      {/* Form card */}
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-8">
         <form onSubmit={onSubmit} className="space-y-5">
+          {/* Error banner */}
           {error ? (
-            <div className="rounded-2xl border border-[#5A77DF]/20 bg-black/30 p-4 text-[#ECEEF0] shadow-sm shadow-black/30 backdrop-blur transition">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 rounded-xl bg-[#5A77DF]/12 p-2 text-[#CCD4DE]">
-                  <AlertCircle className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium leading-5">No se pudo iniciar sesión</p>
-                  <p className="mt-1 text-sm text-[#CCD4DE]">{error}</p>
-                </div>
+            <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4 backdrop-blur-sm">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-red-300">Error de autenticación</p>
+                <p className="mt-0.5 text-sm text-red-400/80">{error}</p>
               </div>
             </div>
           ) : null}
 
+          {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-[#CCD4DE]">
-              Email
-            </Label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#CCD4DE]/70" />
-              <Input
+            <label htmlFor="email" className="text-sm font-medium text-[#94A3B8]">
+              Correo electrónico
+            </label>
+            <div className="group relative">
+              <div className="pointer-events-none absolute left-0 top-0 flex h-full w-11 items-center justify-center">
+                <Mail className="h-4 w-4 text-[#475569] transition-colors group-focus-within:text-[#5A77DF]" />
+              </div>
+              <input
                 id="email"
                 type="email"
                 autoComplete="email"
                 placeholder="tu@correo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 border-[#323954] bg-[#08112F]/55 text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/25 focus-visible:border-[#5A77DF]"
                 disabled={isLoading}
+                className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] pl-11 pr-4 text-sm text-white placeholder:text-[#475569] outline-none transition-all focus:border-[#5A77DF]/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-[#5A77DF]/15 disabled:opacity-50"
               />
             </div>
           </div>
 
+          {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-[#CCD4DE]">
-              Password
-            </Label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#CCD4DE]/70" />
-              <Input
+            <label htmlFor="password" className="text-sm font-medium text-[#94A3B8]">
+              Contraseña
+            </label>
+            <div className="group relative">
+              <div className="pointer-events-none absolute left-0 top-0 flex h-full w-11 items-center justify-center">
+                <Lock className="h-4 w-4 text-[#475569] transition-colors group-focus-within:text-[#5A77DF]" />
+              </div>
+              <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="Tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-11 border-[#323954] bg-[#08112F]/55 text-[#ECEEF0] placeholder:text-[#CCD4DE]/60 focus-visible:ring-[#5A77DF]/25 focus-visible:border-[#5A77DF]"
                 disabled={isLoading}
+                className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] pl-11 pr-12 text-sm text-white placeholder:text-[#475569] outline-none transition-all focus:border-[#5A77DF]/40 focus:bg-white/[0.05] focus:ring-2 focus:ring-[#5A77DF]/15 disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
                 className={cn(
-                  "absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#CCD4DE]/70 transition-colors hover:bg-[#323954]/40 hover:text-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A77DF]/25",
-                  isLoading && "pointer-events-none opacity-60"
+                  "absolute right-1 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-lg text-[#475569] transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A77DF]/25",
+                  isLoading && "pointer-events-none opacity-50"
                 )}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
@@ -155,15 +130,39 @@ export default function LoginForm({ companyName = "Vigitec Panamá", initials = 
             </div>
           </div>
 
-          <Button
+          {/* Submit button */}
+          <button
             type="submit"
-            className="w-full bg-[#5A77DF] text-white hover:bg-[#3E53A0] focus-visible:ring-[#5A77DF]/30"
             disabled={isLoading}
+            className="group relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#5A77DF] to-[#3E53A0] text-sm font-semibold text-white shadow-lg shadow-[#5A77DF]/20 transition-all hover:shadow-[#5A77DF]/30 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A77DF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#030816] disabled:opacity-60 disabled:hover:brightness-100"
           >
-            {isLoading ? "Entrando..." : "Entrar"}
-          </Button>
+            {/* Animated shine effect */}
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+
+            <span className="relative flex items-center gap-2">
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Ingresando...
+                </>
+              ) : (
+                "Ingresar al panel"
+              )}
+            </span>
+          </button>
         </form>
-      </CardContent>
-    </Card>
+
+        {/* Divider */}
+        <div className="mt-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/[0.06]" />
+          <span className="text-[11px] font-medium uppercase tracking-widest text-[#334155]">Vigitec</span>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/[0.06]" />
+        </div>
+
+        <p className="mt-4 text-center text-xs text-[#334155]">
+          Solo para uso interno del equipo Vigitec
+        </p>
+      </div>
+    </div>
   );
 }

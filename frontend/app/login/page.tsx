@@ -2,49 +2,98 @@ import LoginForm from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[#08112F]">
-      <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-44 -translate-x-1/2 lg:block">
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,17,47,0)_0%,rgba(0,0,0,0.70)_38%,rgba(8,17,47,0.92)_52%,rgba(8,17,47,1)_100%)] opacity-95" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_30%,rgba(90,119,223,0.22),transparent_55%),radial-gradient(circle_at_60%_65%,rgba(62,83,160,0.18),transparent_60%)]" />
-          <div className="absolute inset-0 backdrop-blur-2xl" />
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#030816]">
+      {/* ── Background effects ── */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-[20%] top-[-15%] h-[50rem] w-[50rem] rounded-full bg-[#5A77DF]/8 blur-[120px] animate-pulse" style={{ animationDuration: "8s" }} />
+        <div className="absolute -right-[15%] bottom-[-10%] h-[45rem] w-[45rem] rounded-full bg-[#3E53A0]/10 blur-[100px] animate-pulse" style={{ animationDuration: "6s" }} />
+        <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(rgba(90,119,223,0.5)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(90,119,223,0.10),transparent_70%)]" />
+      </div>
 
-        <section className="relative hidden overflow-hidden border-r border-[#323954] bg-[#08112F] lg:block">
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,#08112F_0%,#0B1536_26%,#323954_52%,#3E53A0_78%,#5A77DF_100%)] opacity-95" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(90,119,223,0.30),transparent_55%),radial-gradient(circle_at_70%_30%,rgba(62,83,160,0.26),transparent_60%),radial-gradient(circle_at_75%_78%,rgba(8,17,47,0.95),transparent_52%)]" />
-          <div className="absolute inset-0 opacity-[0.16] [background-image:radial-gradient(rgba(236,238,240,0.18)_1px,transparent_1px)] [background-size:22px_22px]" />
-          <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(rgba(204,212,222,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(204,212,222,0.14)_1px,transparent_1px)] [background-size:72px_72px]" />
-          <div className="absolute -left-32 top-[-10%] h-[24rem] w-[24rem] rounded-full bg-[#5A77DF]/14 blur-3xl" />
-          <div className="absolute -right-40 bottom-[-12%] h-[26rem] w-[26rem] rounded-full bg-[#3E53A0]/18 blur-3xl" />
-          <div className="relative flex h-full flex-col justify-between p-12">
-            <div>
-              <p className="text-sm font-medium tracking-wide text-[#CCD4DE]">Vigitec Alertas</p>
+      <div className="relative grid min-h-screen grid-cols-1 lg:grid-cols-2">
+        {/* ━━━ Left panel ━━━ */}
+        <section className="relative hidden overflow-hidden lg:flex lg:flex-col">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#060E24] via-[#0A1332] to-[#0D1A42]" />
+
+          {/* Subtle grid */}
+          <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(90,119,223,0.4)_1px,transparent_1px),linear-gradient(90deg,rgba(90,119,223,0.4)_1px,transparent_1px)] [background-size:64px_64px]" />
+
+          {/* Glow */}
+          <div className="absolute -left-20 top-[15%] h-72 w-72 rounded-full bg-[#5A77DF]/12 blur-[80px]" />
+          <div className="absolute -right-24 bottom-[20%] h-80 w-80 rounded-full bg-[#3E53A0]/15 blur-[100px]" />
+
+          <div className="relative z-10 flex flex-1 flex-col justify-between p-14 xl:p-20">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#5A77DF] shadow-md shadow-[#5A77DF]/20">
+                <svg className="h-4.5 w-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold tracking-wide text-white/90">Vigitec Panamá</span>
             </div>
 
-            <div className="max-w-lg">
-              <h1 className="text-4xl font-semibold tracking-tight text-[#ECEEF0]">Vigitec Alertas</h1>
-              <p className="mt-4 text-lg leading-relaxed text-[#CCD4DE]">
-                Bienvenido a tu centro de alertas. Gestiona recordatorios, clientes y servicios desde un solo panel,
-                con visibilidad clara y control total.
-              </p>
+            {/* Main content */}
+            <div>
+              <h1 className="text-[2.5rem] font-bold leading-[1.15] tracking-tight text-white xl:text-[2.85rem]">
+                Administra tus
+                <br />
+                servicios y clientes
+                <br />
+                <span className="text-[#5A77DF]">sin complicaciones.</span>
+              </h1>
 
-              <div className="mt-10 flex items-center gap-3">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#CCD4DE]" />
-                <p className="text-sm text-[#CCD4DE]">Acceso con token y auditoría de actividad para trazabilidad y seguridad.</p>
+              <div className="mt-10 space-y-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#5A77DF]" />
+                  <p className="text-sm leading-relaxed text-[#7A8BA8]">
+                    Seguimiento de vencimientos con avisos automáticos por correo electrónico.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#5A77DF]" />
+                  <p className="text-sm leading-relaxed text-[#7A8BA8]">
+                    Historial de actividad para mantener trazabilidad de cada operación.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#5A77DF]" />
+                  <p className="text-sm leading-relaxed text-[#7A8BA8]">
+                    Roles y permisos diferenciados para el equipo.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="text-xs text-[#CCD4DE]/70">Vigitec Panamá</div>
+            {/* Footer */}
+            <p className="text-xs text-[#3D4F6A]">Vigitec Panamá © 2026</p>
           </div>
         </section>
 
+        {/* Divider */}
+        <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 lg:block">
+          <div className="h-full w-full bg-gradient-to-b from-transparent via-[#5A77DF]/15 to-transparent" />
+        </div>
+
+        {/* ━━━ Right panel ━━━ */}
         <section className="relative flex items-center justify-center px-6 py-12">
-          <div className="absolute inset-0 bg-black" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(90,119,223,0.14),transparent_52%),radial-gradient(circle_at_85%_80%,rgba(62,83,160,0.12),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_40%,rgba(8,17,47,0.95),rgba(0,0,0,1)_58%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(90,119,223,0.05),transparent_55%)]" />
+
           <div className="relative w-full max-w-md">
+            {/* Mobile logo */}
+            <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#5A77DF] shadow-lg shadow-[#5A77DF]/20">
+                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-white">Vigitec Panamá</p>
+            </div>
+
             <LoginForm companyName="Vigitec Panamá" initials="VP" />
+
+            <p className="mt-8 text-center text-xs text-[#3D4F6A] lg:hidden">Vigitec Panamá © 2026</p>
           </div>
         </section>
       </div>
