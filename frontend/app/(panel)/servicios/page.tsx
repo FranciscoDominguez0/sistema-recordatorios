@@ -288,6 +288,8 @@ export default function ServiciosPage() {
         variant: "success"
       });
 
+      window.dispatchEvent(new Event("notifications:refresh"));
+
       setDrawerOpen(false);
       await fetchServices({ nextPage: page });
     } catch (e: unknown) {
@@ -326,6 +328,7 @@ export default function ServiciosPage() {
     try {
       await renewService(renewingService.id, renewDate || undefined);
       toast({ title: "Servicio renovado", variant: "success" });
+      window.dispatchEvent(new Event("notifications:refresh"));
       setRenewOpen(false);
       setRenewingService(null);
       await fetchServices({ nextPage: page });

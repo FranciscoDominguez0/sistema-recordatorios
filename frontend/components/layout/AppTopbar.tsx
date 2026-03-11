@@ -79,6 +79,14 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
   }, [fetchUnread]);
 
   useEffect(() => {
+    const onRefresh = () => {
+      fetchUnread();
+    };
+    window.addEventListener("notifications:refresh", onRefresh);
+    return () => window.removeEventListener("notifications:refresh", onRefresh);
+  }, [fetchUnread]);
+
+  useEffect(() => {
     const q = (searchParams?.get("search") ?? "").toString();
     setGlobalSearch(q);
 
