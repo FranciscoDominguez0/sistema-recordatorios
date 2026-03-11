@@ -268,48 +268,68 @@ export default function UsuariosPage() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-4 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-none dark:bg-[#0B1424] dark:shadow-black/20">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Total</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                <User2 className="h-4 w-4" />
+          {/* Total */}
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Total</p>
+                <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{totalUsers}</p>
+                <p className="mt-1 text-xs text-[#94A3B8]">Registrados</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
+                <User2 className="h-5 w-5" style={{ color: "#3B82F6" }} />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{totalUsers}</p>
-            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Usuarios registrados</p>
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
           </div>
 
-          <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4 shadow-sm shadow-black/5 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:shadow-black/20">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-emerald-700 dark:text-emerald-200/80">Activos</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/25 bg-white/70 text-emerald-700 dark:border-emerald-400/25 dark:bg-white/10 dark:text-emerald-200">
-                <CheckCircle2 className="h-4 w-4" />
+          {/* Activos */}
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Activos</p>
+                <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{activeCount}</p>
+                <p className="mt-1 text-xs text-[#94A3B8]">Con acceso</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
+                <CheckCircle2 className="h-5 w-5" style={{ color: "#3B82F6" }} />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-emerald-800 dark:text-emerald-100">{activeCount}</p>
-            <p className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-200/80">Con acceso habilitado</p>
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
           </div>
 
-          <div className="rounded-2xl border border-[#3B82F6]/25 bg-[#3B82F6]/10 p-4 shadow-sm shadow-black/5 dark:border-[#3B82F6]/30 dark:shadow-black/20">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Admins</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                <ShieldCheck className="h-4 w-4" />
+          {/* Admins */}
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Admins</p>
+                <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{adminCount}</p>
+                <p className="mt-1 text-xs text-[#94A3B8]">Permisos elevados</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
+                <ShieldCheck className="h-5 w-5" style={{ color: "#3B82F6" }} />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{adminCount}</p>
-            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Permisos elevados</p>
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-4 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-none dark:bg-[#0B1424] dark:shadow-black/20">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Empleados</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                <User2 className="h-4 w-4" />
+          {/* Empleados */}
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Empleados</p>
+                <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{staffCount}</p>
+                <p className="mt-1 text-xs text-[#94A3B8]">Rol staff</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
+                <User2 className="h-5 w-5" style={{ color: "#3B82F6" }} />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{staffCount}</p>
-            <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Rol staff</p>
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
           </div>
         </div>
       </div>
