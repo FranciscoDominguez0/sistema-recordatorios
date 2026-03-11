@@ -34,14 +34,15 @@ class UsersController {
 
   async create(req, res) {
     try {
-      const { name, full_name, email, password, role, is_active, active } = req.body ?? {};
+      const { name, full_name, email, password, role, is_active, active, receive_notifications } = req.body ?? {};
 
       const user = await usersService.create({
         name: full_name ?? name,
         email,
         password,
         role,
-        is_active: is_active ?? active
+        is_active: is_active ?? active,
+        receive_notifications
       });
 
       return res.status(201).json(user);
@@ -56,14 +57,15 @@ class UsersController {
   async update(req, res) {
     try {
       const { id } = req.params ?? {};
-      const { name, full_name, email, password, role, is_active, active } = req.body ?? {};
+      const { name, full_name, email, password, role, is_active, active, receive_notifications } = req.body ?? {};
 
       const user = await usersService.update(id, {
         name: full_name ?? name,
         email,
         password,
         role,
-        is_active: is_active ?? active
+        is_active: is_active ?? active,
+        receive_notifications
       });
 
       return res.json(user);

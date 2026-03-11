@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, Loader2, Pencil, Plus, ShieldCheck, Trash2, User2, XCircle } from "lucide-react";
+import { Bell, BellOff, CheckCircle2, Loader2, Pencil, Plus, ShieldCheck, Trash2, User2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +29,7 @@ type FormState = {
   confirm_password: string;
   role: UserRole;
   is_active: boolean;
+  receive_notifications: boolean;
 };
 
 const initialForm: FormState = {
@@ -37,7 +38,8 @@ const initialForm: FormState = {
   password: "",
   confirm_password: "",
   role: "staff",
-  is_active: true
+  is_active: true,
+  receive_notifications: true
 };
 
 function roleLabel(role: UserRole) {
@@ -134,7 +136,8 @@ export default function UsuariosPage() {
       password: "",
       confirm_password: "",
       role: user.role,
-      is_active: Boolean(user.is_active)
+      is_active: Boolean(user.is_active),
+      receive_notifications: user.receive_notifications !== false
     });
     setFormError(null);
     setDrawerOpen(true);
@@ -179,17 +182,18 @@ export default function UsuariosPage() {
           email: form.email.trim(),
           password: form.password,
           role: form.role,
-          is_active: form.is_active
+          is_active: form.is_active,
+          receive_notifications: form.receive_notifications
         });
       } else {
         if (!editingUser) throw new Error("Usuario no seleccionado");
-
         const hasPassword = Boolean(form.password || form.confirm_password);
         await updateUser(editingUser.id, {
           name: form.name.trim(),
           email: form.email.trim(),
           role: form.role,
           is_active: form.is_active,
+          receive_notifications: form.receive_notifications,
           ...(hasPassword ? { password: form.password } : {})
         });
       }
@@ -363,6 +367,7 @@ export default function UsuariosPage() {
                       <th className="px-4 py-3 font-semibold">Email</th>
                       <th className="px-4 py-3 font-semibold">Rol</th>
                       <th className="px-4 py-3 font-semibold">Estado</th>
+                      <th className="px-4 py-3 font-semibold">Notif. correo</th>
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
@@ -412,6 +417,19 @@ export default function UsuariosPage() {
                             <span className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-xs font-semibold text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
                               <XCircle className="h-3.5 w-3.5" />
                               Inactivo
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {u.receive_notifications !== false ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3B82F6]/25 bg-[#3B82F6]/10 px-2.5 py-1 text-xs font-semibold text-[#3B82F6]">
+                              <Bell className="h-3 w-3" />
+                              Activas
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1 text-xs font-semibold text-[#94A3B8] dark:border-[#1F2A44] dark:bg-[#111E35]">
+                              <BellOff className="h-3 w-3" />
+                              Omitir
                             </span>
                           )}
                         </td>
@@ -592,6 +610,36 @@ export default function UsuariosPage() {
                     <span className="text-[#0F172A] dark:text-[#F1F5F9]">
                       {form.is_active ? "Activo" : "Inactivo"}
                     </span>
+                  </label>
+                </div>
+
+                {/* Notificaciones por correo */}
+                <div className="sm:col-span-2">
+                  <Label>Notificaciones por correo</Label>
+                  <p className="mb-2 text-xs text-[#94A3B8]">Si está desactivado, este usuario NO recibirá correos de avisos de tareas ni servicios.</p>
+                  <label className="inline-flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors
+                    {form.receive_notifications
+                      ? 'border-[#3B82F6]/30 bg-[#3B82F6]/5 dark:bg-[#3B82F6]/10'
+                      : 'border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]'}
+                  ">
+                    <div className={`relative h-5 w-9 rounded-full transition-colors ${
+                      form.receive_notifications ? 'bg-[#3B82F6]' : 'bg-[#94A3B8]/40'
+                    }`}>
+                      <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                        form.receive_notifications ? 'translate-x-4' : 'translate-x-0.5'
+                      }`} />
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={form.receive_notifications}
+                        onChange={(e) => setForm((p) => ({ ...p, receive_notifications: e.target.checked }))}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">
+                        {form.receive_notifications ? 'Recibe correos' : 'No recibe correos'}
+                      </p>
+                    </div>
                   </label>
                 </div>
               </div>

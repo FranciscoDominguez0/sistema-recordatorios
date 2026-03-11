@@ -18,6 +18,7 @@ function titleFromPath(pathname: string) {
     "/clientes": "Clientes",
     "/servicios": "Servicios",
     "/tareas": "Tareas",
+    "/historial-correos": "Historial de Correos",
     "/configuracion": "Configuración",
     "/auditorias": "Auditorías"
   };
@@ -29,6 +30,7 @@ function searchPlaceholderFromPath(pathname: string) {
     "/usuarios": "Buscar por nombre o email",
     "/clientes": "Buscar por nombre o email",
     "/servicios": "Buscar por servicio o cliente",
+    "/historial-correos": "Buscar por destinatario o asunto",
     "/auditorias": "Buscar por usuario, acción o descripción"
   };
   return map[pathname] ?? "Buscar";

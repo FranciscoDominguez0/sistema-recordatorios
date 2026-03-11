@@ -8,6 +8,7 @@ import {
   Activity,
   ClipboardList,
   LayoutDashboard,
+  Mail,
   Settings,
   ShieldCheck,
   Users,
@@ -22,6 +23,7 @@ const nav = [
   { href: "/clientes", label: "Clientes", icon: BriefcaseBusiness },
   { href: "/servicios", label: "Servicios", icon: ShieldCheck },
   { href: "/tareas", label: "Tareas", icon: ClipboardList },
+  { href: "/historial-correos", label: "Historial de Correos", icon: Mail },
   { href: "/configuracion", label: "Configuración", icon: Settings },
   { href: "/auditorias", label: "Auditorías", icon: Activity }
 ] as const;

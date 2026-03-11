@@ -6,53 +6,36 @@ class UsersService {
     return usersRepository.getAll({ page, limit, search });
   }
 
-  async create({ name, email, password, role, is_active } = {}) {
-    const normalizedName = typeof name === "string" ? name.trim() : "";
+  async create({ name, email, password, role, is_active, receive_notifications } = {}) {
+    const normalizedName  = typeof name  === "string" ? name.trim()  : "";
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-    const normalizedRole = typeof role === "string" ? role.trim().toLowerCase() : "staff";
+    const normalizedRole  = typeof role  === "string" ? role.trim().toLowerCase()  : "staff";
 
-    if (!normalizedName) {
-      const error = new Error("Nombre requerido");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    if (!normalizedEmail) {
-      const error = new Error("Email requerido");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    if (!password || String(password).length < 8) {
-      const error = new Error("La contraseña debe tener mínimo 8 caracteres");
-      error.statusCode = 400;
-      throw error;
-    }
+    if (!normalizedName)  { const e = new Error("Nombre requerido");  e.statusCode = 400; throw e; }
+    if (!normalizedEmail) { const e = new Error("Email requerido");   e.statusCode = 400; throw e; }
+    if (!password || String(password).length < 8) { const e = new Error("La contraseña debe tener mínimo 8 caracteres"); e.statusCode = 400; throw e; }
 
     const allowedRoles = new Set(["admin", "staff"]);
     const finalRole = allowedRoles.has(normalizedRole) ? normalizedRole : "staff";
 
     const existing = await usersRepository.findByEmail(normalizedEmail);
-    if (existing) {
-      const error = new Error("El email ya está registrado");
-      error.statusCode = 409;
-      throw error;
-    }
+    if (existing) { const e = new Error("El email ya está registrado"); e.statusCode = 409; throw e; }
 
     const passwordHash = await bcrypt.hash(String(password), 10);
-
     const active = typeof is_active === "boolean" ? is_active : true;
+    const notif  = typeof receive_notifications === "boolean" ? receive_notifications : true;
 
     return usersRepository.create({
       name: normalizedName,
       email: normalizedEmail,
       password_hash: passwordHash,
       role: finalRole,
-      is_active: active
+      is_active: active,
+      receive_notifications: notif
     });
   }
 
-  async update(id, { name, email, password, role, is_active } = {}) {
+  async update(id, { name, email, password, role, is_active, receive_notifications } = {}) {
     const numericId = Number.parseInt(String(id), 10);
     if (!Number.isFinite(numericId) || numericId <= 0) {
       const error = new Error("ID inválido");
@@ -113,9 +96,8 @@ class UsersService {
       patch.role = allowedRoles.has(normalizedRole) ? normalizedRole : "staff";
     }
 
-    if (typeof is_active === "boolean") {
-      patch.is_active = is_active;
-    }
+    if (typeof is_active === "boolean") patch.is_active = is_active;
+    if (typeof receive_notifications === "boolean") patch.receive_notifications = receive_notifications;
 
     if (Object.keys(patch).length === 0) {
       const error = new Error("No hay campos para actualizar");

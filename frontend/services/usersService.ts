@@ -8,6 +8,7 @@ export type UserItem = {
   email: string;
   role: UserRole;
   is_active: boolean;
+  receive_notifications?: boolean;
   created_at?: string;
 };
 
@@ -34,6 +35,7 @@ type CreateUserInput = {
   password: string;
   role: UserRole;
   is_active: boolean;
+  receive_notifications?: boolean;
 };
 
 type UpdateUserInput = Partial<{
@@ -42,6 +44,7 @@ type UpdateUserInput = Partial<{
   password: string;
   role: UserRole;
   is_active: boolean;
+  receive_notifications: boolean;
 }>;
 
 const resolvedBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim() || "http://localhost:3000";

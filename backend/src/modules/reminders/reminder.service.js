@@ -25,7 +25,15 @@ class ReminderService {
   }
 
   async getAdmins() {
-    const [rows] = await pool.query("SELECT id, name, email FROM users WHERE role = 'admin'");
+    // Verificar si existe la columna receive_notifications
+    const [cols] = await pool.query("SHOW COLUMNS FROM users LIKE 'receive_notifications'");
+    const hasCol = Array.isArray(cols) && cols.length > 0;
+
+    const sql = hasCol
+      ? "SELECT id, name, email FROM users WHERE role = 'admin' AND receive_notifications = 1"
+      : "SELECT id, name, email FROM users WHERE role = 'admin'";
+
+    const [rows] = await pool.query(sql);
     return rows;
   }
 
