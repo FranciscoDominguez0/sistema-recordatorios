@@ -23,7 +23,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3001", "http://localhost:3000"],
+    origin: ["http://localhost:3001", "http://localhost:3000", "http://localhost:3002", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
@@ -66,7 +66,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT ?? 3000);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

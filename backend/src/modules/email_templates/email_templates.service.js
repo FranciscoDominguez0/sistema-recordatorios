@@ -114,9 +114,9 @@ class EmailTemplatesService {
       values.push(content);
     }
 
-    if (cols.template_type) {
+    if (cols.template_type && template_type != null) {
       sets.push("template_type = ?");
-      values.push(template_type ?? null);
+      values.push(template_type);
     }
 
     if (cols.card_content) {

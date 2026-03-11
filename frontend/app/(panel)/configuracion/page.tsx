@@ -566,7 +566,7 @@ export default function ConfiguracionPage() {
 
       {/* ══════════════ TAB EMPRESA ══════════════ */}
       {tab === "empresa" && (
-        <div className="max-w-xl space-y-6">
+        <div className="max-w-4xl space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Identidad de empresa</CardTitle>
@@ -577,65 +577,70 @@ export default function ConfiguracionPage() {
                 <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]"><Loader2 className="h-4 w-4 animate-spin" /> Cargando...</div>
               ) : (
                 <form onSubmit={onSaveCompany} className="space-y-5">
-
-                  {/* Logo */}
-                  <div>
-                    <Label className="mb-2 block text-sm">Logo de la empresa</Label>
-                    <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-                    {companyForm.logo_base64 ? (
-                      <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-[#3B82F6]/30 bg-[#3B82F6]/5 p-4 transition-colors dark:border-[#3B82F6]/40 dark:bg-[#3B82F6]/10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={companyForm.logo_base64} alt="Logo" className="mx-auto max-h-20 w-auto object-contain" />
-                        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                          <button type="button" onClick={() => logoInputRef.current?.click()} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur hover:bg-white/30" title="Cambiar logo"><Upload className="h-4 w-4" /></button>
-                          <button type="button" onClick={() => setCompanyForm((p) => ({ ...p, logo_base64: "" }))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/80 text-white hover:bg-red-500" title="Quitar logo"><X className="h-4 w-4" /></button>
-                        </div>
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <div className="space-y-5">
+                      {/* Logo */}
+                      <div>
+                        <Label className="mb-2 block text-sm">Logo de la empresa</Label>
+                        <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                        {companyForm.logo_base64 ? (
+                          <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-[#3B82F6]/30 bg-[#3B82F6]/5 p-3 transition-colors dark:border-[#3B82F6]/40 dark:bg-[#3B82F6]/10">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={companyForm.logo_base64} alt="Logo" className="mx-auto max-h-16 w-auto object-contain" />
+                            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                              <button type="button" onClick={() => logoInputRef.current?.click()} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur hover:bg-white/30" title="Cambiar logo"><Upload className="h-4 w-4" /></button>
+                              <button type="button" onClick={() => setCompanyForm((p) => ({ ...p, logo_base64: "" }))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/80 text-white hover:bg-red-500" title="Quitar logo"><X className="h-4 w-4" /></button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => logoInputRef.current?.click()} className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC] py-6 text-[#64748B] transition-colors hover:border-[#3B82F6]/40 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:border-[#3B82F6]/40">
+                            <ImageIcon className="h-7 w-7 opacity-40" />
+                            <span className="text-sm font-medium">Haz clic para subir el logo</span>
+                            <span className="text-xs opacity-60">PNG, JPG, SVG · máx. 512 KB</span>
+                          </button>
+                        )}
                       </div>
-                    ) : (
-                      <button type="button" onClick={() => logoInputRef.current?.click()} className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC] py-8 text-[#64748B] transition-colors hover:border-[#3B82F6]/40 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:border-[#3B82F6]/40">
-                        <ImageIcon className="h-8 w-8 opacity-40" />
-                        <span className="text-sm font-medium">Haz clic para subir el logo</span>
-                        <span className="text-xs opacity-60">PNG, JPG, SVG · máx. 512 KB</span>
-                      </button>
-                    )}
-                  </div>
 
-                  {/* Nombre */}
-                  <div>
-                    <Label htmlFor="co-name">Nombre de la empresa</Label>
-                    <Input id="co-name" placeholder="Ej: Vigitec Panamá S.A." value={companyForm.company_name} onChange={(e) => setCompanyForm((p) => ({ ...p, company_name: e.target.value }))} className={inputCls} />
-                    <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Aparece en el encabezado y pie del correo cuando no hay logo.</p>
-                  </div>
-
-                  {/* Firma */}
-                  <div>
-                    <Label htmlFor="co-firma">Firma del correo</Label>
-                    <textarea
-                      id="co-firma"
-                      rows={5}
-                      placeholder={"Atentamente,\nFrancisco Domínguez\nGerente General\ncontacto@vigitec.com\n+507 000-0000"}
-                      value={companyForm.firma}
-                      onChange={(e) => setCompanyForm((p) => ({ ...p, firma: e.target.value }))}
-                      className="mt-1 w-full resize-none rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
-                    />
-                    <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Texto de firma que se muestra al final de cada correo enviado.</p>
-                  </div>
-
-                  {/* Preview mini */}
-                  {(companyForm.logo_base64 || companyForm.company_name || companyForm.firma) && (
-                    <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-[#1F2A44]">
-                      <div className="flex items-center gap-2 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                        <Eye className="h-3.5 w-3.5 text-[#64748B] dark:text-[#94A3B8]" />
-                        <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vista previa del encabezado y firma</span>
+                      {/* Nombre */}
+                      <div>
+                        <Label htmlFor="co-name">Nombre de la empresa</Label>
+                        <Input id="co-name" placeholder="Ej: Vigitec Panamá S.A." value={companyForm.company_name} onChange={(e) => setCompanyForm((p) => ({ ...p, company_name: e.target.value }))} className={inputCls} />
+                        <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Aparece en el encabezado y pie del correo cuando no hay logo.</p>
                       </div>
-                      <iframe
-                        srcDoc={buildEmailHtml({ logo: companyForm.logo_base64, firma: companyForm.firma, companyName: companyForm.company_name, subject: "Ejemplo de correo", bodyText: "Este es el contenido del correo..." })}
-                        className="h-60 w-full"
-                        title="Vista previa"
-                        sandbox="allow-same-origin"
-                      />
                     </div>
-                  )}
+
+                    <div className="space-y-5">
+                      {/* Firma */}
+                      <div>
+                        <Label htmlFor="co-firma">Firma del correo</Label>
+                        <textarea
+                          id="co-firma"
+                          rows={6}
+                          placeholder={"Atentamente,\nFrancisco Domínguez\nGerente General\ncontacto@vigitec.com\n+507 000-0000"}
+                          value={companyForm.firma}
+                          onChange={(e) => setCompanyForm((p) => ({ ...p, firma: e.target.value }))}
+                          className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
+                        />
+                        <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Texto de firma que se muestra al final de cada correo enviado.</p>
+                      </div>
+
+                      {/* Preview mini */}
+                      {(companyForm.logo_base64 || companyForm.company_name || companyForm.firma) && (
+                        <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-[#1F2A44]">
+                          <div className="flex items-center gap-2 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                            <Eye className="h-3.5 w-3.5 text-[#64748B] dark:text-[#94A3B8]" />
+                            <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vista previa del encabezado y firma</span>
+                          </div>
+                          <iframe
+                            srcDoc={buildEmailHtml({ logo: companyForm.logo_base64, firma: companyForm.firma, companyName: companyForm.company_name, subject: "Ejemplo de correo", bodyText: "Este es el contenido del correo..." })}
+                            className="h-52 w-full"
+                            title="Vista previa"
+                            sandbox="allow-same-origin"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="flex justify-end">
                     <Button type="submit" disabled={companySaving}>
