@@ -87,6 +87,7 @@ const LIMIT = 10;
 export default function HistorialCorreosPage() {
   const searchParams = useSearchParams();
   const topbarQ = searchParams?.get("search") ?? "";
+  const statusParam = (searchParams?.get("status") ?? "").toString();
 
   const [logs, setLogs] = useState<EmailLogItem[]>([]);
   const [summary, setSummary] = useState<EmailLogSummary | null>(null);
@@ -95,15 +96,13 @@ export default function HistorialCorreosPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const [search, setSearch] = useState(topbarQ);
-  const [status, setStatus] = useState("all");
-
   const fetchAll = useCallback(
-    async ({ nextPage = 1, nextSearch = search, nextStatus = status } = {}) => {
+    async ({ nextPage = 1, nextSearch = topbarQ } = {}) => {
       setLoading(true);
       try {
+        const safeStatus = statusParam === "sent" || statusParam === "failed" ? statusParam : undefined;
         const [logsRes, summaryRes] = await Promise.all([
-          getEmailLogs({ page: nextPage, limit: LIMIT, search: nextSearch, status: nextStatus }),
+          getEmailLogs({ page: nextPage, limit: LIMIT, search: nextSearch, status: safeStatus }),
           getEmailLogsSummary(),
         ]);
         setLogs(logsRes.data);
@@ -114,18 +113,15 @@ export default function HistorialCorreosPage() {
       } catch { /* silencioso */ }
       finally { setLoading(false); }
     },
-    [search, status]
+    [statusParam, topbarQ]
   );
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   // Sincroniza con la barra de búsqueda del topbar
   useEffect(() => {
-    setSearch(topbarQ);
-    fetchAll({ nextPage: 1, nextSearch: topbarQ, nextStatus: status });
-  }, [topbarQ]);
-
-  const applyFilters = () => fetchAll({ nextPage: 1, nextSearch: search, nextStatus: status });
+    fetchAll({ nextPage: 1, nextSearch: topbarQ });
+  }, [topbarQ, statusParam, fetchAll]);
 
   // Calcular tasa de éxito
   const successRate = useMemo(() => {
@@ -156,39 +152,6 @@ export default function HistorialCorreosPage() {
         <KpiCard label="Hoy" value={summary?.today ?? 0} sub={format(new Date(), "d MMM yyyy", { locale: es })} icon={Send} />
       </div>
 
-      {/* Filtros */}
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-[#64748B]">Buscar</label>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-              placeholder="Buscar por destinatario o asunto..."
-              className="h-10 w-full rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-sm text-[#0F172A] outline-none placeholder:text-[#94A3B8] focus:border-[#3B82F6]/50 focus:ring-2 focus:ring-[#3B82F6]/15 dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9] dark:placeholder:text-[#64748B]"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-[#64748B]">Estado</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="h-10 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-sm text-[#0F172A] outline-none focus:border-[#3B82F6]/50 focus:ring-2 focus:ring-[#3B82F6]/15 dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9]"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="sent">Enviados</option>
-              <option value="failed">Fallidos</option>
-            </select>
-          </div>
-          <Button onClick={applyFilters} disabled={loading} className="h-10 gap-2">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Buscar
-          </Button>
-        </div>
-      </div>
-
       {/* Tabla */}
       <div className="rounded-2xl border border-[#E2E8F0] bg-white shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
         {/* Header de tabla */}
@@ -210,7 +173,7 @@ export default function HistorialCorreosPage() {
         ) : logs.length === 0 ? (
           <div className="flex h-40 flex-col items-center justify-center gap-2 text-sm text-[#94A3B8]">
             <Mail className="h-10 w-10 opacity-20" />
-            <p>{search || status !== "all" ? `Sin resultados para "${search}"` : "No hay registros de correos"}</p>
+            <p>{topbarQ || statusParam ? `Sin resultados para "${topbarQ}"` : "No hay registros de correos"}</p>
           </div>
         ) : (
           <>

@@ -62,7 +62,7 @@ export default function TareasPage() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "completed">("pending");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingTask, setDeletingTask] = useState<TaskItem | null>(null);

@@ -11,20 +11,6 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { getUnreadCount } from "@/services/notificationsService";
 
-function titleFromPath(pathname: string) {
-  const map: Record<string, string> = {
-    "/dashboard": "Dashboard",
-    "/usuarios": "Usuarios",
-    "/clientes": "Clientes",
-    "/servicios": "Servicios",
-    "/tareas": "Tareas",
-    "/historial-correos": "Historial de Correos",
-    "/configuracion": "Configuración",
-    "/auditorias": "Auditorías"
-  };
-  return map[pathname] ?? "Panel";
-}
-
 function searchPlaceholderFromPath(pathname: string) {
   const map: Record<string, string> = {
     "/usuarios": "Buscar por nombre o email",
@@ -36,9 +22,17 @@ function searchPlaceholderFromPath(pathname: string) {
   return map[pathname] ?? "Buscar";
 }
 
+function SlashLogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+      <path d="M10 4L6 20" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M18 4L14 20" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
   const pathname = usePathname();
-  const title = useMemo(() => titleFromPath(pathname ?? "/dashboard"), [pathname]);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -158,29 +152,25 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
         <button
           type="button"
           onClick={() => onOpenSidebar?.()}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844] lg:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition-colors hover:bg-red-100 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-red-400 dark:hover:bg-[#162844] lg:hidden"
           aria-label="Abrir menú"
         >
-          <Menu className="h-5 w-5" />
+          <SlashLogoMark className="h-5 w-5" />
         </button>
 
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">{title}</h2>
-        </div>
-
         <div className="hidden min-w-0 flex-1 items-center sm:flex">
-          <div className="relative w-full max-w-[460px]" ref={popoverRef}>
-            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-              <Search className="h-4 w-4 text-[#64748B] dark:text-[#94A3B8]" />
+          <div className="relative w-full max-w-[420px]" ref={popoverRef}>
+            <div className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center">
+              <Search className="h-4 w-4 text-[#475569] dark:text-[#CBD5E1]" />
             </div>
-            <div className="absolute -inset-[1px] rounded-full bg-[linear-gradient(90deg,rgba(59,130,246,0.32),rgba(16,185,129,0.16),rgba(245,158,11,0.12))] opacity-70 blur-[8px]" />
+            <div className="absolute -inset-[1px] rounded-full bg-[linear-gradient(90deg,rgba(59,130,246,0.28),rgba(16,185,129,0.14),rgba(245,158,11,0.10))] opacity-70 blur-[8px]" />
             <Input
               value={globalSearch}
               onChange={(e) => {
                 setGlobalSearch(e.target.value);
               }}
               placeholder={placeholder}
-              className="relative h-10 w-full rounded-full border-[#E2E8F0] bg-white/95 pl-10 pr-20 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm shadow-black/5 backdrop-blur focus-visible:ring-[#4F46E5]/15 focus-visible:border-[#4F46E5]/35 dark:border-[#1F2A44] dark:bg-[#111E35]/80 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:shadow-black/20 dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+              className="relative h-9 w-full rounded-full border-[#E2E8F0] bg-white/95 pl-10 pr-20 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm shadow-black/5 backdrop-blur focus-visible:ring-[#4F46E5]/15 focus-visible:border-[#4F46E5]/35 dark:border-[#1F2A44] dark:bg-[#111E35]/80 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:shadow-black/20 dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
             />
 
             <div className="absolute inset-y-0 right-2 flex items-center gap-1">
@@ -221,6 +211,34 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
                         { key: "activo", label: "Activo" },
                         { key: "vencido", label: "Vencido" },
                         { key: "completado", label: "Completado" }
+                      ].map((opt) => (
+                        <button
+                          key={opt.key || "all"}
+                          type="button"
+                          onClick={() => {
+                            setServicesStatus(opt.key);
+                            applyStatusToUrl(opt.key);
+                          }}
+                          className={cn(
+                            "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                            (servicesStatus || "") === opt.key
+                              ? "border-[#3B82F6]/40 bg-[#3B82F6]/10 text-[#0F172A] dark:text-[#F1F5F9]"
+                              : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : pathname === "/historial-correos" ? (
+                  <div className="mt-3">
+                    <Label className="text-xs text-[#64748B] dark:text-[#94A3B8]">Estado</Label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {[
+                        { key: "", label: "Todos" },
+                        { key: "sent", label: "Enviados" },
+                        { key: "failed", label: "Fallidos" }
                       ].map((opt) => (
                         <button
                           key={opt.key || "all"}
