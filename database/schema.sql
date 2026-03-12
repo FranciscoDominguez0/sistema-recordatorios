@@ -19,6 +19,9 @@ CREATE TABLE users (
 -- 1. Habilitar/deshabilitar usuarios
 ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1;
 
+-- Seguridad: intentos fallidos de inicio de sesión
+ALTER TABLE users ADD COLUMN failed_login_attempts INT NOT NULL DEFAULT 0;
+
 -- Agregado en v1.x — Notificaciones de correo por usuario
 ALTER TABLE users
   ADD COLUMN receive_notifications TINYINT(1) NOT NULL DEFAULT 1;

@@ -78,10 +78,26 @@ class TasksController {
   async delete(req, res) {
     try {
       const id = Number(req.params.id);
+      const existing = await tasksService.getById(id);
       const deleted = await tasksService.delete(id);
 
       if (!deleted) {
         return res.status(404).json({ message: "Tarea no encontrada" });
+      }
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "DELETE_TASK",
+          entity_type: "task",
+          entity_id: id,
+          description: existing?.title
+            ? `Usuario eliminó la tarea interna: ${existing.title}`
+            : "Usuario eliminó una tarea interna",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
       }
 
       return res.json({ message: "Tarea eliminada" });

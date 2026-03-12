@@ -1,4 +1,5 @@
 import usersService from "./users.service.js";
+import activityLogsService from "../activity_logs/activityLogs.service.js";
 
 class UsersController {
   async getAll(req, res) {
@@ -45,6 +46,21 @@ class UsersController {
         receive_notifications
       });
 
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "CREATE_USER",
+          entity_type: "user",
+          entity_id: user?.id ?? null,
+          description: user?.name
+            ? `Usuario creó el usuario: ${user.name}`
+            : "Usuario creó un usuario",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
       return res.status(201).json(user);
     } catch (error) {
       if (error?.statusCode) {
@@ -80,7 +96,28 @@ class UsersController {
   async remove(req, res) {
     try {
       const { id } = req.params ?? {};
+      let existing = null;
+      try {
+        existing = await usersService.getById?.(id);
+      } catch {
+        existing = null;
+      }
       await usersService.remove(id);
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "DELETE_USER",
+          entity_type: "user",
+          entity_id: Number(id) || null,
+          description: existing?.name
+            ? `Usuario eliminó el usuario: ${existing.name}`
+            : "Usuario eliminó un usuario",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
       return res.status(204).send();
     } catch (error) {
       if (error?.statusCode) {

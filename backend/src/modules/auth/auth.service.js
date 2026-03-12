@@ -21,11 +21,37 @@ class AuthService {
       throw error;
     }
 
+    const isActive = user?.is_active === undefined ? true : Boolean(user.is_active);
+    if (!isActive) {
+      const error = new Error("Usuario deshabilitado");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const maxAttempts = Number(process.env.MAX_LOGIN_ATTEMPTS) > 0
+      ? Number(process.env.MAX_LOGIN_ATTEMPTS)
+      : 3;
+
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidPassword) {
+      try {
+        const updated = await authRepository.incrementFailedLoginAttempt(user.id);
+        const attempts = Number(updated?.failed_login_attempts ?? NaN);
+        if (Number.isFinite(attempts) && attempts >= maxAttempts) {
+          await authRepository.deactivateUser(user.id);
+        }
+      } catch {
+        // ignore
+      }
       const error = new Error("Credenciales incorrectas");
       error.statusCode = 401;
       throw error;
+    }
+
+    try {
+      await authRepository.resetFailedLoginAttempts(user.id);
+    } catch {
+      // ignore
     }
 
     const secret = process.env.JWT_SECRET;
@@ -41,7 +67,8 @@ class AuthService {
       role: user.role
     };
 
-    const token = jwt.sign(payload, secret, { expiresIn: "24h" });
+    const expiresIn = (process.env.JWT_EXPIRES_IN ?? "").trim() || "24h";
+    const token = jwt.sign(payload, secret, { expiresIn });
 
     return {
       token,

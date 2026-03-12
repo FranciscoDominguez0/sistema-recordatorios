@@ -513,7 +513,7 @@ export default function ConfiguracionPage() {
                     </div>
                     <div><Label htmlFor="tpl-subject">Asunto</Label><Input id="tpl-subject" placeholder="Recordatorio de vencimiento - {{servicio}}" value={tplForm.subject} onChange={(e) => setTplForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
                     <div>
-                      <div className="mb-1 flex items-center justify-between"><Label htmlFor="tpl-body">Cuerpo del correo</Label><button type="button" onClick={() => setPreviewOpen(true)} className="flex items-center gap-1 text-xs text-[#3B82F6] hover:underline"><Eye className="h-3 w-3" /> Vista previa</button></div>
+                      <div className="mb-1 flex items-center justify-between"><Label htmlFor="tpl-body">Cuerpo del correo</Label></div>
                       <textarea id="tpl-body" rows={12} placeholder="Estimado {{cliente}},..." value={tplForm.content} onChange={(e) => setTplForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" />
 
                     </div>

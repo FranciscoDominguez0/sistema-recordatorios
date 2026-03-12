@@ -6,6 +6,12 @@ class UsersService {
     return usersRepository.getAll({ page, limit, search });
   }
 
+  async getById(id) {
+    const numericId = Number.parseInt(String(id), 10);
+    if (!Number.isFinite(numericId) || numericId <= 0) return null;
+    return usersRepository.findById(numericId);
+  }
+
   async create({ name, email, password, role, is_active, receive_notifications } = {}) {
     const normalizedName  = typeof name  === "string" ? name.trim()  : "";
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";

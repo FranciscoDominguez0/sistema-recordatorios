@@ -83,10 +83,26 @@ class ClientsController {
   async delete(req, res) {
     try {
       const id = Number(req.params.id);
+      const existing = await clientsService.getById(id);
       const deleted = await clientsService.delete(id);
  
       if (!deleted) {
         return res.status(404).json({ message: "Cliente no encontrado" });
+      }
+
+      try {
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "DELETE_CLIENT",
+          entity_type: "client",
+          entity_id: id,
+          description: existing?.name
+            ? `Usuario eliminó el cliente: ${existing.name}`
+            : "Usuario eliminó un cliente",
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
       }
  
       return res.json({ message: "Cliente eliminado" });

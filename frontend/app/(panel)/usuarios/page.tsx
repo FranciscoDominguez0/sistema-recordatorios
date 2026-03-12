@@ -366,7 +366,6 @@ export default function UsuariosPage() {
                       <th className="px-4 py-3 font-semibold">Nombre</th>
                       <th className="hidden px-4 py-3 font-semibold sm:table-cell">Email</th>
                       <th className="hidden px-4 py-3 font-semibold md:table-cell">Rol</th>
-                      <th className="hidden px-4 py-3 font-semibold md:table-cell">Estado</th>
                       <th className="hidden px-4 py-3 font-semibold lg:table-cell">Notif. correo</th>
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
@@ -388,7 +387,6 @@ export default function UsuariosPage() {
                             <div className="min-w-0">
                               <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{u.name}</p>
                               <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8] sm:hidden">{u.email}</p>
-                              <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">ID {u.id}</p>
                             </div>
                           </div>
                         </td>
@@ -407,19 +405,6 @@ export default function UsuariosPage() {
                             <ShieldCheck className="h-3.5 w-3.5" />
                             {roleLabel(u.role)}
                           </span>
-                        </td>
-                        <td className="hidden px-4 py-3 md:table-cell">
-                          {u.is_active ? (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              Activo
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-xs font-semibold text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
-                              <XCircle className="h-3.5 w-3.5" />
-                              Inactivo
-                            </span>
-                          )}
                         </td>
                         <td className="hidden px-4 py-3 lg:table-cell">
                           {u.receive_notifications !== false ? (
