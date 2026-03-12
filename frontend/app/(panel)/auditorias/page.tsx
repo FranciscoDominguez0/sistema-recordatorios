@@ -266,7 +266,7 @@ export default function AuditoriasPage() {
   const inputCls = "h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#3B82F6]/50 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9] dark:placeholder:text-[#475569]";
 
   return (
-    <div className="space-y-6 text-[#F1F5F9]">
+    <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
 
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -288,9 +288,9 @@ export default function AuditoriasPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-3">
         {/* Line chart — actividad diaria */}
-        <Card className="border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424] lg:col-span-2">
+        <Card className="min-w-0 max-w-full overflow-hidden border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424] lg:col-span-2">
           <CardHeader className="flex flex-row items-start justify-between pb-2">
             <CardTitle className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Actividad diaria</CardTitle>
             <select
@@ -314,7 +314,7 @@ export default function AuditoriasPage() {
         </Card>
 
         {/* Bar chart — top acciones */}
-        <Card className="border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]">
+        <Card className="min-w-0 max-w-full overflow-hidden border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Top acciones</CardTitle>
           </CardHeader>

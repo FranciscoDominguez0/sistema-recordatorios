@@ -390,9 +390,12 @@ export default function ConfiguracionPage() {
           </div>
 
           <Card>
-            <CardHeader className="flex flex-row items-start justify-between gap-3">
-              <div><CardTitle className="text-base">Emails SMTP</CardTitle><CardDescription>Configura uno o más servidores de correo. Solo se usa el marcado como principal.</CardDescription></div>
-              <Button onClick={() => openSmtpDrawer()} className="shrink-0"><Plus className="h-4 w-4" /> Agregar email</Button>
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <CardTitle className="text-base">Emails SMTP</CardTitle>
+                <CardDescription>Configura uno o más servidores de correo. Solo se usa el marcado como principal.</CardDescription>
+              </div>
+              <Button onClick={() => openSmtpDrawer()} className="w-full shrink-0 sm:w-auto"><Plus className="h-4 w-4" /> Agregar email</Button>
             </CardHeader>
             <CardContent>
               {smtpLoading ? (
@@ -412,14 +415,14 @@ export default function ConfiguracionPage() {
                         {/* Info */}
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{item.smtp_email}</p>
+                            <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]" title={item.smtp_email}>{item.smtp_email}</p>
                             {item.is_default && (
                               <span className="flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:border-amber-400/30 dark:text-amber-300">
                                 <Star className="h-3 w-3" /> Principal
                               </span>
                             )}
                           </div>
-                          <p className="mt-0.5 text-xs text-[#64748B] dark:text-[#94A3B8]">{item.smtp_host}:{item.smtp_port} · {item.encryption?.toUpperCase()}</p>
+                          <p className="mt-0.5 truncate text-xs text-[#64748B] dark:text-[#94A3B8]" title={`${item.smtp_host}:${item.smtp_port} · ${item.encryption?.toUpperCase()}`}>{item.smtp_host}:{item.smtp_port} · {item.encryption?.toUpperCase()}</p>
                         </div>
 
                         {/* Actions */}
