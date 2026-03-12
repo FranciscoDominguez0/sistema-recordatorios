@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const BASE = ((process.env.NEXT_PUBLIC_API_URL ?? "").trim() || "/api").replace(/\/$/, "");
 const api = axios.create({ baseURL: BASE });
 
 function authHeaders() {

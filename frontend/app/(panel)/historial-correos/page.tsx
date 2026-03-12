@@ -281,18 +281,19 @@ export default function HistorialCorreosPage() {
             </div>
 
             {/* Paginación */}
-            <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-5 py-3 dark:border-[#1F2A44]">
+            <div className="flex flex-col gap-2 border-t border-[#E2E8F0] px-5 py-3 dark:border-[#1F2A44] sm:flex-row sm:items-center sm:justify-between">
               <span className="text-xs text-[#64748B]">
                 Página <strong>{page}</strong> de <strong>{totalPages}</strong> · {total} registros
               </span>
-              <div className="flex items-center gap-1.5">
+              <div className="flex max-w-full flex-wrap items-center gap-1.5 overflow-x-auto sm:flex-nowrap">
                 <Button
                   variant="secondary"
-                  className="h-8 px-3 text-xs"
+                  className="h-8 shrink-0 px-3 text-xs"
                   disabled={loading || page <= 1}
                   onClick={() => fetchAll({ nextPage: page - 1 })}
                 >
-                  Anterior
+                  <span className="sm:hidden">Ant</span>
+                  <span className="hidden sm:inline">Anterior</span>
                 </Button>
                 {/* Páginas numeradas */}
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -302,7 +303,7 @@ export default function HistorialCorreosPage() {
                       key={p}
                       onClick={() => fetchAll({ nextPage: p })}
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors",
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold transition-colors",
                         p === page
                           ? "bg-[#3B82F6] text-white"
                           : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] dark:bg-[#1F2A44] dark:text-[#94A3B8] dark:hover:bg-[#2D3E5C]"
@@ -314,11 +315,12 @@ export default function HistorialCorreosPage() {
                 })}
                 <Button
                   variant="secondary"
-                  className="h-8 px-3 text-xs"
+                  className="h-8 shrink-0 px-3 text-xs"
                   disabled={loading || page >= totalPages}
                   onClick={() => fetchAll({ nextPage: page + 1 })}
                 >
-                  Siguiente
+                  <span className="sm:hidden">Sig</span>
+                  <span className="hidden sm:inline">Siguiente</span>
                 </Button>
               </div>
             </div>

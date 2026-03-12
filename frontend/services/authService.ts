@@ -5,7 +5,7 @@ type LoginResponse = {
   user?: unknown;
 };
 
-const resolvedBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim() || "http://localhost:3000";
+const resolvedBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/$/, "") || "/api";
 
 const api = axios.create({
   baseURL: resolvedBaseUrl,
@@ -16,10 +16,17 @@ const api = axios.create({
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
   const response = await api.post<LoginResponse>("/auth/login", { email, password }).catch((error) => {
-    const message =
-      error?.response?.data?.message ||
-      error?.message ||
-      "No se pudo iniciar sesión";
+    const status = Number(error?.response?.status ?? NaN);
+    const rawMessage = String(error?.response?.data?.message ?? error?.message ?? "").trim();
+
+    if (status === 403) {
+      throw new Error(
+        rawMessage ||
+          "Tu cuenta está deshabilitada. Contacta al administrador para reactivarla."
+      );
+    }
+
+    const message = rawMessage || "No se pudo iniciar sesión";
     throw new Error(message);
   });
 

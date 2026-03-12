@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const API = ((process.env.NEXT_PUBLIC_API_URL ?? "").trim() || "/api").replace(/\/$/, "");
 
 function getAuthHeaders() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;

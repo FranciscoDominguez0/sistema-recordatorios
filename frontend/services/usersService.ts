@@ -48,7 +48,7 @@ type UpdateUserInput = Partial<{
   receive_notifications: boolean;
 }>;
 
-const resolvedBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim() || "http://localhost:3000";
+const resolvedBaseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/$/, "") || "/api";
 
 const api = axios.create({
   baseURL: resolvedBaseUrl,
