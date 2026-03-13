@@ -87,6 +87,16 @@ function textToHtml(text) {
 
 /** URL del logo o nombre de empresa como texto */
 function buildLogoHtml(company) {
+  const directLogoUrl = (process.env.COMPANY_LOGO_URL || "").trim();
+  const directLogoLink = (process.env.COMPANY_LOGO_LINK_URL || "").trim();
+  if (directLogoUrl) {
+    const img = `<img src="${directLogoUrl}" alt="${company?.company_name || ""}" border="0" style="max-height:44px;max-width:180px;object-fit:contain;display:block;border:0;"/>`;
+    if (directLogoLink) {
+      return `<a href="${directLogoLink}" target="_blank" rel="noopener noreferrer">${img}</a>`;
+    }
+    return img;
+  }
+
   const backendUrl = (process.env.BACKEND_URL || "").trim().replace(/\/$/, "");
   if (backendUrl && company?.logo_base64) {
     const logoUrl = `${backendUrl}/company/logo`;

@@ -21,7 +21,7 @@ import { uploadAvatar } from "@/services/usersService";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/usuarios", label: "Usuarios", icon: Users },
+  { href: "/usuarios", label: "Administradores", icon: Users },
   { href: "/clientes", label: "Clientes", icon: BriefcaseBusiness },
   { href: "/servicios", label: "Servicios", icon: ShieldCheck },
   { href: "/tareas", label: "Tareas", icon: ClipboardList },

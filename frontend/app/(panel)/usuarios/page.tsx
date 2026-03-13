@@ -100,7 +100,7 @@ export default function UsuariosPage() {
       setAdminTotal(Number(result.summary?.admin ?? 0));
       setStaffTotal(Number(result.summary?.staff ?? 0));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "No se pudo cargar usuarios");
+      setError(e instanceof Error ? e.message : "No se pudo cargar administradores");
     } finally {
       setLoading(false);
     }
@@ -186,7 +186,7 @@ export default function UsuariosPage() {
           receive_notifications: form.receive_notifications
         });
       } else {
-        if (!editingUser) throw new Error("Usuario no seleccionado");
+        if (!editingUser) throw new Error("Administrador no seleccionado");
         const hasPassword = Boolean(form.password || form.confirm_password);
         await updateUser(editingUser.id, {
           name: form.name.trim(),
@@ -199,7 +199,7 @@ export default function UsuariosPage() {
       }
 
       toast({
-        title: drawerMode === "create" ? "Usuario creado" : "Usuario actualizado",
+        title: drawerMode === "create" ? "Administrador creado" : "Administrador actualizado",
         variant: "success"
       });
 
@@ -208,7 +208,7 @@ export default function UsuariosPage() {
       setEditingUser(null);
       await fetchUsers();
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "No se pudo guardar usuario";
+      const message = e instanceof Error ? e.message : "No se pudo guardar administrador";
       setFormError(message);
       toast({ title: "Error", description: message, variant: "error" });
     } finally {
@@ -226,12 +226,12 @@ export default function UsuariosPage() {
     setDeleting(true);
     try {
       await deleteUser(deletingUser.id);
-      toast({ title: "Usuario eliminado", variant: "success" });
+      toast({ title: "Administrador eliminado", variant: "success" });
       setDeleteOpen(false);
       setDeletingUser(null);
       await fetchUsers();
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "No se pudo eliminar usuario";
+      const message = e instanceof Error ? e.message : "No se pudo eliminar administrador";
       setError(message);
       toast({ title: "Error", description: message, variant: "error" });
     } finally {
@@ -243,8 +243,8 @@ export default function UsuariosPage() {
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
       <ConfirmDialog
         open={deleteOpen}
-        title="Eliminar usuario"
-        description={deletingUser ? `¿Seguro que deseas eliminar el usuario ${deletingUser.name}?` : ""}
+        title="Eliminar administrador"
+        description={deletingUser ? `¿Seguro que deseas eliminar al administrador ${deletingUser.name}?` : ""}
         confirmText={deleting ? "Eliminando..." : "Eliminar"}
         cancelText="Cancelar"
         loading={deleting}
@@ -259,14 +259,14 @@ export default function UsuariosPage() {
       <div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">Usuarios</h1>
-            <p className="mt-1 text-sm text-[#64748B] dark:text-[#94A3B8]">Gestiona los usuarios que acceden al sistema.</p>
+            <h1 className="text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">Administradores</h1>
+            <p className="mt-1 text-sm text-[#64748B] dark:text-[#94A3B8]">Gestiona los administradores y agentes que acceden al sistema.</p>
           </div>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Button onClick={openCreate} className="w-full sm:w-auto">
               <Plus className="h-4 w-4" />
-              Nuevo
+              Nuevo administrador
             </Button>
           </div>
         </div>
@@ -341,13 +341,13 @@ export default function UsuariosPage() {
       <Card>
         <CardHeader className="flex flex-col gap-2">
           <CardTitle className="text-base text-[#0F172A] dark:text-[#F1F5F9]">Listado</CardTitle>
-          <CardDescription className="text-[#64748B] dark:text-[#94A3B8]">Usuarios registrados en el sistema.</CardDescription>
+          <CardDescription className="text-[#64748B] dark:text-[#94A3B8]">Administradores registrados en el sistema.</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Cargando usuarios...
+              Cargando administradores...
             </div>
           ) : error ? (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
@@ -355,7 +355,7 @@ export default function UsuariosPage() {
             </div>
           ) : users.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
-              No hay usuarios registrados.
+              No hay administradores registrados.
             </div>
           ) : (
             <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
@@ -500,16 +500,16 @@ export default function UsuariosPage() {
             )}
             role="dialog"
             aria-modal="true"
-            aria-label={drawerMode === "create" ? "Crear usuario" : "Editar usuario"}
+            aria-label={drawerMode === "create" ? "Crear administrador" : "Editar administrador"}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
               <div>
-                <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo usuario" : "Editar usuario"}</p>
+                <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo administrador" : "Editar administrador"}</p>
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
                   {drawerMode === "create"
-                    ? "Completa los datos para crear un usuario."
-                    : "Actualiza los datos del usuario."}
+                    ? "Completa los datos para crear un administrador."
+                    : "Actualiza los datos del administrador."}
                 </p>
               </div>
 
