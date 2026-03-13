@@ -20,6 +20,7 @@ import {
   type ClientOverviewResponse,
   type ClientItem
 } from "@/services/clientsService";
+import { getCompanySettings, type CompanySettings } from "@/services/companyService";
 
 type DrawerMode = "create" | "edit";
 
@@ -70,6 +71,7 @@ export default function ClientesPage() {
   const [overviewLoading, setOverviewLoading] = useState(false);
   const [overviewError, setOverviewError] = useState<string | null>(null);
   const [overview, setOverview] = useState<ClientOverviewResponse | null>(null);
+  const [companySettings, setCompanySettings] = useState<CompanySettings | null>(null);
 
   const fetchClients = async ({ nextSearch, nextPage }: { nextSearch?: string; nextPage?: number } = {}) => {
     setLoading(true);
@@ -143,6 +145,203 @@ export default function ClientesPage() {
 
     loadOverview();
   }, [quickOpen, quickClient]);
+
+  useEffect(() => {
+    if (!quickOpen) return;
+    if (companySettings) return;
+    getCompanySettings()
+      .then(setCompanySettings)
+      .catch(() => {
+        setCompanySettings(null);
+      });
+  }, [quickOpen, companySettings]);
+
+  const exportClientPdf = () => {
+    if (!overview) return;
+
+    const esc = (v: unknown) =>
+      String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    const companyName = companySettings?.company_name?.trim() || "Sistema de recordatorios";
+    const logo = (companySettings?.logo_base64 ?? "").trim();
+
+    const historyItems = (overview.activity_logs ?? [])
+      .filter((l) => {
+        const a = String(l.action ?? "").toUpperCase();
+        if (a.includes("RENEW")) return true;
+        if (a.includes("CREAT") && String(l.entity_type ?? "") === "service") return true;
+        if (a.includes("SERVICE") && a.includes("CREAT")) return true;
+        return false;
+      })
+      .slice(0, 30);
+
+    const html = `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${esc(companyName)} · Cliente ${esc(overview.client.name)}</title>
+    <style>
+      :root { --bg:#0B1424; --card:#ffffff; --muted:#64748b; --ink:#0f172a; --line:#e2e8f0; --accent:#3B82F6; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: var(--ink); margin: 0; background: #f1f5f9; }
+      .wrap { padding: 22px; }
+      .header { border-radius: 16px; overflow: hidden; box-shadow: 0 10px 28px rgba(15,23,42,.10); }
+      .hero { background: radial-gradient(1200px 400px at 20% 0%, rgba(59,130,246,.55), transparent 60%), linear-gradient(135deg, #08112F 0%, #1a2f6e 100%); padding: 22px 22px; color: #fff; }
+      .heroTop { display:flex; align-items:center; justify-content:space-between; gap: 16px; }
+      .brand { display:flex; align-items:center; gap: 12px; }
+      .logo { width: 72px; height: 72px; border-radius: 18px; background: rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; overflow:hidden; border: 1px solid rgba(255,255,255,.15); }
+      .logo img { width: 100%; height: 100%; object-fit: contain; }
+      .company { font-size: 16px; font-weight: 800; letter-spacing: .2px; }
+      .meta { font-size: 12px; color: rgba(255,255,255,.75); text-align:right; }
+      .heroTitle { margin-top: 12px; font-size: 18px; font-weight: 800; }
+      .heroSub { margin-top: 4px; font-size: 12px; color: rgba(255,255,255,.75); }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-top: 14px; }
+      .muted { color: var(--muted); font-size: 12px; }
+      h2 { font-size: 13px; margin: 0 0 10px; color: #334155; }
+      .grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+      .kv { padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: #f8fafc; }
+      .k { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+      .v { margin-top: 4px; font-size: 13px; font-weight: 800; color: #0f172a; }
+      .list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+      .item { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: #ffffff; }
+      .itemTop { display:flex; align-items:flex-start; justify-content:space-between; gap: 10px; }
+      .itemTitle { font-size: 13px; font-weight: 900; color: #0f172a; }
+      .itemMeta { font-size: 11px; color: #64748b; white-space: nowrap; }
+      .itemDesc { margin-top: 6px; font-size: 12px; color: #334155; line-height: 1.55; }
+      .pill { display:inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(59,130,246,.10); border: 1px solid rgba(59,130,246,.22); color: #1d4ed8; font-size: 11px; font-weight: 700; }
+      .no-print { padding: 16px 22px 0; }
+      .btn { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 9px 12px; cursor: pointer; font-weight: 700; }
+      .btnPrimary { border-color: rgba(59,130,246,.35); background: rgba(59,130,246,.12); }
+      @media print {
+        body { background: #fff; }
+        .wrap { padding: 0; }
+        .no-print { display:none; }
+        .header { border-radius: 0; box-shadow: none; }
+        .card { border-radius: 0; border-left: 0; border-right: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="header">
+        <div class="hero">
+          <div class="heroTop">
+            <div class="brand">
+              <div class="logo">${logo ? `<img src="${esc(logo)}" alt="${esc(companyName)}" />` : `<span style="font-weight:900;">${esc(companyName).slice(0,1).toUpperCase()}</span>`}</div>
+              <div>
+                <div class="company">${esc(companyName)}</div>
+                <div class="heroSub">Reporte de cliente</div>
+              </div>
+            </div>
+            <div class="meta">
+              <div>${esc(new Date().toLocaleString())}</div>
+              <div style="margin-top:4px"><span class="pill">Cliente</span></div>
+            </div>
+          </div>
+          <div class="heroTitle">${esc(overview.client.name)}</div>
+          <div class="heroSub">${esc(overview.client.email)}${overview.client.phone ? ` · ${esc(overview.client.phone)}` : ""}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Datos del cliente</h2>
+        <div class="grid">
+          <div class="kv"><div class="k">Nombre</div><div class="v">${esc(overview.client.name)}</div></div>
+          <div class="kv"><div class="k">Email</div><div class="v">${esc(overview.client.email)}</div></div>
+          <div class="kv"><div class="k">Teléfono</div><div class="v">${esc(overview.client.phone ?? "-")}</div></div>
+          <div class="kv"><div class="k">Servicios</div><div class="v">${esc(overview.services.length)}</div></div>
+        </div>
+        ${overview.client.notes ? `<div class="muted" style="margin-top:10px">Notas: ${esc(overview.client.notes)}</div>` : ""}
+      </div>
+
+      <div class="card">
+        <h2>Servicios</h2>
+        ${(overview.services ?? []).length === 0 ? (
+          `<div class="muted">Sin servicios registrados.</div>`
+        ) : (
+          `<ul class="list">
+            ${(overview.services ?? []).map((s) => {
+              const vence = `${esc(s.expiration_date)}${typeof s.days_to_expire === "number" ? ` (${esc(s.days_to_expire)} día(s))` : ""}`;
+              const desc = `Vence: ${vence} · Estado: ${esc(s.status)} · Recordatorios: ${esc(s.reminders_sent_count)} · Emails OK: ${esc(s.emails_sent_count)} · Fallidos: ${esc(s.emails_failed_count)}`;
+              return `
+                <li class="item">
+                  <div class="itemTop">
+                    <div class="itemTitle">${esc(s.service_name)}</div>
+                    <div class="itemMeta">${esc(String(s.status ?? ""))}</div>
+                  </div>
+                  <div class="itemDesc">${esc(desc)}</div>
+                </li>`;
+            }).join("")}
+          </ul>`
+        )}
+      </div>
+
+      <div class="card">
+        <h2>Historial de renovaciones / creaciones</h2>
+        ${historyItems.length === 0 ? (
+          `<div class="muted">Sin renovaciones registradas.</div>`
+        ) : (
+          `<ul class="list">
+            ${historyItems.map((l) => `
+              <li class="item">
+                <div class="itemTop">
+                  <div class="itemTitle">${esc(String(l.action ?? ""))}</div>
+                  <div class="itemMeta">${esc(new Date(l.created_at).toLocaleString())}</div>
+                </div>
+                ${l.description ? `<div class="itemDesc">${esc(l.description)}</div>` : `<div class="itemDesc">—</div>`}
+              </li>
+            `).join("")}
+          </ul>`
+        )}
+      </div>
+    </div>
+  </body>
+</html>`;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.setAttribute("aria-hidden", "true");
+
+    const cleanup = () => {
+      try {
+        iframe.remove();
+      } catch {
+        // silent
+      }
+    };
+
+    iframe.onload = () => {
+      const win = iframe.contentWindow;
+      if (!win) {
+        cleanup();
+        toast({ title: "Error", description: "No se pudo iniciar la impresión", variant: "error" });
+        return;
+      }
+
+      win.focus();
+      setTimeout(() => {
+        try {
+          win.print();
+        } finally {
+          setTimeout(cleanup, 1000);
+        }
+      }, 250);
+    };
+
+    // srcdoc evita popups bloqueados
+    iframe.srcdoc = html;
+    document.body.appendChild(iframe);
+  };
 
   const openEdit = (client: ClientItem) => {
     setDrawerMode("edit");
@@ -624,6 +823,16 @@ export default function ClientesPage() {
                 >
                   <Pencil className="h-4 w-4" />
                   Editar
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  className="justify-start"
+                  disabled={!overview || overviewLoading}
+                  onClick={exportClientPdf}
+                >
+                  <Mail className="h-4 w-4" />
+                  Exportar PDF
                 </Button>
               </div>
 
