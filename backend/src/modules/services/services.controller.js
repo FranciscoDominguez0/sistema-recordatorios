@@ -25,12 +25,13 @@ class ServicesController {
       });
 
       try {
+        const actor = req.user?.role === "admin" ? "Administrador" : "Usuario";
         await activityLogsService.logActivity({
           user_id: req.user?.id ?? null,
           action: "CREATE_SERVICE",
           entity_type: "service",
           entity_id: service.id,
-          description: "Usuario creó un nuevo servicio",
+          description: `${actor} creó un nuevo servicio`,
           ip_address: req.ip
         });
       } catch (error) {
@@ -118,12 +119,13 @@ class ServicesController {
       }
 
       try {
+        const actor = req.user?.role === "admin" ? "Administrador" : "Usuario";
         await activityLogsService.logActivity({
           user_id: req.user?.id ?? null,
           action: "UPDATE_SERVICE",
           entity_type: "service",
           entity_id: id,
-          description: "Usuario actualizó un servicio",
+          description: `${actor} actualizó un servicio`,
           ip_address: req.ip
         });
       } catch (error) {
@@ -147,12 +149,13 @@ class ServicesController {
       }
 
       try {
+        const actor = req.user?.role === "admin" ? "Administrador" : "Usuario";
         await activityLogsService.logActivity({
           user_id: req.user?.id ?? null,
           action: "DELETE_SERVICE",
           entity_type: "service",
           entity_id: id,
-          description: "Usuario eliminó un servicio",
+          description: `${actor} eliminó un servicio`,
           ip_address: req.ip
         });
       } catch (error) {
@@ -190,12 +193,13 @@ class ServicesController {
       }
 
       try {
+        const actor = req.user?.role === "admin" ? "Administrador" : "Usuario";
         await activityLogsService.logActivity({
           user_id: req.user?.id ?? null,
           action: "RENEW_SERVICE",
           entity_type: "service",
           entity_id: id,
-          description: `Servicio renovado hasta ${service.expiration_date}`,
+          description: `${actor} renovó el servicio hasta ${service.expiration_date}`,
           ip_address: req.ip
         });
       } catch (logErr) {

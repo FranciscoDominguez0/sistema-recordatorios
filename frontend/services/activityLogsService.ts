@@ -40,7 +40,7 @@ function authHeaders() {
 
 export async function getActivityLogs(params: {
   page?: number; limit?: number; user_id?: string; action?: string;
-  entity_type?: string; date_from?: string; date_to?: string;
+  entity_type?: string; entity_id?: number; date_from?: string; date_to?: string;
 } = {}): Promise<LogsResponse> {
   const res = await api.get<LogsResponse>("/activity-logs", {
     headers: authHeaders(),

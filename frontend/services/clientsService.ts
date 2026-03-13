@@ -9,6 +9,67 @@ export type ClientItem = {
   created_at?: string;
 };
 
+export type ClientServiceOverviewItem = {
+  id: number;
+  client_id: number;
+  service_name: string;
+  description: string | null;
+  start_date: string | null;
+  expiration_date: string;
+  reminder_days: number;
+  status: "activo" | "vencido" | "completado";
+  created_at: string;
+  days_to_expire: number | null;
+  last_reminder_sent_at: string | null;
+  reminders_sent_count: number;
+  emails_sent_count: number;
+  emails_failed_count: number;
+  last_email_sent_at: string | null;
+};
+
+export type ClientEmailLogItem = {
+  id: number;
+  client_id: number | null;
+  service_id: number | null;
+  email: string;
+  subject: string | null;
+  status: "sent" | "failed";
+  error_message: string | null;
+  sent_at: string;
+};
+
+export type ClientNotificationItem = {
+  id: number;
+  user_id: number | null;
+  client_id: number | null;
+  service_id: number | null;
+  task_id: number | null;
+  type: string;
+  title: string;
+  message: string | null;
+  is_read: 0 | 1 | boolean;
+  created_at: string;
+  recipients_count?: number;
+};
+
+export type ClientOverviewResponse = {
+  client: ClientItem;
+  services: ClientServiceOverviewItem[];
+  email_logs: ClientEmailLogItem[];
+  notifications: ClientNotificationItem[];
+  activity_logs: {
+    id: number;
+    user_id: number | null;
+    user: string | null;
+    action: string;
+    entity_type: string | null;
+    entity_id: number | null;
+    description: string | null;
+    ip_address: string | null;
+    created_at: string;
+  }[];
+};
+
 export type PaginationInfo = {
   page: number;
   limit: number;
@@ -112,4 +173,17 @@ export async function deleteClient(id: number): Promise<void> {
       const message = error?.response?.data?.message || error?.message || "No se pudo eliminar cliente";
       throw new Error(message);
     });
+}
+
+export async function getClientOverview(id: number): Promise<ClientOverviewResponse> {
+  const response = await api
+    .get<ClientOverviewResponse>(`/clients/${id}/overview`, {
+      headers: authHeaders()
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo cargar detalle del cliente";
+      throw new Error(message);
+    });
+
+  return response.data;
 }

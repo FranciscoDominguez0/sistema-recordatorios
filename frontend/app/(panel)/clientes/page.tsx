@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { BriefcaseBusiness, CheckCircle2, Loader2, Pencil, Plus, Trash2, XCircle } from "lucide-react";
+import { BriefcaseBusiness, CheckCircle2, Loader2, Mail, Pencil, Phone, Plus, Trash2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +14,10 @@ import { cn } from "@/lib/utils";
 import {
   createClient,
   deleteClient,
+  getClientOverview,
   getClientsPaginated,
   updateClient,
+  type ClientOverviewResponse,
   type ClientItem
 } from "@/services/clientsService";
 
@@ -62,6 +64,12 @@ export default function ClientesPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingClient, setDeletingClient] = useState<ClientItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickClient, setQuickClient] = useState<ClientItem | null>(null);
+  const [overviewLoading, setOverviewLoading] = useState(false);
+  const [overviewError, setOverviewError] = useState<string | null>(null);
+  const [overview, setOverview] = useState<ClientOverviewResponse | null>(null);
 
   const fetchClients = async ({ nextSearch, nextPage }: { nextSearch?: string; nextPage?: number } = {}) => {
     setLoading(true);
@@ -111,6 +119,30 @@ export default function ClientesPage() {
     setFormError(null);
     setDrawerOpen(true);
   };
+
+  const openQuick = (client: ClientItem) => {
+    setQuickClient(client);
+    setQuickOpen(true);
+  };
+
+  useEffect(() => {
+    const loadOverview = async () => {
+      if (!quickOpen || !quickClient) return;
+      setOverviewLoading(true);
+      setOverviewError(null);
+      try {
+        const res = await getClientOverview(quickClient.id);
+        setOverview(res);
+      } catch (e: unknown) {
+        setOverviewError(e instanceof Error ? e.message : "No se pudo cargar detalle del cliente");
+        setOverview(null);
+      } finally {
+        setOverviewLoading(false);
+      }
+    };
+
+    loadOverview();
+  }, [quickOpen, quickClient]);
 
   const openEdit = (client: ClientItem) => {
     setDrawerMode("edit");
@@ -299,9 +331,10 @@ export default function ClientesPage() {
                       <tr
                         key={c.id}
                         className={cn(
-                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
+                          "group cursor-pointer transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
                           idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
                         )}
+                        onClick={() => openQuick(c)}
                       >
                         <td className="px-4 py-3">
                           <p className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</p>
@@ -318,7 +351,10 @@ export default function ClientesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => openEdit(c)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEdit(c);
+                              }}
                               aria-label="Editar"
                               className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
                             >
@@ -327,7 +363,10 @@ export default function ClientesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => onDelete(c)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(c);
+                              }}
                               aria-label="Eliminar"
                               className="rounded-xl border border-transparent text-red-600 hover:bg-red-500/10 dark:text-red-200"
                             >
@@ -486,6 +525,197 @@ export default function ClientesPage() {
                 </Button>
               </div>
             </form>
+          </aside>
+        </div>
+      </div>
+
+      <div className={cn("fixed inset-0 z-40", quickOpen ? "" : "pointer-events-none")}>
+        <div
+          className={cn(
+            "absolute inset-0 bg-black/50 transition-opacity",
+            quickOpen ? "opacity-100" : "opacity-0"
+          )}
+          onClick={() => setQuickOpen(false)}
+        />
+
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center p-4 transition-opacity",
+            quickOpen ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <aside
+            className={cn(
+              "relative z-50 flex w-full max-w-[640px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              quickOpen ? "scale-100" : "scale-95"
+            )}
+            role="dialog"
+            aria-modal="true"
+            aria-label={quickClient ? `Acciones rápidas: ${quickClient.name}` : "Acciones rápidas"}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+              <div>
+                <p className="text-sm font-semibold">{quickClient?.name ?? "Cliente"}</p>
+                <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                  {quickClient?.email ?? ""}
+                </p>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setQuickOpen(false)}
+                className="rounded-xl"
+              >
+                <XCircle className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="max-h-[calc(100dvh-12rem)] flex-1 overflow-auto p-5">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button
+                  variant="secondary"
+                  className="justify-start"
+                  disabled={!quickClient?.phone}
+                  onClick={() => {
+                    if (!quickClient?.phone) return;
+                    window.open(`tel:${quickClient.phone}`, "_self");
+                  }}
+                >
+                  <Phone className="h-4 w-4" />
+                  Llamar
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  className="justify-start"
+                  disabled={!quickClient?.phone}
+                  onClick={() => {
+                    if (!quickClient?.phone) return;
+                    const phone = String(quickClient.phone).replace(/\D/g, "");
+                    window.open(`https://wa.me/${phone}`, "_blank", "noopener,noreferrer");
+                  }}
+                >
+                  <Phone className="h-4 w-4" />
+                  WhatsApp
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  className="justify-start"
+                  disabled={!quickClient?.email}
+                  onClick={() => {
+                    if (!quickClient?.email) return;
+                    window.open(`mailto:${quickClient.email}`, "_self");
+                  }}
+                >
+                  <Mail className="h-4 w-4" />
+                  Email
+                </Button>
+
+                <Button
+                  className="justify-start"
+                  onClick={() => {
+                    if (!quickClient) return;
+                    setQuickOpen(false);
+                    openEdit(quickClient);
+                  }}
+                >
+                  <Pencil className="h-4 w-4" />
+                  Editar
+                </Button>
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                <p className="text-sm font-semibold">Resumen</p>
+
+                {overviewLoading ? (
+                  <div className="mt-3 flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Cargando información...
+                  </div>
+                ) : overviewError ? (
+                  <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+                    {overviewError}
+                  </div>
+                ) : !overview ? (
+                  <div className="mt-3 text-sm text-[#64748B] dark:text-[#94A3B8]">Sin datos.</div>
+                ) : (
+                  <div className="mt-3 space-y-4">
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[#64748B] dark:text-[#94A3B8]">Servicios</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{overview.services.length}</p>
+                      </div>
+                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[#64748B] dark:text-[#94A3B8]">Notificaciones</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{overview.notifications.length}</p>
+                      </div>
+                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[#64748B] dark:text-[#94A3B8]">Emails</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{overview.email_logs.length}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold">Servicios</p>
+                      {overview.services.length === 0 ? (
+                        <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">Sin servicios.</p>
+                      ) : (
+                        <div className="mt-2 space-y-2">
+                          {overview.services.slice(0, 6).map((svc) => (
+                            <div key={svc.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
+                              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-xs font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{svc.service_name}</p>
+                                <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                  Vence: {String(svc.expiration_date)}
+                                  {typeof svc.days_to_expire === "number" ? ` · ${svc.days_to_expire} día(s)` : ""}
+                                </p>
+                              </div>
+                              <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
+                                Recordatorios: {svc.reminders_sent_count} · Emails OK: {svc.emails_sent_count} · Emails fallidos: {svc.emails_failed_count}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold">Auditoría</p>
+                      {overview.activity_logs.length === 0 ? (
+                        <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">Sin registros.</p>
+                      ) : (
+                        <div className="mt-2 space-y-2">
+                          {overview.activity_logs.slice(0, 6).map((log) => (
+                            <div key={log.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
+                              <p className="text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">{log.action}</p>
+                              <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{log.description ?? "—"}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  variant="secondary"
+                  className="border border-red-500/30 bg-red-500/10 text-red-700 hover:bg-red-500/15 dark:text-red-200"
+                  onClick={() => {
+                    if (!quickClient) return;
+                    setQuickOpen(false);
+                    onDelete(quickClient);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Eliminar
+                </Button>
+              </div>
+            </div>
           </aside>
         </div>
       </div>

@@ -32,6 +32,7 @@ class ActivityLogsService {
     user_id,
     action,
     entity_type,
+    entity_id,
     date_from,
     date_to
   } = {}) {
@@ -55,6 +56,11 @@ class ActivityLogsService {
     if (entity_type) {
       conditions.push("al.entity_type = ?");
       params.push(String(entity_type));
+    }
+
+    if (entity_id) {
+      conditions.push("al.entity_id = ?");
+      params.push(Number(entity_id));
     }
 
     if (date_from) {

@@ -1,6 +1,3 @@
-CREATE DATABASE reminder_app;
-USE reminder_app;
-
 -- =============================
 -- USERS
 -- =============================

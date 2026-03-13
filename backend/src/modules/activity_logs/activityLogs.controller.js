@@ -3,13 +3,14 @@ import activityLogsService from "./activityLogs.service.js";
 class ActivityLogsController {
   async getLogs(req, res) {
     try {
-      const { page, limit, user_id, action, entity_type, date_from, date_to } = req.query ?? {};
+      const { page, limit, user_id, action, entity_type, entity_id, date_from, date_to } = req.query ?? {};
       const result = await activityLogsService.getLogs({
         page,
         limit,
         user_id,
         action,
         entity_type,
+        entity_id,
         date_from,
         date_to
       });
