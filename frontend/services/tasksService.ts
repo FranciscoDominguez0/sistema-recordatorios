@@ -59,6 +59,16 @@ export async function completeTask(id: number): Promise<TaskItem> {
   return response.data;
 }
 
+export async function setTaskPending(id: number): Promise<TaskItem> {
+  const response = await api
+    .put<TaskItem>(`/tasks/${id}/pending`, {}, { headers: authHeaders() })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo deshacer la tarea";
+      throw new Error(message);
+    });
+  return response.data;
+}
+
 export async function deleteTask(id: number): Promise<void> {
   await api
     .delete(`/tasks/${id}`, { headers: authHeaders() })

@@ -75,6 +75,22 @@ class TasksController {
     }
   }
 
+  async pending(req, res) {
+    try {
+      const id = Number(req.params.id);
+      const updated = await tasksService.setPending(id);
+
+      if (!updated) {
+        return res.status(404).json({ message: "Tarea no encontrada" });
+      }
+
+      const task = await tasksService.getById(id);
+      return res.json(task);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
   async delete(req, res) {
     try {
       const id = Number(req.params.id);

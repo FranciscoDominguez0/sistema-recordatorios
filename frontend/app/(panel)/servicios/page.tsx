@@ -280,7 +280,42 @@ export default function ServiciosPage() {
         if (!Number.isFinite(serviceId)) {
           throw new Error("ID de servicio inválido");
         }
+
+        const prevStatus = ((editingService.status as ServiceStatus) ?? "activo") as ServiceStatus;
         await updateService(serviceId, payload);
+
+        if (prevStatus !== "completado" && payload.status === "completado") {
+          toast({
+            title: "Servicio marcado como completado",
+            variant: "success",
+            durationMs: 10000,
+            actionLabel: "Deshacer",
+            onAction: async () => {
+              try {
+                await updateService(serviceId, {
+                  client_id: payload.client_id,
+                  service_name: payload.service_name,
+                  description: payload.description,
+                  start_date: payload.start_date,
+                  expiration_date: payload.expiration_date,
+                  reminder_days: payload.reminder_days,
+                  status: prevStatus
+                });
+                toast({ title: "Cambio deshecho", variant: "success" });
+                await fetchServices({ nextPage: page });
+              } catch (e: unknown) {
+                const msg = e instanceof Error ? e.message : "No se pudo deshacer";
+                toast({ title: "Error", description: msg, variant: "error" });
+              }
+            }
+          });
+
+          // Evitar mostrar el toast genérico "Servicio actualizado" al mismo tiempo.
+          window.dispatchEvent(new Event("notifications:refresh"));
+          setDrawerOpen(false);
+          await fetchServices({ nextPage: page });
+          return;
+        }
       }
 
       toast({

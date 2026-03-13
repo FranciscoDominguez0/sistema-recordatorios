@@ -10,6 +10,8 @@ export type ToastInput = {
   description?: string;
   variant?: ToastVariant;
   durationMs?: number;
+  actionLabel?: string;
+  onAction?: () => void;
 };
 
 type ToastItem = {
@@ -17,6 +19,9 @@ type ToastItem = {
   title: string;
   description?: string;
   variant: ToastVariant;
+  durationMs: number;
+  actionLabel?: string;
+  onAction?: () => void;
 };
 
 type ToastContextValue = {
@@ -77,7 +82,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const durationMs = input.durationMs ?? 4000;
     setItems((prev) => [
-      { id, title: input.title, description: input.description, variant: input.variant ?? "info" },
+      {
+        id,
+        title: input.title,
+        description: input.description,
+        variant: input.variant ?? "info",
+        durationMs,
+        actionLabel: input.actionLabel,
+        onAction: input.onAction
+      },
       ...prev
     ].slice(0, 4));
     timers.current[id] = window.setTimeout(() => remove(id), durationMs);
@@ -153,11 +166,29 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
               </button>
             </div>
 
+            {t.actionLabel && t.onAction ? (
+              <div className="pointer-events-auto flex justify-end px-5 pb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      t.onAction?.();
+                    } finally {
+                      onDismiss(t.id);
+                    }
+                  }}
+                  className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#0B1424]"
+                >
+                  {t.actionLabel}
+                </button>
+              </div>
+            ) : null}
+
             {/* Barra de progreso */}
             <div className="h-0.5 w-full opacity-40" style={{ background: cfg.bar }}>
               <div
                 className="h-full animate-[shrink_4s_linear_forwards] rounded-full"
-                style={{ background: cfg.bar, transformOrigin: "left" }}
+                style={{ background: cfg.bar, transformOrigin: "left", animationDuration: `${t.durationMs}ms` }}
               />
             </div>
           </div>

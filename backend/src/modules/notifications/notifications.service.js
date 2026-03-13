@@ -2,11 +2,21 @@ import pool from "../../config/database.js";
 
 class NotificationsService {
   /** Crear una notificación para un usuario (o broadcast a todos los admins si user_id es null) */
-  async create({ user_id, client_id, service_id, task_id, type, title, message }) {
+  async create({ user_id, client_id, service_id, task_id, type, title, message, event_key }) {
     const [result] = await pool.query(
-      `INSERT INTO notifications (user_id, client_id, service_id, task_id, type, title, message)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [user_id ?? null, client_id ?? null, service_id ?? null, task_id ?? null, type, title, message ?? null]
+      `INSERT INTO notifications (user_id, client_id, service_id, task_id, type, title, message, event_key)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE id = id`,
+      [
+        user_id ?? null,
+        client_id ?? null,
+        service_id ?? null,
+        task_id ?? null,
+        type,
+        title,
+        message ?? null,
+        event_key ?? null
+      ]
     );
     return result.insertId;
   }
@@ -14,8 +24,11 @@ class NotificationsService {
   /** Crear notificación para CADA admin */
   async broadcastToAdmins({ client_id, service_id, task_id, type, title, message }) {
     const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+    const day = new Date().toISOString().slice(0, 10);
+    const rawKey = `${type}|${client_id ?? ""}|${service_id ?? ""}|${task_id ?? ""}|${title ?? ""}|${message ?? ""}|${day}`;
+    const event_key = rawKey.length > 255 ? rawKey.slice(0, 255) : rawKey;
     for (const admin of admins) {
-      await this.create({ user_id: admin.id, client_id, service_id, task_id, type, title, message });
+      await this.create({ user_id: admin.id, client_id, service_id, task_id, type, title, message, event_key });
     }
   }
 

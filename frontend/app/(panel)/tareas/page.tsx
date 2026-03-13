@@ -26,6 +26,7 @@ import {
   createTask,
   deleteTask,
   getAllTasks,
+  setTaskPending,
   type TaskItem
 } from "@/services/tasksService";
 
@@ -135,8 +136,32 @@ export default function TareasPage() {
     setCompletingId(task.id);
     try {
       await completeTask(task.id);
-      toast({ title: "Tarea completada", variant: "success" });
+      let undone = false;
+      toast({
+        title: "Marcada como completada",
+        description: "Puedes deshacer durante 10 segundos",
+        variant: "info",
+        durationMs: 10000,
+        actionLabel: "Deshacer",
+        onAction: async () => {
+          undone = true;
+          try {
+            await setTaskPending(task.id);
+            toast({ title: "Tarea restaurada", variant: "success" });
+            await fetchTasks();
+          } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : "No se pudo deshacer";
+            toast({ title: "Error", description: msg, variant: "error" });
+          }
+        }
+      });
+
       await fetchTasks();
+
+      window.setTimeout(() => {
+        if (undone) return;
+        toast({ title: "Tarea completada", variant: "success" });
+      }, 10000);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo completar la tarea";
       toast({ title: "Error", description: msg, variant: "error" });

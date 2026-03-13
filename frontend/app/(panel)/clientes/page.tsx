@@ -72,6 +72,8 @@ export default function ClientesPage() {
   const [overviewError, setOverviewError] = useState<string | null>(null);
   const [overview, setOverview] = useState<ClientOverviewResponse | null>(null);
   const [companySettings, setCompanySettings] = useState<CompanySettings | null>(null);
+  const [servicesShown, setServicesShown] = useState(6);
+  const [logsShown, setLogsShown] = useState(6);
 
   const fetchClients = async ({ nextSearch, nextPage }: { nextSearch?: string; nextPage?: number } = {}) => {
     setLoading(true);
@@ -125,6 +127,8 @@ export default function ClientesPage() {
   const openQuick = (client: ClientItem) => {
     setQuickClient(client);
     setQuickOpen(true);
+    setServicesShown(6);
+    setLogsShown(6);
   };
 
   useEffect(() => {
@@ -135,6 +139,8 @@ export default function ClientesPage() {
       try {
         const res = await getClientOverview(quickClient.id);
         setOverview(res);
+        setServicesShown(6);
+        setLogsShown(6);
       } catch (e: unknown) {
         setOverviewError(e instanceof Error ? e.message : "No se pudo cargar detalle del cliente");
         setOverview(null);
@@ -145,6 +151,32 @@ export default function ClientesPage() {
 
     loadOverview();
   }, [quickOpen, quickClient]);
+
+  const normalizedOverview = useMemo(() => {
+    if (!overview) return null;
+
+    const dedupBy = <T,>(items: T[], keyFn: (t: T) => string) => {
+      const map = new Map<string, T>();
+      for (const it of items) {
+        const k = keyFn(it);
+        if (!map.has(k)) map.set(k, it);
+      }
+      return Array.from(map.values());
+    };
+
+    const services = dedupBy(overview.services ?? [], (s) => `svc:${(s as any).id}`);
+    const activity_logs = dedupBy(overview.activity_logs ?? [], (l) => {
+      const anyL = l as any;
+      return `log:${anyL.id ?? ""}:${anyL.action ?? ""}:${anyL.entity_type ?? ""}:${anyL.entity_id ?? ""}:${anyL.created_at ?? ""}`;
+    });
+    const notifications = dedupBy(overview.notifications ?? [], (n) => {
+      const anyN = n as any;
+      return `ntf:${anyN.type ?? ""}:${anyN.client_id ?? ""}:${anyN.service_id ?? ""}:${anyN.task_id ?? ""}:${anyN.title ?? ""}:${anyN.message ?? ""}:${anyN.created_at ?? ""}`;
+    });
+    const email_logs = dedupBy(overview.email_logs ?? [], (e) => `em:${(e as any).id}`);
+
+    return { ...overview, services, activity_logs, notifications, email_logs };
+  }, [overview]);
 
   useEffect(() => {
     if (!quickOpen) return;
@@ -855,25 +887,25 @@ export default function ClientesPage() {
                     <div className="grid gap-2 sm:grid-cols-3">
                       <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
                         <p className="text-[#64748B] dark:text-[#94A3B8]">Servicios</p>
-                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{overview.services.length}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{normalizedOverview?.services.length ?? overview.services.length}</p>
                       </div>
                       <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
                         <p className="text-[#64748B] dark:text-[#94A3B8]">Notificaciones</p>
-                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{overview.notifications.length}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{normalizedOverview?.notifications.length ?? overview.notifications.length}</p>
                       </div>
                       <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
                         <p className="text-[#64748B] dark:text-[#94A3B8]">Emails</p>
-                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{overview.email_logs.length}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{normalizedOverview?.email_logs.length ?? overview.email_logs.length}</p>
                       </div>
                     </div>
 
                     <div>
                       <p className="text-sm font-semibold">Servicios</p>
-                      {overview.services.length === 0 ? (
+                      {(normalizedOverview?.services ?? overview.services).length === 0 ? (
                         <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">Sin servicios.</p>
                       ) : (
                         <div className="mt-2 space-y-2">
-                          {overview.services.slice(0, 6).map((svc) => (
+                          {(normalizedOverview?.services ?? overview.services).slice(0, servicesShown).map((svc) => (
                             <div key={svc.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
                               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-xs font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{svc.service_name}</p>
@@ -887,22 +919,44 @@ export default function ClientesPage() {
                               </p>
                             </div>
                           ))}
+
+                          {(normalizedOverview?.services ?? overview.services).length > servicesShown ? (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setServicesShown((p) => p + 6)}
+                            >
+                              Ver más servicios
+                            </Button>
+                          ) : null}
                         </div>
                       )}
                     </div>
 
                     <div>
                       <p className="text-sm font-semibold">Auditoría</p>
-                      {overview.activity_logs.length === 0 ? (
+                      {(normalizedOverview?.activity_logs ?? overview.activity_logs).length === 0 ? (
                         <p className="mt-2 text-sm text-[#64748B] dark:text-[#94A3B8]">Sin registros.</p>
                       ) : (
                         <div className="mt-2 space-y-2">
-                          {overview.activity_logs.slice(0, 6).map((log) => (
+                          {(normalizedOverview?.activity_logs ?? overview.activity_logs).slice(0, logsShown).map((log) => (
                             <div key={log.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
                               <p className="text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">{log.action}</p>
                               <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{log.description ?? "—"}</p>
                             </div>
                           ))}
+
+                          {(normalizedOverview?.activity_logs ?? overview.activity_logs).length > logsShown ? (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setLogsShown((p) => p + 10)}
+                            >
+                              Ver más registros
+                            </Button>
+                          ) : null}
                         </div>
                       )}
                     </div>

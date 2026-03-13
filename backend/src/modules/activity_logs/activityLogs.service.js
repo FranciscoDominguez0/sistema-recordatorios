@@ -6,12 +6,14 @@ class ActivityLogsService {
     action,
     entity_type,
     entity_id,
+    event_key,
     description,
     ip_address
   }) {
     const sql = `
-      INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description, ip_address)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO activity_logs (user_id, action, entity_type, entity_id, event_key, description, ip_address)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE id = id
     `;
 
     const [result] = await pool.query(sql, [
@@ -19,6 +21,7 @@ class ActivityLogsService {
       action,
       entity_type ?? null,
       entity_id ?? null,
+      event_key ?? null,
       description ?? null,
       ip_address ?? null
     ]);

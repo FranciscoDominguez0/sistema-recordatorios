@@ -60,6 +60,16 @@ class TasksService {
     return result.affectedRows > 0;
   }
 
+  async setPending(id) {
+    const sql = `
+      UPDATE internal_tasks
+      SET status = 'pending'
+      WHERE id = ?
+    `;
+    const [result] = await pool.query(sql, [id]);
+    return result.affectedRows > 0;
+  }
+
   async delete(id) {
     const sql = `DELETE FROM internal_tasks WHERE id = ?`;
     const [result] = await pool.query(sql, [id]);

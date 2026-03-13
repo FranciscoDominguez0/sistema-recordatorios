@@ -151,6 +151,7 @@ CREATE TABLE activity_logs (
     action VARCHAR(100) NOT NULL,
     entity_type VARCHAR(50),
     entity_id INT,
+    event_key VARCHAR(255) DEFAULT NULL,
     description TEXT,
     ip_address VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -159,7 +160,8 @@ CREATE TABLE activity_logs (
 
     INDEX idx_logs_user (user_id),
     INDEX idx_logs_entity (entity_type, entity_id),
-    INDEX idx_logs_created (created_at)
+    INDEX idx_logs_created (created_at),
+    UNIQUE KEY uniq_activity_event (user_id, event_key)
 );
 
 CREATE TABLE email_templates (
@@ -195,6 +197,8 @@ CREATE TABLE notifications (
     title VARCHAR(200) NOT NULL,
     message TEXT,
 
+    event_key VARCHAR(255) DEFAULT NULL,
+
     is_read BOOLEAN DEFAULT FALSE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -208,7 +212,8 @@ CREATE TABLE notifications (
     INDEX idx_notifications_service (service_id),
     INDEX idx_notifications_task (task_id),
     INDEX idx_notifications_read (is_read),
-    INDEX idx_notifications_created (created_at)
+    INDEX idx_notifications_created (created_at),
+    UNIQUE KEY uniq_notification_event (user_id, event_key)
 );
 
 -- =============================
