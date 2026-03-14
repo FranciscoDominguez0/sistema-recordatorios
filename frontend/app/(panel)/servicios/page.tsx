@@ -63,7 +63,7 @@ function formatDate(value?: string | null) {
   if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString();
+  return d.toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "2-digit", timeZone: "UTC" });
 }
 
 function toDateInputValue(value?: string | null) {
@@ -914,15 +914,33 @@ export default function ServiciosPage() {
             aria-label={detailService ? `Detalle servicio: ${detailService.service_name}` : "Detalle servicio"}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{detailService?.service_name ?? "Servicio"}</p>
-                <p className="mt-1 truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{detailService?.client_name ?? "Cliente"}</p>
-              </div>
+            <div className="border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold">{detailService?.service_name ?? "Servicio"}</p>
+                  <p className="mt-1 truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{detailService?.client_name ?? "Cliente"}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                      Servicio #{detailService?.id ?? "-"}
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                      Cliente #{detailService?.client_id ?? "-"}
+                    </span>
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                        statusClasses((detailService?.status ?? "activo") as ServiceStatus)
+                      )}
+                    >
+                      {statusLabel((detailService?.status ?? "activo") as ServiceStatus)}
+                    </span>
+                  </div>
+                </div>
 
-              <Button variant="ghost" size="icon" onClick={closeDetail} className="rounded-xl">
-                <XCircle className="h-4 w-4" />
-              </Button>
+                <Button variant="ghost" size="icon" onClick={closeDetail} className="rounded-xl">
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             <div className="max-h-[calc(100dvh-12rem)] flex-1 overflow-auto p-5">
@@ -939,26 +957,25 @@ export default function ServiciosPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Vence</p>
-                      <p className="mt-1 text-sm font-semibold">{formatDate(detailService.expiration_date)}</p>
-                    </div>
-                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Estado</p>
-                      <p className="mt-1">
-                        <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold", statusClasses((detailService.status ?? "activo") as ServiceStatus))}>
-                          {statusLabel((detailService.status ?? "activo") as ServiceStatus)}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Recordar con</p>
-                      <p className="mt-1 text-sm font-semibold">{Number(detailService.reminder_days ?? 5)} día(s)</p>
-                    </div>
-                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Inicio</p>
-                      <p className="mt-1 text-sm font-semibold">{detailService.start_date ? formatDate(detailService.start_date) : "-"}</p>
+                  <div className="rounded-3xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                    <p className="text-sm font-semibold">Resumen</p>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Vence</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{formatDate(detailService.expiration_date)}</p>
+                      </div>
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Recordatorio</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{Number(detailService.reminder_days ?? 5)} día(s) antes</p>
+                      </div>
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Inicio</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.start_date ? formatDate(detailService.start_date) : "-"}</p>
+                      </div>
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Creado</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.created_at ? formatDate(detailService.created_at) : "-"}</p>
+                      </div>
                     </div>
                   </div>
 

@@ -181,12 +181,21 @@ class ServicesController {
       // Notify admins of the renewal
       try {
         const notificationsService = (await import("../notifications/notifications.service.js")).default;
+        const prettyDate = (() => {
+          try {
+            const d = service?.expiration_date instanceof Date ? service.expiration_date : new Date(service?.expiration_date);
+            if (Number.isNaN(d.getTime())) return String(service?.expiration_date ?? "");
+            return d.toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "2-digit", timeZone: "UTC" });
+          } catch {
+            return String(service?.expiration_date ?? "");
+          }
+        })();
         await notificationsService.broadcastToAdmins({
           service_id: id,
           client_id: service.client_id ?? null,
           type: "service_expiring",
           title: `Servicio renovado: ${service.service_name}`,
-          message: `Nueva fecha de vencimiento: ${service.expiration_date}`
+          message: `Vence: ${prettyDate}`
         });
       } catch (notifErr) {
         console.error("Notification error:", notifErr.message);
@@ -194,12 +203,21 @@ class ServicesController {
 
       try {
         const actor = req.user?.role === "admin" ? "Administrador" : "Usuario";
+        const prettyDate = (() => {
+          try {
+            const d = service?.expiration_date instanceof Date ? service.expiration_date : new Date(service?.expiration_date);
+            if (Number.isNaN(d.getTime())) return String(service?.expiration_date ?? "");
+            return d.toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "2-digit", timeZone: "UTC" });
+          } catch {
+            return String(service?.expiration_date ?? "");
+          }
+        })();
         await activityLogsService.logActivity({
           user_id: req.user?.id ?? null,
           action: "RENEW_SERVICE",
           entity_type: "service",
           entity_id: id,
-          description: `${actor} renovó el servicio hasta ${service.expiration_date}`,
+          description: `${actor} renovó el servicio hasta ${prettyDate}`,
           ip_address: req.ip
         });
       } catch (logErr) {

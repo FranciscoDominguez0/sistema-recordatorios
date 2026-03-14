@@ -38,6 +38,28 @@ const initialForm: FormState = {
   notes: ""
 };
 
+function formatUiDate(value?: string | null) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "2-digit", timeZone: "UTC" });
+}
+
+function formatUiDateTime(value?: string | null) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleString("es-PA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC"
+  });
+}
+
 export default function ClientesPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -920,7 +942,7 @@ export default function ClientesPage() {
                               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-xs font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{svc.service_name}</p>
                                 <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
-                                  Vence: {String(svc.expiration_date)}
+                                  Vence: {formatUiDate(String(svc.expiration_date))}
                                   {typeof svc.days_to_expire === "number" ? ` · ${svc.days_to_expire} día(s)` : ""}
                                 </p>
                               </div>
@@ -954,6 +976,9 @@ export default function ClientesPage() {
                             <div key={log.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
                               <p className="text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">{log.action}</p>
                               <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{log.description ?? "—"}</p>
+                              {(log as any)?.created_at ? (
+                                <p className="mt-1 text-[10px] text-[#94A3B8] dark:text-[#64748B]">{formatUiDateTime(String((log as any).created_at))}</p>
+                              ) : null}
                             </div>
                           ))}
 
