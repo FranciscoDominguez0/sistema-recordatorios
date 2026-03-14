@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   BellRing,
@@ -65,6 +66,7 @@ export default function NotificationsPanel({
   isDark?: boolean;
   onUnreadCountChange?: (count: number) => void;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -112,6 +114,19 @@ export default function NotificationsPanel({
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudieron limpiar las notificaciones");
       await load().catch(() => {});
+    }
+  };
+
+  const handleOpenItem = async (n: NotificationItem) => {
+    if (!n) return;
+    if (!n.is_read) {
+      await handleMarkRead(n.id).catch(() => {});
+    }
+
+    if ((n.type === "service_expiring" || n.type === "service_expired") && n.service_id) {
+      router.push(`/servicios?open=${n.service_id}`);
+      onClose();
+      return;
     }
   };
 
@@ -199,6 +214,14 @@ export default function NotificationsPanel({
                       ? "border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]"
                       : "border-[#3B82F6]/20 bg-[#3B82F6]/5 dark:border-[#3B82F6]/30 dark:bg-[#3B82F6]/10"
                   )}
+                  role={(n.type === "service_expiring" || n.type === "service_expired") && n.service_id ? "button" : undefined}
+                  tabIndex={(n.type === "service_expiring" || n.type === "service_expired") && n.service_id ? 0 : undefined}
+                  onClick={() => handleOpenItem(n)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
+                    handleOpenItem(n);
+                  }}
                 >
                   {/* Dot indicador */}
                   {!n.is_read && (
@@ -230,7 +253,10 @@ export default function NotificationsPanel({
                     {!n.is_read && (
                       <button
                         type="button"
-                        onClick={() => handleMarkRead(n.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkRead(n.id);
+                        }}
                         className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-[#3B82F6] hover:bg-[#3B82F6]/10 dark:border-[#1F2A44] dark:bg-[#111E35]"
                         title="Marcar como leída"
                       >
@@ -239,7 +265,10 @@ export default function NotificationsPanel({
                     )}
                     <button
                       type="button"
-                      onClick={() => handleDelete(n.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(n.id);
+                      }}
                       className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-red-500 hover:bg-red-500/10 dark:border-[#1F2A44] dark:bg-[#111E35]"
                       title="Eliminar"
                     >

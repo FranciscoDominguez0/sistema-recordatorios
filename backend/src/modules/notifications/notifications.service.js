@@ -32,6 +32,17 @@ class NotificationsService {
     }
   }
 
+  /** Crear notificación para CADA agente (admins + staff activos) */
+  async broadcastToAgents({ client_id, service_id, task_id, type, title, message }) {
+    const [agents] = await pool.query("SELECT id FROM users WHERE is_active = 1");
+    const day = new Date().toISOString().slice(0, 10);
+    const rawKey = `${type}|${client_id ?? ""}|${service_id ?? ""}|${task_id ?? ""}|${title ?? ""}|${message ?? ""}|${day}`;
+    const event_key = rawKey.length > 255 ? rawKey.slice(0, 255) : rawKey;
+    for (const user of agents) {
+      await this.create({ user_id: user.id, client_id, service_id, task_id, type, title, message, event_key });
+    }
+  }
+
   /** Listar notificaciones del usuario autenticado (más recientes primero) */
   async getForUser(userId, { limit = 30 } = {}) {
     const [rows] = await pool.query(

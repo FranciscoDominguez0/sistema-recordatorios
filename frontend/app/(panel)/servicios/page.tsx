@@ -27,6 +27,7 @@ import { getClientsPaginated, type ClientItem } from "@/services/clientsService"
 import {
   createService,
   deleteService,
+  getServiceById,
   getServicesPaginated,
   renewService,
   updateService,
@@ -132,6 +133,11 @@ export default function ServiciosPage() {
   const [renewing, setRenewing] = useState(false);
   const [renewError, setRenewError] = useState<string | null>(null);
 
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailService, setDetailService] = useState<ServiceItem | null>(null);
+
   const [clientQuery, setClientQuery] = useState("");
   const [clientLoading, setClientLoading] = useState(false);
   const [clientOptions, setClientOptions] = useState<ClientItem[]>([]);
@@ -194,6 +200,28 @@ export default function ServiciosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  useEffect(() => {
+    const raw = (searchParams?.get("open") ?? "").toString();
+    const id = Number(raw);
+    if (!raw || !Number.isFinite(id) || id <= 0) return;
+
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailError(null);
+    getServiceById(id)
+      .then((svc) => {
+        setDetailService(svc);
+      })
+      .catch((e: unknown) => {
+        setDetailService(null);
+        setDetailError(e instanceof Error ? e.message : "No se pudo cargar el servicio");
+      })
+      .finally(() => {
+        setDetailLoading(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const applyStatusToUrl = (value: ServiceStatus | "all") => {
     const params = new URLSearchParams(searchParams?.toString() ?? "");
     if (value === "all") params.delete("status");
@@ -222,6 +250,46 @@ export default function ServiciosPage() {
     setFormError(null);
     setDrawerOpen(true);
   };
+
+  const openDetail = (service: ServiceItem) => {
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailError(null);
+    setDetailService(service);
+    getServiceById(service.id)
+      .then((svc) => {
+        setDetailService(svc);
+      })
+      .catch((e: unknown) => {
+        setDetailError(e instanceof Error ? e.message : "No se pudo cargar el servicio");
+      })
+      .finally(() => {
+        setDetailLoading(false);
+      });
+  };
+
+  const closeDetail = () => {
+    setDetailOpen(false);
+    setDetailError(null);
+    setDetailLoading(false);
+    setDetailService(null);
+
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (params.has("open")) {
+      params.delete("open");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : `${pathname}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!detailOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [detailOpen]);
 
   const openEdit = (service: ServiceItem) => {
     setDrawerMode("edit");
@@ -714,6 +782,7 @@ export default function ServiciosPage() {
                           "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
                           idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
                         )}
+                        onClick={() => openDetail(s)}
                       >
                         <td className="px-4 py-3">
                           <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{s.service_name}</p>
@@ -742,7 +811,10 @@ export default function ServiciosPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => openRenew(s)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openRenew(s);
+                              }}
                               aria-label="Renovar"
                               title="Renovar servicio"
                               className={cn(
@@ -757,7 +829,10 @@ export default function ServiciosPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => openEdit(s)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEdit(s);
+                              }}
                               aria-label="Editar"
                               className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
                             >
@@ -766,7 +841,10 @@ export default function ServiciosPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => onDelete(s)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(s);
+                              }}
                               aria-label="Eliminar"
                               className="rounded-xl border border-transparent text-red-600 hover:bg-red-500/10 dark:text-red-200"
                             >
@@ -810,6 +888,131 @@ export default function ServiciosPage() {
           )}
         </CardContent>
       </Card>
+
+      <div className={cn("fixed inset-0 z-40", detailOpen ? "" : "pointer-events-none")}>
+        <div
+          className={cn(
+            "fixed inset-0 h-[100dvh] w-[100vw] bg-black/50 transition-opacity",
+            detailOpen ? "opacity-100" : "opacity-0"
+          )}
+          onClick={closeDetail}
+        />
+
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center p-4 transition-opacity",
+            detailOpen ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <aside
+            className={cn(
+              "relative z-50 flex w-full max-w-[680px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              detailOpen ? "scale-100" : "scale-95"
+            )}
+            role="dialog"
+            aria-modal="true"
+            aria-label={detailService ? `Detalle servicio: ${detailService.service_name}` : "Detalle servicio"}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{detailService?.service_name ?? "Servicio"}</p>
+                <p className="mt-1 truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{detailService?.client_name ?? "Cliente"}</p>
+              </div>
+
+              <Button variant="ghost" size="icon" onClick={closeDetail} className="rounded-xl">
+                <XCircle className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="max-h-[calc(100dvh-12rem)] flex-1 overflow-auto p-5">
+              {detailLoading ? (
+                <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Cargando detalle...
+                </div>
+              ) : detailError ? (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{detailError}</div>
+              ) : !detailService ? (
+                <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-4 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+                  Sin información.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Vence</p>
+                      <p className="mt-1 text-sm font-semibold">{formatDate(detailService.expiration_date)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Estado</p>
+                      <p className="mt-1">
+                        <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold", statusClasses((detailService.status ?? "activo") as ServiceStatus))}>
+                          {statusLabel((detailService.status ?? "activo") as ServiceStatus)}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Recordar con</p>
+                      <p className="mt-1 text-sm font-semibold">{Number(detailService.reminder_days ?? 5)} día(s)</p>
+                    </div>
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Inicio</p>
+                      <p className="mt-1 text-sm font-semibold">{detailService.start_date ? formatDate(detailService.start_date) : "-"}</p>
+                    </div>
+                  </div>
+
+                  {detailService.description ? (
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                      <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Descripción</p>
+                      <p className="mt-2 text-sm leading-relaxed text-[#0F172A] dark:text-[#F1F5F9]">{detailService.description}</p>
+                    </div>
+                  ) : null}
+
+                  <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        if (!detailService) return;
+                        closeDetail();
+                        openRenew(detailService);
+                      }}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Renovar
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (!detailService) return;
+                        closeDetail();
+                        openEdit(detailService);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="border border-red-500/30 bg-red-500/10 text-red-700 hover:bg-red-500/15 dark:text-red-200"
+                      onClick={() => {
+                        if (!detailService) return;
+                        closeDetail();
+                        onDelete(detailService);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Eliminar
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
+      </div>
 
       <div className={cn("fixed inset-0 z-40", drawerOpen ? "" : "pointer-events-none")}>
         <div

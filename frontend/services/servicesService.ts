@@ -89,6 +89,19 @@ export async function getServicesPaginated({
   return response.data;
 }
 
+export async function getServiceById(id: number): Promise<ServiceItem> {
+  const response = await api
+    .get<ServiceItem>(`/services/${id}`, {
+      headers: authHeaders()
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo cargar el servicio";
+      throw new Error(message);
+    });
+
+  return response.data;
+}
+
 export async function createService(input: CreateServiceInput): Promise<ServiceItem> {
   const response = await api
     .post<ServiceItem>("/services", input, {

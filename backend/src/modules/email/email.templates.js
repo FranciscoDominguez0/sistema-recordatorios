@@ -332,6 +332,17 @@ export async function buildClientReminderEmail({ clientName, serviceName, expira
   });
 }
 
+/** Aviso al CLIENTE (último día) */
+export async function buildClientLastDayEmail({ clientName, serviceName, expirationDate }) {
+  const fecha = formatDate(expirationDate);
+  return renderEmail({
+    templateName:   "cliente_ultimo_dia",
+    vars:           { cliente: clientName, servicio: serviceName, fecha_vencimiento: fecha },
+    cardHtml:       buildClientServiceCard({ servicio: serviceName, fecha }),
+    defaultSubject: `Último día: tu servicio ${serviceName} vence hoy (${fecha})`
+  });
+}
+
 /** Aviso al ADMINISTRADOR (servicio por vencer) */
 export async function buildAdminReminderEmail({ adminName, clientName, serviceName, expirationDate }) {
   const fecha = formatDate(expirationDate);

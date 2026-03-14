@@ -20,6 +20,18 @@ Si tienes alguna pregunta, no dudes en contactarnos. Estamos a tu disposición.
 Gracias por confiar en nosotros.`
   },
   {
+    name: "cliente_ultimo_dia",
+    subject: "Último día: tu servicio {{servicio}} vence hoy ({{fecha_vencimiento}})",
+    template_type: "client_service_last_day",
+    card_content: "Servicio|{{servicio}}\nVence hoy|{{fecha_vencimiento}}",
+    content:
+`Estimado/a {{cliente}},
+
+Hoy es el último día de vigencia del servicio {{servicio}}.
+
+Si ya realizaste la renovación, puedes ignorar este mensaje.`
+  },
+  {
     name: "admin_reminder",
     subject: "[Aviso Interno] Vencimiento próximo: {{servicio}} — {{cliente}}",
     template_type: "admin_service_expiring",
