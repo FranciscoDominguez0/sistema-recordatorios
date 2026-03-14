@@ -120,13 +120,13 @@ export default function TareasPage() {
         due_date: form.due_date
       });
 
-      toast({ title: "Tarea creada", variant: "success" });
+      toast({ title: "Tarea creada", variant: "success", presentation: "confirm" });
       setDrawerOpen(false);
       await fetchTasks();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo crear la tarea";
       setFormError(msg);
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setSaving(false);
     }
@@ -141,17 +141,18 @@ export default function TareasPage() {
         title: "Marcada como completada",
         description: "Puedes deshacer durante 10 segundos",
         variant: "info",
+        presentation: "confirm",
         durationMs: 10000,
         actionLabel: "Deshacer",
         onAction: async () => {
           undone = true;
           try {
             await setTaskPending(task.id);
-            toast({ title: "Tarea restaurada", variant: "success" });
+            toast({ title: "Tarea restaurada", variant: "success", presentation: "confirm", iconOverride: "undo" });
             await fetchTasks();
           } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : "No se pudo deshacer";
-            toast({ title: "Error", description: msg, variant: "error" });
+            toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
           }
         }
       });
@@ -160,11 +161,11 @@ export default function TareasPage() {
 
       window.setTimeout(() => {
         if (undone) return;
-        toast({ title: "Tarea completada", variant: "success" });
+        toast({ title: "Tarea completada", variant: "success", presentation: "confirm" });
       }, 10000);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo completar la tarea";
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setCompletingId(null);
     }
@@ -180,13 +181,13 @@ export default function TareasPage() {
     setDeleting(true);
     try {
       await deleteTask(deletingTask.id);
-      toast({ title: "Tarea eliminada", variant: "success" });
+      toast({ title: "Tarea eliminada", variant: "success", presentation: "confirm" });
       setDeleteOpen(false);
       setDeletingTask(null);
       await fetchTasks();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo eliminar la tarea";
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setDeleting(false);
     }

@@ -64,7 +64,7 @@ export default function PerfilPage() {
       setName(me.name ?? "");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo cargar tu perfil";
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setLoading(false);
     }
@@ -83,12 +83,12 @@ export default function PerfilPage() {
 
       try {
         if (!file.type.startsWith("image/")) {
-          toast({ title: "Archivo inválido", description: "Selecciona una imagen", variant: "error" });
+          toast({ title: "Archivo inválido", description: "Selecciona una imagen", variant: "error", presentation: "confirm" });
           return;
         }
 
         if (file.size > 2 * 1024 * 1024) {
-          toast({ title: "Imagen muy grande", description: "Máximo 2MB", variant: "error" });
+          toast({ title: "Imagen muy grande", description: "Máximo 2MB", variant: "error", presentation: "confirm" });
           return;
         }
 
@@ -106,10 +106,10 @@ export default function PerfilPage() {
         setName(updated.name ?? "");
         syncUserToStorage(updated);
 
-        toast({ title: "Foto actualizada", variant: "success" });
+        toast({ title: "Foto actualizada", variant: "success", presentation: "confirm" });
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "No se pudo actualizar la foto";
-        toast({ title: "Error", description: msg, variant: "error" });
+        toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
       } finally {
         setSavingAvatar(false);
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -121,7 +121,7 @@ export default function PerfilPage() {
   const onSaveProfile = useCallback(async () => {
     const normalized = name.trim();
     if (!normalized) {
-      toast({ title: "Nombre requerido", variant: "error" });
+      toast({ title: "Nombre requerido", variant: "error", presentation: "confirm" });
       return;
     }
 
@@ -131,10 +131,10 @@ export default function PerfilPage() {
       setUser(updated);
       setName(updated.name ?? "");
       syncUserToStorage(updated);
-      toast({ title: "Perfil actualizado", variant: "success" });
+      toast({ title: "Perfil actualizado", variant: "success", presentation: "confirm" });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo actualizar tu perfil";
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setSavingProfile(false);
     }
@@ -142,17 +142,17 @@ export default function PerfilPage() {
 
   const onSavePassword = useCallback(async () => {
     if (!currentPassword || !newPassword) {
-      toast({ title: "Completa los campos", variant: "error" });
+      toast({ title: "Completa los campos", variant: "error", presentation: "confirm" });
       return;
     }
 
     if (newPassword.length < 8) {
-      toast({ title: "Contraseña débil", description: "Mínimo 8 caracteres", variant: "error" });
+      toast({ title: "Contraseña débil", description: "Mínimo 8 caracteres", variant: "error", presentation: "confirm" });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast({ title: "No coincide", description: "Confirma tu nueva contraseña", variant: "error" });
+      toast({ title: "No coincide", description: "Confirma tu nueva contraseña", variant: "error", presentation: "confirm" });
       return;
     }
 
@@ -167,10 +167,10 @@ export default function PerfilPage() {
       setNewPassword("");
       setConfirmPassword("");
 
-      toast({ title: "Contraseña actualizada", variant: "success" });
+      toast({ title: "Contraseña actualizada", variant: "success", presentation: "confirm" });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo cambiar la contraseña";
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setSavingPassword(false);
     }

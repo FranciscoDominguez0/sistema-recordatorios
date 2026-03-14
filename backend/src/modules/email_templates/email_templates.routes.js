@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyToken } from "../../middleware/auth.middleware.js";
+import { verifyToken } from "../../middlewares/auth.middleware.js";
 import emailTemplatesController from "./email_templates.controller.js";
 
 const router = Router();

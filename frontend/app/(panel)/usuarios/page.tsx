@@ -200,7 +200,8 @@ export default function UsuariosPage() {
 
       toast({
         title: drawerMode === "create" ? "Administrador creado" : "Administrador actualizado",
-        variant: "success"
+        variant: "success",
+        presentation: "confirm"
       });
 
       setDrawerOpen(false);
@@ -210,7 +211,7 @@ export default function UsuariosPage() {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "No se pudo guardar administrador";
       setFormError(message);
-      toast({ title: "Error", description: message, variant: "error" });
+      toast({ title: "Error", description: message, variant: "error", presentation: "confirm" });
     } finally {
       setSaving(false);
     }
@@ -226,14 +227,14 @@ export default function UsuariosPage() {
     setDeleting(true);
     try {
       await deleteUser(deletingUser.id);
-      toast({ title: "Administrador eliminado", variant: "success" });
+      toast({ title: "Administrador eliminado", variant: "success", presentation: "confirm" });
       setDeleteOpen(false);
       setDeletingUser(null);
       await fetchUsers();
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "No se pudo eliminar administrador";
       setError(message);
-      toast({ title: "Error", description: message, variant: "error" });
+      toast({ title: "Error", description: message, variant: "error", presentation: "confirm" });
     } finally {
       setDeleting(false);
     }

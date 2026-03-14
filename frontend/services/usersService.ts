@@ -62,6 +62,18 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function currentUserId() {
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const id = Number(parsed?.id);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getUsers(search?: string): Promise<UserItem[]> {
   const response = await api
     .get<UserItem[]>("/users", {
@@ -101,6 +113,45 @@ export async function getUsersPaginated({
     });
 
   return response.data;
+}
+
+export async function getMe(): Promise<UserItem> {
+  const id = currentUserId();
+  if (!id) {
+    throw new Error("No se encontró el usuario en sesión");
+  }
+
+  const list = await getUsers();
+  const me = list.find((u) => Number(u.id) === id) ?? null;
+  if (!me) {
+    throw new Error("No se pudo cargar tu perfil");
+  }
+  return me;
+}
+
+export async function updateMe(input: { name?: string }): Promise<UserItem> {
+  const id = currentUserId();
+  if (!id) {
+    throw new Error("No se encontró el usuario en sesión");
+  }
+  return updateUser(id, input);
+}
+
+export async function uploadMyAvatar(avatarBase64: string): Promise<UserItem> {
+  const id = currentUserId();
+  if (!id) {
+    throw new Error("No se encontró el usuario en sesión");
+  }
+  return uploadAvatar(id, avatarBase64);
+}
+
+export async function changeMyPassword(input: { current_password: string; new_password: string }): Promise<UserItem> {
+  const id = currentUserId();
+  if (!id) {
+    throw new Error("No se encontró el usuario en sesión");
+  }
+
+  return updateUser(id, { password: input.new_password });
 }
 
 export async function createUser(input: CreateUserInput): Promise<UserItem> {

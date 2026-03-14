@@ -288,6 +288,7 @@ export default function ServiciosPage() {
           toast({
             title: "Servicio marcado como completado",
             variant: "success",
+            presentation: "confirm",
             durationMs: 10000,
             actionLabel: "Deshacer",
             onAction: async () => {
@@ -301,11 +302,11 @@ export default function ServiciosPage() {
                   reminder_days: payload.reminder_days,
                   status: prevStatus
                 });
-                toast({ title: "Cambio deshecho", variant: "success" });
+                toast({ title: "Cambio deshecho", variant: "success", presentation: "confirm", iconOverride: "undo" });
                 await fetchServices({ nextPage: page });
               } catch (e: unknown) {
                 const msg = e instanceof Error ? e.message : "No se pudo deshacer";
-                toast({ title: "Error", description: msg, variant: "error" });
+                toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
               }
             }
           });
@@ -320,7 +321,8 @@ export default function ServiciosPage() {
 
       toast({
         title: drawerMode === "create" ? "Servicio creado" : "Servicio actualizado",
-        variant: "success"
+        variant: "success",
+        presentation: "confirm"
       });
 
       window.dispatchEvent(new Event("notifications:refresh"));
@@ -328,9 +330,9 @@ export default function ServiciosPage() {
       setDrawerOpen(false);
       await fetchServices({ nextPage: page });
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "No se pudo guardar servicio";
-      setFormError(message);
-      toast({ title: "Error", description: message, variant: "error" });
+      const msg = e instanceof Error ? e.message : "No se pudo guardar el servicio";
+      setFormError(msg);
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setSaving(false);
     }
@@ -362,7 +364,7 @@ export default function ServiciosPage() {
     setRenewError(null);
     try {
       await renewService(renewingService.id, renewDate || undefined);
-      toast({ title: "Servicio renovado", variant: "success" });
+      toast({ title: "Servicio renovado", variant: "success", presentation: "confirm" });
       window.dispatchEvent(new Event("notifications:refresh"));
       setRenewOpen(false);
       setRenewingService(null);
@@ -370,7 +372,7 @@ export default function ServiciosPage() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "No se pudo renovar";
       setRenewError(msg);
-      toast({ title: "Error", description: msg, variant: "error" });
+      toast({ title: "Error", description: msg, variant: "error", presentation: "confirm" });
     } finally {
       setRenewing(false);
     }
@@ -382,14 +384,14 @@ export default function ServiciosPage() {
     setError(null);
     try {
       await deleteService(deletingService.id);
-      toast({ title: "Servicio eliminado", variant: "success" });
+      toast({ title: "Servicio eliminado", variant: "success", presentation: "confirm" });
       setDeleteOpen(false);
       setDeletingService(null);
       await fetchServices({ nextPage: page });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "No se pudo eliminar servicio";
       setError(message);
-      toast({ title: "Error", description: message, variant: "error" });
+      toast({ title: "Error", description: message, variant: "error", presentation: "confirm" });
     } finally {
       setDeleting(false);
     }

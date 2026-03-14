@@ -75,6 +75,15 @@ export default function ClientesPage() {
   const [servicesShown, setServicesShown] = useState(6);
   const [logsShown, setLogsShown] = useState(6);
 
+  useEffect(() => {
+    if (!drawerOpen && !quickOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [drawerOpen, quickOpen]);
+
   const fetchClients = async ({ nextSearch, nextPage }: { nextSearch?: string; nextPage?: number } = {}) => {
     setLoading(true);
     setError(null);
@@ -356,7 +365,7 @@ export default function ClientesPage() {
       const win = iframe.contentWindow;
       if (!win) {
         cleanup();
-        toast({ title: "Error", description: "No se pudo iniciar la impresión", variant: "error" });
+        toast({ title: "Error", description: "No se pudo iniciar la impresión", variant: "error", presentation: "confirm" });
         return;
       }
 
@@ -426,7 +435,8 @@ export default function ClientesPage() {
 
       toast({
         title: drawerMode === "create" ? "Cliente creado" : "Cliente actualizado",
-        variant: "success"
+        variant: "success",
+        presentation: "confirm"
       });
 
       setDrawerOpen(false);
@@ -434,7 +444,7 @@ export default function ClientesPage() {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "No se pudo guardar cliente";
       setFormError(message);
-      toast({ title: "Error", description: message, variant: "error" });
+      toast({ title: "Error", description: message, variant: "error", presentation: "confirm" });
     } finally {
       setSaving(false);
     }
@@ -451,14 +461,14 @@ export default function ClientesPage() {
     setError(null);
     try {
       await deleteClient(deletingClient.id);
-      toast({ title: "Cliente eliminado", variant: "success" });
+      toast({ title: "Cliente eliminado", variant: "success", presentation: "confirm" });
       setDeleteOpen(false);
       setDeletingClient(null);
       await fetchClients({ nextPage: page });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "No se pudo eliminar cliente";
       setError(message);
-      toast({ title: "Error", description: message, variant: "error" });
+      toast({ title: "Error", description: message, variant: "error", presentation: "confirm" });
     } finally {
       setDeleting(false);
     }
@@ -645,7 +655,7 @@ export default function ClientesPage() {
       <div className={cn("fixed inset-0 z-40", drawerOpen ? "" : "pointer-events-none")}>
         <div
           className={cn(
-            "absolute inset-0 bg-black/50 transition-opacity",
+            "fixed inset-0 h-[100dvh] w-[100vw] bg-black/50 transition-opacity",
             drawerOpen ? "opacity-100" : "opacity-0"
           )}
           onClick={() => setDrawerOpen(false)}
@@ -763,7 +773,7 @@ export default function ClientesPage() {
       <div className={cn("fixed inset-0 z-40", quickOpen ? "" : "pointer-events-none")}>
         <div
           className={cn(
-            "absolute inset-0 bg-black/50 transition-opacity",
+            "fixed inset-0 h-[100dvh] w-[100vw] bg-black/50 transition-opacity",
             quickOpen ? "opacity-100" : "opacity-0"
           )}
           onClick={() => setQuickOpen(false)}

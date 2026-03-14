@@ -183,7 +183,7 @@ export default function ConfiguracionPage() {
         encryption: smtpForm.encryption
       };
       editingSmtp ? await updateEmailSetting(editingSmtp.id, payload) : await createEmailSetting(payload);
-      toast({ title: editingSmtp ? "SMTP actualizado" : "SMTP agregado", variant: "success" });
+      toast({ title: editingSmtp ? "SMTP actualizado" : "SMTP agregado", variant: "success", presentation: "confirm" });
       setSmtpDrawerOpen(false); await fetchSmtp();
     } catch (e: unknown) { setSmtpFormError(e instanceof Error ? e.message : "Error al guardar"); }
     finally { setSmtpSaving(false); }
@@ -194,9 +194,9 @@ export default function ConfiguracionPage() {
     setDeletingSmtpLoading(true);
     try {
       await deleteEmailSetting(deletingSmtp.id);
-      toast({ title: "Email SMTP eliminado", variant: "success" });
+      toast({ title: "Email SMTP eliminado", variant: "success", presentation: "confirm" });
       setSmtpDeleteOpen(false); setDeletingSmtp(null); await fetchSmtp();
-    } catch (e: unknown) { toast({ title: "Error", description: e instanceof Error ? e.message : "", variant: "error" }); }
+    } catch (e: unknown) { toast({ title: "Error", description: e instanceof Error ? e.message : "", variant: "error", presentation: "confirm" }); }
     finally { setDeletingSmtpLoading(false); }
   };
 
