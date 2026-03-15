@@ -924,7 +924,7 @@ export default function ServiciosPage() {
                       Servicio #{detailService?.id ?? "-"}
                     </span>
                     <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                      Cliente #{detailService?.client_id ?? "-"}
+                      Cliente: {detailService?.client_name ?? detailService?.client_id ?? "-"}
                     </span>
                     <span
                       className={cn(
