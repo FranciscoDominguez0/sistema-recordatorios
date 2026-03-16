@@ -97,6 +97,58 @@ Importa/ejecuta estos scripts en tu motor de base de datos según el entorno.
   - Revisa el token en `localStorage` (clave `token`).
   - Inspecciona Network en el navegador para identificar el endpoint que falla.
 
-## Licencia
+## Pruebas (backend)
 
-Uso interno del equipo. Si se requiere una licencia formal, agregar un archivo `LICENSE` en la raíz del repositorio.
+Este repositorio incluye pruebas automatizadas para el backend usando:
+
+- `vitest` (runner de tests)
+- `supertest` (pruebas de endpoints Express)
+
+### Instalación
+
+Desde `backend/`:
+
+```bash
+npm install
+```
+
+### Ejecutar pruebas
+
+Desde `backend/`:
+
+```bash
+npm test
+```
+
+Opcionales:
+
+```bash
+npm run test:watch
+npm run test:coverage
+```
+
+### Dónde están los tests
+
+- `backend/tests/health.test.js`: prueba un endpoint público (`GET /health`).
+- `backend/tests/services.auth.test.js`: prueba que endpoints protegidos respondan `401` sin token.
+
+### Cómo crear un test nuevo (ejemplo)
+
+1) Crea un archivo en `backend/tests/` con sufijo `.test.js`.
+2) Importa `createApp` y crea la app con los jobs desactivados:
+
+```js
+import { describe, it, expect } from "vitest";
+import request from "supertest";
+import createApp from "../src/appInstance.js";
+
+describe("Mi feature", () => {
+  it("ejemplo", async () => {
+    const app = createApp({ startJobs: false });
+    const res = await request(app).get("/health");
+    expect(res.status).toBe(200);
+  });
+});
+```
+
+  

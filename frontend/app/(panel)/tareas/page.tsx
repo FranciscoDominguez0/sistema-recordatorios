@@ -42,9 +42,21 @@ const initialForm: FormState = {
   due_date: ""
 };
 
+function parseDateOnlyLocal(value: string) {
+  const raw = String(value ?? "");
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    const d = Number(m[3]);
+    return new Date(y, mo - 1, d);
+  }
+  return parseISO(raw);
+}
+
 function getTaskUrgency(dueDate: string): "overdue" | "today" | "upcoming" | "future" {
   const today = startOfDay(new Date());
-  const due = startOfDay(parseISO(dueDate));
+  const due = startOfDay(parseDateOnlyLocal(dueDate));
   if (isBefore(due, today)) return "overdue";
   if (isToday(due)) return "today";
   if (isAfter(due, today) && isBefore(due, new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000))) return "upcoming";
@@ -394,7 +406,7 @@ export default function TareasPage() {
 
                   let formattedDate = task.due_date;
                   try {
-                    formattedDate = format(parseISO(task.due_date), "d MMM yyyy", { locale: es });
+                    formattedDate = format(parseDateOnlyLocal(task.due_date), "d MMM yyyy", { locale: es });
                   } catch {
                     /* keep raw */
                   }

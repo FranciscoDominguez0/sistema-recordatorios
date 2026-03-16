@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   CalendarClock,
@@ -131,6 +132,8 @@ export default function ServiciosPage() {
   const [sendingEmailService, setSendingEmailService] = useState<ServiceItem | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
+
   // ── Renewal state ─────────────────────────────────────────────────────────
   const [renewOpen, setRenewOpen] = useState(false);
   const [renewingService, setRenewingService] = useState<ServiceItem | null>(null);
@@ -217,6 +220,10 @@ export default function ServiciosPage() {
   useEffect(() => {
     fetchServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -577,81 +584,121 @@ export default function ServiciosPage() {
       />
 
       {/* ── Renewal Modal ──────────────────────────────────────────────────── */}
-      <div className={cn("fixed inset-0 z-40", renewOpen ? "" : "pointer-events-none")}>
-        <div
-          className={cn("absolute inset-0 bg-black/50 transition-opacity", renewOpen ? "opacity-100" : "opacity-0")}
-          onClick={() => { if (!renewing) { setRenewOpen(false); setRenewingService(null); }}}
-        />
-        <div className={cn("absolute inset-0 flex items-center justify-center p-4 transition-opacity", renewOpen ? "opacity-100" : "opacity-0")}>
-          <aside
-            className={cn(
-              "relative z-50 flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9]",
-              renewOpen ? "scale-100" : "scale-95"
-            )}
-            role="dialog" aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10">
-                  <RotateCcw className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Renovar servicio</p>
-                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate max-w-[200px]">{renewingService?.service_name}</p>
-                </div>
-              </div>
-              <button type="button" onClick={() => { if (!renewing) { setRenewOpen(false); setRenewingService(null); }}} className="rounded-xl p-1.5 text-[#64748B] hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:hover:bg-[#111E35]">
-                <XCircle className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              {renewingService && (
-                <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-[#1F2A44] dark:bg-[#111E35]">
-                  <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vencimiento actual</p>
-                  <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
-                    <CalendarClock className="h-4 w-4 text-amber-500" />
-                    {new Date(renewingService.expiration_date).toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <Label htmlFor="renew-date">Nueva fecha de vencimiento</Label>
-                <Input
-                  id="renew-date"
-                  type="date"
-                  value={renewDate}
-                  onChange={(e) => setRenewDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
-                  className="mt-1 h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]"
-                />
-                <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Por defecto: +1 mes desde la fecha de vencimiento anterior.</p>
-              </div>
-
-              {renewError && (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{renewError}</div>
-              )}
-
-              <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
-                <Button type="button" variant="secondary" onClick={() => { if (!renewing) { setRenewOpen(false); setRenewingService(null); }}} disabled={renewing}>
-                  Cancelar
-                </Button>
-                <Button
-                  type="button"
-                  onClick={confirmRenew}
-                  disabled={renewing || !renewDate}
-                  className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+      {mounted
+        ? createPortal(
+            <div className={cn("fixed inset-0 z-40", renewOpen ? "" : "pointer-events-none")}>
+              <div
+                className={cn("absolute inset-0 bg-black/50 transition-opacity", renewOpen ? "opacity-100" : "opacity-0")}
+                onClick={() => {
+                  if (!renewing) {
+                    setRenewOpen(false);
+                    setRenewingService(null);
+                  }
+                }}
+              />
+              <div
+                className={cn(
+                  "absolute inset-0 flex items-center justify-center p-4 transition-opacity",
+                  renewOpen ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <aside
+                  className={cn(
+                    "relative z-50 flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9]",
+                    renewOpen ? "scale-100" : "scale-95"
+                  )}
+                  role="dialog"
+                  aria-modal="true"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {renewing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-                  {renewing ? "Renovando..." : "Confirmar renovación"}
-                </Button>
+                  <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+                        <RotateCcw className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">Renovar servicio</p>
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8] truncate max-w-[200px]">{renewingService?.service_name}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!renewing) {
+                          setRenewOpen(false);
+                          setRenewingService(null);
+                        }
+                      }}
+                      className="rounded-xl p-1.5 text-[#64748B] hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:hover:bg-[#111E35]"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="p-5 space-y-4">
+                    {renewingService && (
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vencimiento actual</p>
+                        <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
+                          <CalendarClock className="h-4 w-4 text-amber-500" />
+                          {new Date(renewingService.expiration_date).toLocaleDateString("es-PA", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            timeZone: "UTC"
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <Label htmlFor="renew-date">Nueva fecha de vencimiento</Label>
+                      <Input
+                        id="renew-date"
+                        type="date"
+                        value={renewDate}
+                        onChange={(e) => setRenewDate(e.target.value)}
+                        min={new Date().toISOString().split("T")[0]}
+                        className="mt-1 h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]"
+                      />
+                      <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Por defecto: +1 mes desde la fecha de vencimiento anterior.</p>
+                    </div>
+
+                    {renewError && (
+                      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{renewError}</div>
+                    )}
+
+                    <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => {
+                          if (!renewing) {
+                            setRenewOpen(false);
+                            setRenewingService(null);
+                          }
+                        }}
+                        disabled={renewing}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={confirmRenew}
+                        disabled={renewing || !renewDate}
+                        className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                      >
+                        {renewing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                        {renewing ? "Renovando..." : "Confirmar renovación"}
+                      </Button>
+                    </div>
+                  </div>
+                </aside>
               </div>
-            </div>
-          </aside>
-        </div>
-      </div>
+            </div>,
+            document.body
+          )
+        : null}
       <div className="rounded-[28px] border border-[#E2E8F0] bg-white p-5 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

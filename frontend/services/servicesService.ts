@@ -154,7 +154,7 @@ export async function renewService(id: number, new_expiration_date?: string): Pr
 
 export async function sendServiceManualEmail(id: number): Promise<{ message: string; service_id: number; email?: string; subject?: string }> {
   const response = await api
-    .post<{ message: string; service_id: number; email?: string; subject?: string }>(`/services/${id}/send-manual-email`, null, {
+    .post<{ message: string; service_id: number; email?: string; subject?: string }>(`/services/${id}/send-manual-email`, {}, {
       headers: authHeaders()
     })
     .catch((error) => {

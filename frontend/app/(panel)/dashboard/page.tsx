@@ -12,7 +12,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { differenceInDays, format, parseISO } from "date-fns";
+import { differenceInCalendarDays, format, parseISO, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
@@ -28,6 +28,18 @@ const DONUT_COLORS: Record<string, { fill: string; light: string }> = {
 const DONUT_LABELS: Record<string, string> = {
   activo: "Activos", vencido: "Vencidos", completado: "Completados",
 };
+
+function parseDateOnlyLocal(value: string) {
+  const raw = String(value ?? "");
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    const d = Number(m[3]);
+    return new Date(y, mo - 1, d);
+  }
+  return parseISO(raw);
+}
 
 // ─── Donut Chart ──────────────────────────────────────────────────────────────
 function DonutChart({ data }: { data: { status: string; total: number }[] }) {
@@ -313,7 +325,10 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {data.upcoming_services.map((sv) => {
-                    const days = differenceInDays(parseISO(String(sv.expiration_date)), new Date());
+                    const days = differenceInCalendarDays(
+                      startOfDay(parseDateOnlyLocal(String(sv.expiration_date))),
+                      startOfDay(new Date())
+                    );
                     return (
                       <div key={sv.id} className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 dark:border-[#1F2A44] dark:bg-[#070F1E]">
                         <div className="min-w-0">
@@ -340,7 +355,10 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {data.pending_tasks.map((t) => {
-                    const days = differenceInDays(parseISO(String(t.due_date)), new Date());
+                    const days = differenceInCalendarDays(
+                      startOfDay(parseDateOnlyLocal(String(t.due_date))),
+                      startOfDay(new Date())
+                    );
                     return (
                       <div key={t.id} className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 dark:border-[#1F2A44] dark:bg-[#070F1E]">
                         <p className="min-w-0 flex-1 truncate text-xs font-semibold">{t.title}</p>
