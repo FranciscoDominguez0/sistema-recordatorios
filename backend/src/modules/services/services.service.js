@@ -134,7 +134,7 @@ class ServicesService {
 
   async getByClientId(clientId) {
     const sql = `
-      SELECT s.*, c.name, c.email
+      SELECT s.*, c.name AS client_name, c.email AS client_email
       FROM services s
       JOIN clients c ON s.client_id = c.id
       WHERE s.client_id = ?
@@ -147,7 +147,7 @@ class ServicesService {
 
   async getById(id) {
     const sql = `
-      SELECT s.*, c.name, c.email
+      SELECT s.*, c.name AS client_name, c.email AS client_email
       FROM services s
       JOIN clients c ON s.client_id = c.id
       WHERE s.id = ?

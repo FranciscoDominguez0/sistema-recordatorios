@@ -6,6 +6,7 @@ export type ServiceItem = {
   id: number;
   client_id: number;
   client_name?: string;
+  client_email?: string;
   service_name: string;
   description?: string | null;
   start_date?: string | null;
@@ -145,6 +146,19 @@ export async function renewService(id: number, new_expiration_date?: string): Pr
     })
     .catch((error) => {
       const message = error?.response?.data?.message || error?.message || "No se pudo renovar servicio";
+      throw new Error(message);
+    });
+
+  return response.data;
+}
+
+export async function sendServiceManualEmail(id: number): Promise<{ message: string; service_id: number; email?: string; subject?: string }> {
+  const response = await api
+    .post<{ message: string; service_id: number; email?: string; subject?: string }>(`/services/${id}/send-manual-email`, null, {
+      headers: authHeaders()
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo enviar el correo";
       throw new Error(message);
     });
 

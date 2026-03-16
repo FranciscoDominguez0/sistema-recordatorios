@@ -77,6 +77,67 @@ class ReminderService {
     );
   }
 
+  async createReminderHistoryForDate(serviceId, reminderDate) {
+    if (!reminderDate) return;
+    await pool.query(
+      "INSERT IGNORE INTO reminder_history (service_id, reminder_date) VALUES (?, DATE(?))",
+      [serviceId, reminderDate]
+    );
+  }
+
+  async findServiceByIdWithClient(serviceId) {
+    const [[row]] = await pool.query(
+      `
+      SELECT
+        s.*, 
+        c.email AS client_email,
+        c.name AS client_name,
+        c.id AS client_id_fk,
+        (DATE(s.expiration_date) = CURDATE()) AS is_last_day
+      FROM services s
+      JOIN clients c ON s.client_id = c.id
+      WHERE s.id = ?
+      LIMIT 1
+      `,
+      [serviceId]
+    );
+    return row ?? null;
+  }
+
+  async sendManualServiceEmail(serviceId) {
+    const service = await this.findServiceByIdWithClient(serviceId);
+    if (!service) {
+      const error = new Error("Servicio no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const clientId = service.client_id;
+    const clientName = service.client_name;
+    const clientEmail = service.client_email;
+    const serviceName = service.service_name;
+    const expirationDate = service.expiration_date;
+    const isLastDay = Boolean(service.is_last_day);
+
+    const builder = isLastDay ? buildClientLastDayEmail : buildClientReminderEmail;
+
+    try {
+      const { subject, html, attachments } = await builder({ clientName, serviceName, expirationDate });
+      await emailService.sendSystemMail({ to: clientEmail, subject, html, attachments });
+      await this.logEmailSent({ clientId, serviceId, email: clientEmail, subject });
+
+      await this.createReminderHistoryForDate(serviceId, expirationDate).catch(() => {});
+
+      return { message: "Correo enviado", service_id: serviceId, email: clientEmail, subject };
+    } catch (err) {
+      const fallbackSubject = isLastDay ? `Último día: ${serviceName}` : `Recordatorio: ${serviceName}`;
+      await this.logEmailFailed({ clientId, serviceId, email: clientEmail, subject: fallbackSubject, errorMessage: err.message }).catch(() => {});
+      const error = new Error(err?.message || "No se pudo enviar el correo");
+      error.statusCode = 500;
+      throw error;
+    }
+  }
+
   async logEmailSent({ clientId, serviceId, email, subject }) {
     const hasRetry = await this.hasEmailLogRetryColumns();
     if (hasRetry) {

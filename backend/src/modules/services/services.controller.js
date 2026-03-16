@@ -1,5 +1,6 @@
 import servicesService from "./services.service.js";
 import activityLogsService from "../activity_logs/activityLogs.service.js";
+import reminderService from "../reminders/reminder.service.js";
 
 class ServicesController {
   async create(req, res) {
@@ -227,6 +228,36 @@ class ServicesController {
       return res.json(service);
     } catch (error) {
       return res.status(500).json({ message: error.message });
+    }
+  }
+
+  async sendManualEmail(req, res) {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id) || id <= 0) {
+        return res.status(400).json({ message: "ID de servicio inválido" });
+      }
+
+      const result = await reminderService.sendManualServiceEmail(id);
+
+      try {
+        const actor = req.user?.role === "admin" ? "Administrador" : "Usuario";
+        await activityLogsService.logActivity({
+          user_id: req.user?.id ?? null,
+          action: "SEND_SERVICE_EMAIL_MANUAL",
+          entity_type: "service",
+          entity_id: id,
+          description: `${actor} envió correo manual del servicio`,
+          ip_address: req.ip
+        });
+      } catch (error) {
+        console.error("Activity log error:", error.message);
+      }
+
+      return res.json(result);
+    } catch (error) {
+      const status = error?.statusCode || 500;
+      return res.status(status).json({ message: error.message });
     }
   }
 }

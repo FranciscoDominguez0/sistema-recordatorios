@@ -9,6 +9,7 @@ router.get("/", verifyToken, (req, res) => servicesController.getAll(req, res));
 router.get("/client/:clientId", verifyToken, (req, res) =>
   servicesController.getByClient(req, res)
 );
+router.post("/:id/send-manual-email", verifyToken, (req, res) => servicesController.sendManualEmail(req, res));
 router.get("/:id", verifyToken, (req, res) => servicesController.getById(req, res));
 router.put("/:id", verifyToken, (req, res) => servicesController.update(req, res));
 router.post("/:id/renew", verifyToken, (req, res) => servicesController.renew(req, res));

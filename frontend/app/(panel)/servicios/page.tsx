@@ -30,6 +30,7 @@ import {
   getServiceById,
   getServicesPaginated,
   renewService,
+  sendServiceManualEmail,
   updateService,
   type ServiceItem,
   type ServiceStatus
@@ -126,6 +127,10 @@ export default function ServiciosPage() {
   const [deletingService, setDeletingService] = useState<ServiceItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const [sendEmailOpen, setSendEmailOpen] = useState(false);
+  const [sendingEmailService, setSendingEmailService] = useState<ServiceItem | null>(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+
   // ── Renewal state ─────────────────────────────────────────────────────────
   const [renewOpen, setRenewOpen] = useState(false);
   const [renewingService, setRenewingService] = useState<ServiceItem | null>(null);
@@ -174,6 +179,32 @@ export default function ServiciosPage() {
       setError(e instanceof Error ? e.message : "No se pudo cargar servicios");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onSendManualEmail = (service: ServiceItem) => {
+    setSendingEmailService(service);
+    setSendEmailOpen(true);
+  };
+
+  const confirmSendManualEmail = async () => {
+    if (!sendingEmailService) return;
+    setSendingEmail(true);
+    try {
+      const result = await sendServiceManualEmail(sendingEmailService.id);
+      toast({
+        title: "Correo enviado",
+        description: result?.email ? `Destino: ${result.email}` : undefined,
+        variant: "success",
+        presentation: "confirm"
+      });
+      setSendEmailOpen(false);
+      setSendingEmailService(null);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "No se pudo enviar el correo";
+      toast({ title: "Error", description: message, variant: "error", presentation: "confirm" });
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -510,6 +541,25 @@ export default function ServiciosPage() {
 
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
+      <ConfirmDialog
+        open={sendEmailOpen}
+        title="Enviar correo manual"
+        description={
+          sendingEmailService
+            ? `Se enviará un correo a ${sendingEmailService.client_name ?? "Cliente"}${(sendingEmailService as ServiceItem & { client_email?: string })?.client_email ? ` (${(sendingEmailService as ServiceItem & { client_email?: string })?.client_email})` : ""} para el servicio ${sendingEmailService.service_name}. Esto también lo marcará como enviado para evitar reenvíos automáticos.`
+            : ""
+        }
+        confirmText={sendingEmail ? "Enviando..." : "Enviar"}
+        cancelText="Cancelar"
+        loading={sendingEmail}
+        onConfirm={confirmSendManualEmail}
+        onOpenChange={(open) => {
+          if (sendingEmail) return;
+          setSendEmailOpen(open);
+          if (!open) setSendingEmailService(null);
+        }}
+      />
+
       <ConfirmDialog
         open={deleteOpen}
         title="Eliminar servicio"
@@ -919,6 +969,9 @@ export default function ServiciosPage() {
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold">{detailService?.service_name ?? "Servicio"}</p>
                   <p className="mt-1 truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{detailService?.client_name ?? "Cliente"}</p>
+                  {detailService?.client_email ? (
+                    <p className="mt-1 truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{detailService.client_email}</p>
+                  ) : null}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
                       Servicio #{detailService?.id ?? "-"}
@@ -992,36 +1045,11 @@ export default function ServiciosPage() {
                       variant="secondary"
                       onClick={() => {
                         if (!detailService) return;
-                        closeDetail();
-                        openRenew(detailService);
+                        onSendManualEmail(detailService);
                       }}
                     >
-                      <RotateCcw className="h-4 w-4" />
-                      Renovar
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        if (!detailService) return;
-                        closeDetail();
-                        openEdit(detailService);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                      Editar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="border border-red-500/30 bg-red-500/10 text-red-700 hover:bg-red-500/15 dark:text-red-200"
-                      onClick={() => {
-                        if (!detailService) return;
-                        closeDetail();
-                        onDelete(detailService);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Eliminar
+                      <Sparkles className="h-4 w-4" />
+                      Enviar correo manual
                     </Button>
                   </div>
                 </div>
