@@ -16,6 +16,7 @@ function searchPlaceholderFromPath(pathname: string) {
     "/usuarios": "Buscar por nombre o email",
     "/clientes": "Buscar por nombre o email",
     "/servicios": "Buscar por servicio o cliente",
+    "/tareas": "Buscar por título o descripción",
     "/historial-correos": "Buscar por destinatario o asunto",
     "/auditorias": "Buscar por usuario, acción o descripción"
   };

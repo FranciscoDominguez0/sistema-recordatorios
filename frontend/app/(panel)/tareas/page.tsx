@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
   Circle,
@@ -65,6 +66,8 @@ function getTaskUrgency(dueDate: string): "overdue" | "today" | "upcoming" | "fu
 
 export default function TareasPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const search = (searchParams?.get("search") ?? "").toString();
 
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +105,11 @@ export default function TareasPage() {
     fetchTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const openCreate = () => {
     setForm(initialForm);
@@ -217,8 +225,16 @@ export default function TareasPage() {
     return true;
   });
 
-  const totalPages = Math.ceil(filteredTasks.length / TASKS_PER_PAGE);
-  const pagedTasks = filteredTasks.slice((page - 1) * TASKS_PER_PAGE, page * TASKS_PER_PAGE);
+  const searchFilteredTasks = filteredTasks.filter((t) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const title = String(t.title ?? "").toLowerCase();
+    const desc = String((t as unknown as { description?: string | null })?.description ?? "").toLowerCase();
+    return title.includes(q) || desc.includes(q);
+  });
+
+  const totalPages = Math.ceil(searchFilteredTasks.length / TASKS_PER_PAGE);
+  const pagedTasks = searchFilteredTasks.slice((page - 1) * TASKS_PER_PAGE, page * TASKS_PER_PAGE);
 
   const urgencyConfig = {
     overdue: {
@@ -363,7 +379,10 @@ export default function TareasPage() {
             {(["all", "pending", "completed"] as const).map((f) => (
               <button
                 key={f}
-            onClick={() => { setFilter(f); setPage(1); }}
+                onClick={() => {
+                  setFilter(f);
+                  setPage(1);
+                }}
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                   filter === f
@@ -387,14 +406,16 @@ export default function TareasPage() {
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-700 dark:text-red-300">
               {error}
             </div>
-          ) : filteredTasks.length === 0 ? (
+          ) : searchFilteredTasks.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-8 text-center text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
               <ClipboardList className="mx-auto mb-3 h-8 w-8 opacity-40" />
-              {filter === "all"
-                ? "No hay tareas registradas. Crea una nueva."
-                : filter === "pending"
-                  ? "No hay tareas pendientes."
-                  : "No hay tareas completadas."}
+              {search.trim()
+                ? "No se encontraron tareas con esa búsqueda."
+                : filter === "all"
+                  ? "No hay tareas registradas. Crea una nueva."
+                  : filter === "pending"
+                    ? "No hay tareas pendientes."
+                    : "No hay tareas completadas."}
             </div>
           ) : (
             <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
