@@ -266,7 +266,7 @@ export default function TareasPage() {
 
   const todoTasks = pendingTasks.filter((t) => {
     const u = getTaskUrgency(t.due_date);
-    return u !== "overdue" && u !== "today";
+    return u !== "overdue";
   });
 
   const searchFilteredTasks = tasks.filter((t) => {
@@ -283,7 +283,7 @@ export default function TareasPage() {
   const boardOverdue = boardPending.filter((t) => getTaskUrgency(t.due_date) === "overdue");
   const boardTodo = boardPending.filter((t) => {
     const u = getTaskUrgency(t.due_date);
-    return u !== "overdue" && u !== "today";
+    return u !== "overdue";
   });
 
   const urgencyConfig = {
@@ -294,7 +294,7 @@ export default function TareasPage() {
       row: "border-l-4 border-l-red-500"
     },
     today: {
-      label: "Hoy",
+      label: "Vence hoy",
       badge:
         "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-300",
       row: "border-l-4 border-l-amber-500"

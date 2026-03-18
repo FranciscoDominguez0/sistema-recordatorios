@@ -139,7 +139,7 @@ function WeeklyBars({ data }: { data: { day_name: string; actions: number }[] })
 }
 
 // ─── Line Chart (crecimiento clientes) ───────────────────────────────────────
-function ClientsLine({ data }: { data: { month: string; new_clients: number }[] }) {
+function ClientsLine({ data }: { data: { week: string; new_clients: number }[] }) {
   if (!data.length) return (
     <div className="flex h-28 items-center justify-center text-sm text-[#94A3B8]">Sin datos</div>
   );
@@ -150,6 +150,14 @@ function ClientsLine({ data }: { data: { month: string; new_clients: number }[] 
   const toY = (v: number) => PT + cH - (v / max) * cH;
   const pts = data.map((d, i) => `${toX(i)},${toY(d.new_clients)}`).join(" ");
   const area = `${PL},${PT + cH} ${pts} ${toX(data.length - 1)},${PT + cH}`;
+
+  const labelForWeek = (week: string) => {
+    try {
+      return format(parseDateOnlyLocal(week), "d MMM", { locale: es });
+    } catch {
+      return String(week ?? "");
+    }
+  };
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
@@ -172,14 +180,14 @@ function ClientsLine({ data }: { data: { month: string; new_clients: number }[] 
         <circle key={i} cx={toX(i)} cy={toY(d.new_clients)} r="3.5"
           fill="#22C55E" stroke="white" strokeWidth="1.5"
           className="[stroke:theme(colors.white)] dark:[stroke:#0B1424]" >
-          <title>{d.month}: {d.new_clients}</title>
+          <title>{d.week}: {d.new_clients}</title>
         </circle>
       ))}
       {data.filter((_, i) => i % Math.ceil(data.length / 5) === 0 || i === data.length - 1).map((d, _, arr) => {
         const origIdx = data.indexOf(d);
         return (
           <text key={origIdx} x={toX(origIdx)} y={H - 4}
-            textAnchor="middle" fontSize="8" fill="#94A3B8">{d.month?.slice(5)}</text>
+            textAnchor="middle" fontSize="8" fill="#94A3B8">{labelForWeek(d.week)}</text>
         );
       })}
     </svg>
@@ -308,9 +316,9 @@ export default function DashboardPage() {
               <WeeklyBars data={data?.weekly_activity ?? []} />
               <p className="mt-2 text-xs text-[#94A3B8]">Acciones por día · últimos 7 días</p>
             </Panel>
-            <Panel title="Nuevos clientes · 6 meses">
+            <Panel title="Nuevos clientes · 8 semanas">
               <ClientsLine data={data?.clients_growth ?? []} />
-              <p className="mt-2 text-xs text-[#94A3B8]">Clientes registrados por mes</p>
+              <p className="mt-2 text-xs text-[#94A3B8]">Clientes registrados por semana</p>
             </Panel>
           </div>
 

@@ -20,7 +20,7 @@ export type DashboardStats = {
 };
 
 export type ServiceStatusItem = { status: string; total: number };
-export type ClientGrowthItem = { month: string; new_clients: number };
+export type ClientGrowthItem = { week: string; new_clients: number };
 export type WeeklyActivityItem = { day_name: string; day_num: number; actions: number };
 export type UpcomingService = { id: number; name: string; expiration_date: string; reminder_days: number; client_name: string };
 export type PendingTask = { id: number; title: string; due_date: string; status: string };

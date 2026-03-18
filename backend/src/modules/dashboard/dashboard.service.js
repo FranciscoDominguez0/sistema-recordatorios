@@ -43,12 +43,12 @@ class DashboardService {
   async getClientsGrowth() {
     const [rows] = await pool.query(`
       SELECT
-        DATE_FORMAT(created_at, '%Y-%m') AS month,
+        DATE_FORMAT(DATE_SUB(DATE(created_at), INTERVAL WEEKDAY(created_at) DAY), '%Y-%m-%d') AS week,
         COUNT(*) AS new_clients
       FROM clients
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-      GROUP BY month
-      ORDER BY month ASC
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
+      GROUP BY week
+      ORDER BY week ASC
     `);
     return rows;
   }
