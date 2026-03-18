@@ -39,6 +39,43 @@ class TasksService {
     return rows;
   }
 
+  async getByStatus(status, { limit, page } = {}) {
+    const normalized = String(status ?? "").trim().toLowerCase();
+    if (normalized !== "pending" && normalized !== "completed") return [];
+
+    const hasLimit = Number.isFinite(limit) && Number(limit) > 0;
+    const finalLimit = hasLimit ? Math.min(Number(limit), 100) : null;
+
+    const hasPage = Number.isFinite(page) && Number(page) > 0;
+    const finalPage = hasPage ? Number(page) : 1;
+    const offset = finalLimit ? (finalPage - 1) * finalLimit : 0;
+
+    const order = normalized === "completed" ? "created_at DESC" : "due_date ASC";
+    const limitSql = finalLimit ? "LIMIT ? OFFSET ?" : "";
+    const params = finalLimit ? [normalized, finalLimit, offset] : [normalized];
+
+    const sql = `
+      SELECT id, title, description, due_date, status, created_at
+      FROM internal_tasks
+      WHERE status = ?
+      ORDER BY ${order}
+      ${limitSql}
+    `;
+
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  }
+
+  async countByStatus(status) {
+    const normalized = String(status ?? "").trim().toLowerCase();
+    if (normalized !== "pending" && normalized !== "completed") return 0;
+    const [[row]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM internal_tasks WHERE status = ?",
+      [normalized]
+    );
+    return Number(row?.total ?? 0);
+  }
+
   async getById(id) {
     const sql = `
       SELECT id, title, description, due_date, status, created_at

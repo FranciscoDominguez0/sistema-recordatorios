@@ -39,6 +39,55 @@ export async function getAllTasks(): Promise<TaskItem[]> {
   return response.data;
 }
 
+export type TaskPagination = {
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+};
+
+export async function getCompletedTasksPaginated({
+  page = 1,
+  limit = 10
+}: {
+  page?: number;
+  limit?: number;
+} = {}): Promise<{ data: TaskItem[]; pagination: TaskPagination }> {
+  const response = await api
+    .get<{ data: TaskItem[]; pagination: TaskPagination }>("/tasks", {
+      headers: authHeaders(),
+      params: { status: "completed", page, limit }
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo cargar las tareas";
+      throw new Error(message);
+    });
+  return response.data;
+}
+
+export async function getPendingTasks(): Promise<TaskItem[]> {
+  const response = await api
+    .get<TaskItem[]>("/tasks/pending", { headers: authHeaders() })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo cargar las tareas";
+      throw new Error(message);
+    });
+  return response.data;
+}
+
+export async function getCompletedTasks({ limit = 10 }: { limit?: number } = {}): Promise<TaskItem[]> {
+  const response = await api
+    .get<TaskItem[]>("/tasks", {
+      headers: authHeaders(),
+      params: { status: "completed", limit }
+    })
+    .catch((error) => {
+      const message = error?.response?.data?.message || error?.message || "No se pudo cargar las tareas";
+      throw new Error(message);
+    });
+  return response.data;
+}
+
 export async function createTask(input: CreateTaskInput): Promise<TaskItem> {
   const response = await api
     .post<TaskItem>("/tasks", input, { headers: authHeaders() })

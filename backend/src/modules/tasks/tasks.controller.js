@@ -28,6 +28,43 @@ class TasksController {
 
   async getAll(req, res) {
     try {
+      const status = (req.query?.status ?? "").toString();
+      const limitRaw = (req.query?.limit ?? "").toString();
+      const pageRaw = (req.query?.page ?? "").toString();
+
+      if (status) {
+        const normalized = status.trim().toLowerCase();
+        const parsedLimit = limitRaw ? Number.parseInt(limitRaw, 10) : undefined;
+        const parsedPage = pageRaw ? Number.parseInt(pageRaw, 10) : undefined;
+
+        const limit =
+          normalized === "completed" && !Number.isFinite(parsedLimit)
+            ? 4
+            : parsedLimit;
+
+        if (normalized === "completed") {
+          const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+          const tasks = await tasksService.getByStatus(normalized, { limit, page });
+
+          // Total for pagination
+          const total = await tasksService.countByStatus(normalized);
+          const totalPages = limit ? Math.ceil(total / Number(limit)) : 1;
+
+          return res.json({
+            data: tasks,
+            pagination: {
+              total,
+              page,
+              limit: Number(limit) || 4,
+              total_pages: totalPages
+            }
+          });
+        }
+
+        const tasks = await tasksService.getByStatus(normalized, { limit });
+        return res.json(tasks);
+      }
+
       const tasks = await tasksService.getAll();
       return res.json(tasks);
     } catch (error) {
