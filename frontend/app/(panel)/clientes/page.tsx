@@ -38,6 +38,19 @@ const initialForm: FormState = {
   notes: ""
 };
 
+function clientInitials(name: string) {
+  const source = (name ?? "").trim();
+  if (!source) return "C";
+  const parts = source
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const first = parts[0]?.[0] ?? "C";
+  const second = parts.length > 1 ? parts[1]?.[0] : parts[0]?.[1];
+  return `${first}${second ?? ""}`.toUpperCase();
+}
+
 function formatUiDate(value?: string | null) {
   if (!value) return "-";
   const d = new Date(value);
@@ -600,10 +613,17 @@ export default function ClientesPage() {
                         onClick={() => openQuick(c)}
                       >
                         <td className="px-4 py-3">
-                          <p className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</p>
-                          {c.notes ? <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{c.notes}</p> : null}
-                          {/* Email visible only on mobile (shown inline under name) */}
-                          <p className="mt-0.5 truncate text-xs text-[#64748B] dark:text-[#94A3B8] sm:hidden">{c.email}</p>
+                          <div className="flex items-center gap-3">
+                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                              <span>{clientInitials(c.name)}</span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</p>
+                              {c.notes ? <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{c.notes}</p> : null}
+                              {/* Email visible only on mobile (shown inline under name) */}
+                              <p className="mt-0.5 truncate text-xs text-[#64748B] dark:text-[#94A3B8] sm:hidden">{c.email}</p>
+                            </div>
+                          </div>
                         </td>
                         <td className="hidden px-4 py-3 text-[#64748B] dark:text-[#94A3B8] sm:table-cell">
                           <span className="font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.email}</span>

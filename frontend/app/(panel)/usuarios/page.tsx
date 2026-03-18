@@ -46,8 +46,8 @@ function roleLabel(role: UserRole) {
   return role === "admin" ? "Administrador" : "Empleado";
 }
 
-function userInitials(user: Pick<UserItem, "name" | "email">) {
-  const source = (user?.name ?? "").trim() || (user?.email ?? "").trim();
+function userInitials(name: string) {
+  const source = (name ?? "").trim();
   if (!source) return "U";
   const parts = source
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
@@ -400,7 +400,7 @@ export default function UsuariosPage() {
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={u.avatar_url} alt={u.name} className="h-full w-full object-cover" />
                               ) : (
-                                <span>{userInitials({ name: u.name, email: u.email })}</span>
+                                <span>{userInitials(u.name)}</span>
                               )}
                             </div>
                             <div className="min-w-0">
