@@ -610,11 +610,11 @@ export default function TareasPage() {
                 <Label htmlFor="task-title">Título *</Label>
                 <Input
                   id="task-title"
-                  placeholder="Ej: Cobrar a cliente Acme Corp"
+                  placeholder="Ej: Recordatorio: hacer pedido"
                   value={form.title}
                   onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                   required
-                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:border-[#3B82F6]/40 focus-visible:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:border-[#3B82F6]/60 dark:focus-visible:ring-[#3B82F6]/40"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
                 />
               </div>
 

@@ -62,6 +62,63 @@ class EmailLogsService {
       today: today.total
     };
   }
+
+  async cleanupOlderThanDays(days) {
+    const cutoffExpr = "DATE_SUB(NOW(), INTERVAL ? DAY)";
+
+    // Compatibilidad: algunos esquemas antiguos no tienen columnas extra.
+    const [colsSentAt] = await pool.query("SHOW COLUMNS FROM email_logs LIKE 'sent_at'");
+    const [colsLastAttempt] = await pool.query("SHOW COLUMNS FROM email_logs LIKE 'last_attempt_at'");
+    const [colsCreatedAt] = await pool.query("SHOW COLUMNS FROM email_logs LIKE 'created_at'");
+    const [colsUpdatedAt] = await pool.query("SHOW COLUMNS FROM email_logs LIKE 'updated_at'");
+
+    const hasSentAt = (colsSentAt?.length ?? 0) > 0;
+    const hasLastAttempt = (colsLastAttempt?.length ?? 0) > 0;
+    const hasCreatedAt = (colsCreatedAt?.length ?? 0) > 0;
+    const hasUpdatedAt = (colsUpdatedAt?.length ?? 0) > 0;
+
+    const dateCols = [
+      hasSentAt ? "sent_at" : null,
+      hasLastAttempt ? "last_attempt_at" : null,
+      hasCreatedAt ? "created_at" : null,
+      hasUpdatedAt ? "updated_at" : null
+    ].filter(Boolean);
+
+    if (dateCols.length === 0) {
+      return {
+        deleted: 0,
+        candidates: 0,
+        cutoff_days: days,
+        used_columns: []
+      };
+    }
+
+    const ageExpr = `COALESCE(${dateCols.join(", ")})`;
+
+    const [[{ total }]] = await pool.query("SELECT COUNT(*) AS total FROM email_logs");
+    const [[{ candidates }]] = await pool.query(
+      `SELECT COUNT(*) AS candidates FROM email_logs WHERE ${ageExpr} IS NOT NULL AND ${ageExpr} >= ${cutoffExpr}`,
+      [days]
+    );
+    const [[range]] = await pool.query(
+      `SELECT MIN(${ageExpr}) AS oldest, MAX(${ageExpr}) AS newest FROM email_logs WHERE ${ageExpr} IS NOT NULL`
+    );
+
+    const [result] = await pool.query(
+      `DELETE FROM email_logs WHERE ${ageExpr} IS NOT NULL AND ${ageExpr} >= ${cutoffExpr}`,
+      [days]
+    );
+
+    return {
+      deleted: result.affectedRows ?? 0,
+      candidates,
+      total,
+      oldest: range?.oldest ?? null,
+      newest: range?.newest ?? null,
+      cutoff_days: days,
+      used_columns: dateCols
+    };
+  }
 }
 
 export default new EmailLogsService();

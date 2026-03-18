@@ -56,3 +56,12 @@ export async function getEmailLogsSummary(): Promise<EmailLogSummary> {
   });
   return res.data;
 }
+
+export async function cleanupEmailLogs(days: number): Promise<{ deleted: number }> {
+  const res = await api.post<{ deleted: number }>(
+    "/email-logs/cleanup",
+    { days },
+    { headers: authHeaders() }
+  );
+  return res.data;
+}

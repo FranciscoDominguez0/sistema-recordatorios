@@ -17,8 +17,11 @@ import { es } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 import {
   getEmailLogs,
+  cleanupEmailLogs,
   getEmailLogsSummary,
   type EmailLogItem,
   type EmailLogSummary,
@@ -89,12 +92,18 @@ export default function HistorialCorreosPage() {
   const topbarQ = searchParams?.get("search") ?? "";
   const statusParam = (searchParams?.get("status") ?? "").toString();
 
+  const { toast } = useToast();
+
   const [logs, setLogs] = useState<EmailLogItem[]>([]);
   const [summary, setSummary] = useState<EmailLogSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const [cleanupDays, setCleanupDays] = useState(90);
+  const [cleanupOpen, setCleanupOpen] = useState(false);
+  const [cleanupLoading, setCleanupLoading] = useState(false);
 
   const fetchAll = useCallback(
     async ({ nextPage = 1, nextSearch = topbarQ } = {}) => {
@@ -132,6 +141,33 @@ export default function HistorialCorreosPage() {
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
 
+      <ConfirmDialog
+        open={cleanupOpen}
+        title="Limpiar historial"
+        description={`¿Seguro que deseas borrar del historial los correos de los últimos ${cleanupDays} días?`}
+        confirmText={cleanupLoading ? "Limpiando..." : "Limpiar"}
+        cancelText="Cancelar"
+        loading={cleanupLoading}
+        variant="danger"
+        onConfirm={async () => {
+          setCleanupLoading(true);
+          try {
+            const res = await cleanupEmailLogs(cleanupDays);
+            toast({ title: "Historial limpiado", description: `Registros eliminados: ${res.deleted}` });
+            setCleanupOpen(false);
+            await fetchAll({ nextPage: 1 });
+          } catch {
+            toast({ title: "Error", description: "No se pudo limpiar el historial" });
+          } finally {
+            setCleanupLoading(false);
+          }
+        }}
+        onOpenChange={(open) => {
+          if (cleanupLoading) return;
+          setCleanupOpen(open);
+        }}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -162,6 +198,30 @@ export default function HistorialCorreosPage() {
             <span className="ml-1 rounded-full bg-[#3B82F6]/10 px-2 py-0.5 text-xs font-bold text-[#3B82F6]">
               {total}
             </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={cleanupDays}
+              onChange={(e) => setCleanupDays(parseInt(e.target.value, 10))}
+              className="h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#0F172A] shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]"
+              aria-label="Rango de limpieza"
+            >
+              <option value={7}>Borrar últimos 7 días</option>
+              <option value={30}>Borrar últimos 30 días</option>
+              <option value={60}>Borrar últimos 60 días</option>
+              <option value={90}>Borrar últimos 90 días</option>
+              <option value={180}>Borrar últimos 180 días</option>
+            </select>
+
+            <Button
+              variant="secondary"
+              className="h-9 gap-2"
+              disabled={loading || cleanupLoading}
+              onClick={() => setCleanupOpen(true)}
+            >
+              Limpiar
+            </Button>
           </div>
         </div>
 
