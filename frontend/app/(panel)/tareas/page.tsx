@@ -74,6 +74,8 @@ export default function TareasPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [completedTotal, setCompletedTotal] = useState(0);
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(initialForm);
@@ -101,6 +103,7 @@ export default function TareasPage() {
 
       setCompletedPage(1);
       setCompletedHasMore((completedRes.pagination?.total_pages ?? 1) > 1);
+      setCompletedTotal(completedRes.pagination?.total ?? completedRes.data.length);
       setTasks([...pending, ...completedRes.data]);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "No se pudo cargar las tareas");
@@ -188,6 +191,9 @@ export default function TareasPage() {
     try {
       await completeTask(task.id);
       let undone = false;
+      let dismissed = false;
+      let completeTimer: number | null = null;
+
       toast({
         title: "Marcada como completada",
         description: "Puedes deshacer durante 10 segundos",
@@ -195,6 +201,14 @@ export default function TareasPage() {
         presentation: "confirm",
         durationMs: 10000,
         actionLabel: "Deshacer",
+        onDismiss: (reason) => {
+          if (reason !== "manual") return;
+          dismissed = true;
+          if (completeTimer) {
+            window.clearTimeout(completeTimer);
+            completeTimer = null;
+          }
+        },
         onAction: async () => {
           undone = true;
           try {
@@ -210,8 +224,8 @@ export default function TareasPage() {
 
       await fetchTasks();
 
-      window.setTimeout(() => {
-        if (undone) return;
+      completeTimer = window.setTimeout(() => {
+        if (undone || dismissed) return;
         toast({ title: "Tarea completada", variant: "success", presentation: "confirm" });
       }, 10000);
     } catch (e: unknown) {
@@ -244,8 +258,8 @@ export default function TareasPage() {
     }
   };
 
-  const totalTasks = tasks.length;
   const pendingTasks = tasks.filter((t) => t.status === "pending");
+  const totalTasks = pendingTasks.length + completedTotal;
   const completedTasks = tasks.filter((t) => t.status === "completed");
   const overdueTasks = pendingTasks.filter((t) => getTaskUrgency(t.due_date) === "overdue");
   const todayTasks = pendingTasks.filter((t) => getTaskUrgency(t.due_date) === "today");
@@ -383,7 +397,7 @@ export default function TareasPage() {
             </div>
           </div>
           <p className="mt-2 text-2xl font-semibold tracking-tight text-emerald-800 dark:text-emerald-200">
-            {completedTasks.length}
+            {completedTotal}
           </p>
           <p className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80">Finalizadas</p>
         </div>

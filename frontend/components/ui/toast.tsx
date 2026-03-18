@@ -9,6 +9,8 @@ type ToastPresentation = "card" | "confirm";
 
 type ToastIconOverride = "undo";
 
+type ToastDismissReason = "manual" | "timeout";
+
 export type ToastInput = {
   title: string;
   description?: string;
@@ -16,6 +18,7 @@ export type ToastInput = {
   durationMs?: number;
   actionLabel?: string;
   onAction?: () => void;
+  onDismiss?: (reason: ToastDismissReason) => void;
   presentation?: ToastPresentation;
   iconOverride?: ToastIconOverride;
 };
@@ -28,12 +31,13 @@ type ToastItem = {
   durationMs: number;
   actionLabel?: string;
   onAction?: () => void;
+  onDismiss?: (reason: ToastDismissReason) => void;
   presentation: ToastPresentation;
   iconOverride?: ToastIconOverride;
 };
 
 type ToastContextValue = {
-  toast: (input: ToastInput) => void;
+  toast: (input: ToastInput) => string;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -80,8 +84,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const timers = useRef<Record<string, number>>({});
 
-  const remove = useCallback((id: string) => {
-    setItems((prev) => prev.filter((t) => t.id !== id));
+  const remove = useCallback((id: string, reason: ToastDismissReason = "manual") => {
+    setItems((prev) => {
+      const item = prev.find((t) => t.id === id);
+      if (item?.onDismiss) {
+        try {
+          item.onDismiss(reason);
+        } catch {
+          // no-op
+        }
+      }
+      return prev.filter((t) => t.id !== id);
+    });
     const timer = timers.current[id];
     if (timer) { window.clearTimeout(timer); delete timers.current[id]; }
   }, []);
@@ -98,12 +112,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         durationMs,
         actionLabel: input.actionLabel,
         onAction: input.onAction,
+        onDismiss: input.onDismiss,
         presentation: input.presentation ?? "card",
         iconOverride: input.iconOverride
       },
       ...prev
     ].slice(0, 4));
-    timers.current[id] = window.setTimeout(() => remove(id), durationMs);
+    timers.current[id] = window.setTimeout(() => remove(id, "timeout"), durationMs);
+    return id;
   }, [remove]);
 
   const value = useMemo(() => ({ toast }), [toast]);
@@ -188,7 +204,7 @@ function ConfirmMark({ variant, color, iconOverride }: { variant: ToastVariant; 
   );
 }
 
-function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: string) => void }) {
+function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: string, reason?: ToastDismissReason) => void }) {
   if (!items.length) return null;
 
   // El layout usa lg:pl-72 (288px) y xl:pl-80 (320px) para el sidebar.
@@ -235,7 +251,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
 
               <button
                 type="button"
-                onClick={() => onDismiss(t.id)}
+                onClick={() => onDismiss(t.id, "manual")}
                 className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-2xl text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:hover:bg-[#1F2A44] dark:hover:text-[#F1F5F9]"
               >
                 <X className="h-4 w-4" />
@@ -249,7 +265,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
                       try {
                         t.onAction?.();
                       } finally {
-                        onDismiss(t.id);
+                        onDismiss(t.id, "manual");
                       }
                     }}
                     className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#0B1424]"
@@ -298,7 +314,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
               {/* Botón cerrar */}
               <button
                 type="button"
-                onClick={() => onDismiss(t.id)}
+                onClick={() => onDismiss(t.id, "manual")}
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:hover:bg-[#1F2A44] dark:hover:text-[#F1F5F9]"
               >
                 <X className="h-3.5 w-3.5" />
@@ -313,7 +329,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
                     try {
                       t.onAction?.();
                     } finally {
-                      onDismiss(t.id);
+                      onDismiss(t.id, "manual");
                     }
                   }}
                   className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#0B1424]"
