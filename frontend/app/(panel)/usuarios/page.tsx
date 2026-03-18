@@ -46,6 +46,19 @@ function roleLabel(role: UserRole) {
   return role === "admin" ? "Administrador" : "Empleado";
 }
 
+function userInitials(user: Pick<UserItem, "name" | "email">) {
+  const source = (user?.name ?? "").trim() || (user?.email ?? "").trim();
+  if (!source) return "U";
+  const parts = source
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const first = parts[0]?.[0] ?? "U";
+  const second = parts.length > 1 ? parts[1]?.[0] : parts[0]?.[1];
+  return `${first}${second ?? ""}`.toUpperCase();
+}
+
 export default function UsuariosPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -382,8 +395,13 @@ export default function UsuariosPage() {
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                              <User2 className="h-4 w-4" />
+                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                              {u.avatar_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={u.avatar_url} alt={u.name} className="h-full w-full object-cover" />
+                              ) : (
+                                <span>{userInitials({ name: u.name, email: u.email })}</span>
+                              )}
                             </div>
                             <div className="min-w-0">
                               <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{u.name}</p>

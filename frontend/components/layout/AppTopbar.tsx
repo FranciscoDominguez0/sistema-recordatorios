@@ -160,7 +160,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
         </button>
 
         <div className="hidden min-w-0 flex-1 items-center sm:flex">
-          <div className="relative w-full max-w-[420px]" ref={popoverRef}>
+          <div className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[420px]" ref={popoverRef}>
             <div className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center">
               <Search className="h-4 w-4 text-[#475569] dark:text-[#CBD5E1]" />
             </div>
@@ -302,7 +302,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
             className="rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Cerrar Sesión</span>
+            <span className="hidden md:inline">Cerrar Sesión</span>
           </Button>
         </div>
       </div>
