@@ -108,7 +108,7 @@ function LineChart({ data }: { data: { date: string; total: number }[] }) {
   const areaPoints = `${PL},${PT + chartH} ${points} ${toX(data.length - 1)},${PT + chartH}`;
 
   // Y-axis ticks
-  const yTicks = [0, Math.round(maxVal / 2), maxVal];
+  const yTicks = Array.from(new Set([0, Math.round(maxVal / 2), maxVal])).sort((a, b) => a - b);
 
   // X labels — show up to 7 labels
   const step = Math.ceil(data.length / 7);
