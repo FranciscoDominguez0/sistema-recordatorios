@@ -78,6 +78,7 @@ CREATE TABLE services (
     expiration_date DATE NOT NULL,
     reminder_days INT DEFAULT 5,
     status ENUM('activo','vencido','completado') DEFAULT 'activo',
+    auto_renew TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,

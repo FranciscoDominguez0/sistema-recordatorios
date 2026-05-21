@@ -14,7 +14,8 @@ import {
   Plus,
   ShieldAlert,
   Trash2,
-  XCircle
+  XCircle,
+  RefreshCw
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ type FormState = {
   expiration_date: string;
   reminder_days: string;
   status: ServiceStatus;
+  auto_renew: boolean;
 };
 
 const initialForm: FormState = {
@@ -58,7 +60,8 @@ const initialForm: FormState = {
   start_date: "",
   expiration_date: "",
   reminder_days: "5",
-  status: "activo"
+  status: "activo",
+  auto_renew: false
 };
 
 function formatDate(value?: string | null) {
@@ -340,7 +343,8 @@ export default function ServiciosPage() {
       start_date: toDateInputValue(service.start_date),
       expiration_date: toDateInputValue(service.expiration_date),
       reminder_days: String(service.reminder_days ?? 5),
-      status: ((service.status as ServiceStatus) ?? "activo") as ServiceStatus
+      status: ((service.status as ServiceStatus) ?? "activo") as ServiceStatus,
+      auto_renew: Boolean(service.auto_renew)
     });
     setClientQuery(service.client_name ?? "");
     setClientOptions([]);
@@ -375,7 +379,8 @@ export default function ServiciosPage() {
         start_date: form.start_date.trim() || undefined,
         expiration_date: form.expiration_date.trim(),
         reminder_days: Number(form.reminder_days || 5),
-        status: (form.status || "activo") as ServiceStatus
+        status: (form.status || "activo") as ServiceStatus,
+        auto_renew: form.auto_renew
       };
 
       if (drawerMode === "create") {
@@ -882,7 +887,14 @@ export default function ServiciosPage() {
                         onClick={() => openDetail(s)}
                       >
                         <td className="px-4 py-3">
-                          <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{s.service_name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{s.service_name}</p>
+                            {s.auto_renew ? (
+                              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" title="Renovación automática activa">
+                                <RefreshCw className="h-3 w-3" />
+                              </span>
+                            ) : null}
+                          </div>
                           {s.description ? (
                             <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{s.description}</p>
                           ) : null}
@@ -1075,6 +1087,10 @@ export default function ServiciosPage() {
                       <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Creado</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.created_at ? formatDate(detailService.created_at) : "-"}</p>
+                      </div>
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Renovación automática</p>
+                        <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.auto_renew ? "Sí (Mensual)" : "No"}</p>
                       </div>
                     </div>
                   </div>
@@ -1269,6 +1285,24 @@ export default function ServiciosPage() {
                     <option value="vencido">vencido</option>
                     <option value="completado">completado</option>
                   </select>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35] sm:col-span-2">
+                  <input
+                    id="auto_renew"
+                    type="checkbox"
+                    checked={form.auto_renew}
+                    onChange={(e) => setForm((p) => ({ ...p, auto_renew: e.target.checked }))}
+                    className="h-5 w-5 rounded border-[#E2E8F0] text-[#3B82F6] focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#0B1424] cursor-pointer"
+                  />
+                  <div className="grid gap-0.5 leading-none">
+                    <Label htmlFor="auto_renew" className="font-semibold text-sm cursor-pointer text-[#0F172A] dark:text-[#F1F5F9]">
+                      Renovación automática
+                    </Label>
+                    <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                      Renovar automáticamente por 1 mes al expirar (solo si está activo/vencido).
+                    </p>
+                  </div>
                 </div>
               </div>
 

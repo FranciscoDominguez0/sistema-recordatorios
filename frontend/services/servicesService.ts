@@ -13,6 +13,7 @@ export type ServiceItem = {
   expiration_date: string;
   reminder_days?: number | null;
   status?: ServiceStatus;
+  auto_renew?: boolean | number;
   created_at?: string;
 };
 
@@ -43,6 +44,7 @@ type CreateServiceInput = {
   expiration_date: string;
   reminder_days?: number;
   status?: ServiceStatus;
+  auto_renew?: boolean | number;
 };
 
 type UpdateServiceInput = Partial<CreateServiceInput>;

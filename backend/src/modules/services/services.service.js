@@ -17,7 +17,8 @@ class ServicesService {
     start_date,
     expiration_date,
     reminder_days,
-    status
+    status,
+    auto_renew
   }) {
     const normalizedStatus = normalizeStatus(status) ?? "activo";
     if (!ALLOWED_STATUSES.has(normalizedStatus)) {
@@ -32,9 +33,10 @@ class ServicesService {
         start_date,
         expiration_date,
         reminder_days,
-        status
+        status,
+        auto_renew
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await pool.query(sql, [
@@ -44,7 +46,8 @@ class ServicesService {
       start_date,
       expiration_date,
       reminder_days,
-      normalizedStatus
+      normalizedStatus,
+      auto_renew ? 1 : 0
     ]);
 
     return {
@@ -55,7 +58,8 @@ class ServicesService {
       start_date,
       expiration_date,
       reminder_days,
-      status: normalizedStatus
+      status: normalizedStatus,
+      auto_renew: auto_renew ? 1 : 0
     };
   }
 
@@ -165,7 +169,8 @@ class ServicesService {
     start_date,
     expiration_date,
     reminder_days,
-    status
+    status,
+    auto_renew
   }) {
     const normalizedStatus = normalizeStatus(status);
     if (normalizedStatus && !ALLOWED_STATUSES.has(normalizedStatus)) {
@@ -187,7 +192,8 @@ class ServicesService {
           start_date = ?,
           expiration_date = ?,
           reminder_days = ?,
-          status = ?
+          status = ?,
+          auto_renew = ?
       WHERE id = ?
     `;
 
@@ -199,6 +205,7 @@ class ServicesService {
       expiration_date,
       reminder_days,
       nextStatus,
+      auto_renew ? 1 : 0,
       id
     ]);
 

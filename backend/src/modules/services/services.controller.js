@@ -12,7 +12,8 @@ class ServicesController {
         start_date,
         expiration_date,
         reminder_days,
-        status
+        status,
+        auto_renew
       } = req.body ?? {};
 
       const service = await servicesService.create({
@@ -22,7 +23,8 @@ class ServicesController {
         start_date,
         expiration_date,
         reminder_days,
-        status
+        status,
+        auto_renew
       });
 
       try {
@@ -102,7 +104,8 @@ class ServicesController {
         start_date,
         expiration_date,
         reminder_days,
-        status
+        status,
+        auto_renew
       } = req.body ?? {};
 
       const updated = await servicesService.update(id, {
@@ -112,7 +115,8 @@ class ServicesController {
         start_date,
         expiration_date,
         reminder_days,
-        status
+        status,
+        auto_renew
       });
 
       if (!updated) {

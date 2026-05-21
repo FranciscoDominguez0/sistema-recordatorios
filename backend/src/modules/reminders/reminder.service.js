@@ -379,6 +379,89 @@ class ReminderService {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // PROCESO 4 — Renovación automática de servicios
+  // ─────────────────────────────────────────────────────────────────────────
+  async processAutoRenewals() {
+    console.log("▶ Proceso 4: Renovación automática de servicios...");
+    
+    // Buscar servicios con auto_renovación activa, estado activo/vencido y fecha expiración <= hoy
+    const [services] = await pool.query(`
+      SELECT s.*, c.name AS client_name, c.email AS client_email
+      FROM services s
+      JOIN clients c ON s.client_id = c.id
+      WHERE s.auto_renew = 1
+        AND s.expiration_date <= CURDATE()
+        AND s.status IN ('activo', 'vencido')
+    `);
+
+    let renewedCount = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const service of services) {
+      let nextDateObj = new Date(service.expiration_date);
+      
+      // Asegurarse de que el nuevo vencimiento esté estrictamente en el futuro (mínimo el mes siguiente)
+      while (nextDateObj <= today) {
+        const currentDay = nextDateObj.getDate();
+        nextDateObj.setMonth(nextDateObj.getMonth() + 1);
+        if (nextDateObj.getDate() !== currentDay) {
+          nextDateObj.setDate(0); // Manejo correcto del fin de mes
+        }
+      }
+
+      const yyyy = nextDateObj.getFullYear();
+      const mm = String(nextDateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(nextDateObj.getDate()).padStart(2, "0");
+      const nextDate = `${yyyy}-${mm}-${dd}`;
+
+      // Actualizar servicio a activo con la nueva fecha de vencimiento
+      await pool.query(
+        `UPDATE services SET expiration_date = ?, status = 'activo' WHERE id = ?`,
+        [nextDate, service.id]
+      );
+
+      // Limpiar historial de recordatorios para el nuevo periodo
+      await pool.query(`DELETE FROM reminder_history WHERE service_id = ?`, [service.id]);
+
+      // Notificación in-app para admins
+      try {
+        const prettyDate = nextDateObj.toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "2-digit" });
+        await notificationsService.broadcastToAdmins({
+          service_id: service.id,
+          client_id: service.client_id ?? null,
+          type: "service_expiring",
+          title: `Auto-renovado: ${service.service_name}`,
+          message: `El servicio de ${service.client_name} se renovó automáticamente hasta el ${prettyDate}`
+        });
+      } catch (notifErr) {
+        console.error("Auto-renew notification error:", notifErr.message);
+      }
+
+      // Log de actividad
+      try {
+        const activityLogsService = (await import("../activity_logs/activityLogs.service.js")).default;
+        const prettyDate = nextDateObj.toLocaleDateString("es-PA", { year: "numeric", month: "long", day: "2-digit" });
+        await activityLogsService.logActivity({
+          user_id: null,
+          action: "AUTO_RENEW_SERVICE",
+          entity_type: "service",
+          entity_id: service.id,
+          description: `El sistema renovó automáticamente el servicio de ${service.client_name} hasta el ${prettyDate} (Auto-Renovación activa)`,
+          ip_address: "127.0.0.1"
+        });
+      } catch (logErr) {
+        console.error("Auto-renew activity log error:", logErr.message);
+      }
+
+      renewedCount++;
+      console.log(`  [AUTO-RENEW] Servicio ID ${service.id} ("${service.service_name}") auto-renovado hasta ${nextDate}.`);
+    }
+
+    return { auto_renewed: renewedCount };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Punto de entrada del cron job
   // ─────────────────────────────────────────────────────────────────────────
   async processDailyReminders() {
@@ -392,12 +475,16 @@ class ReminderService {
     const r2 = await this.processExpiredServices();
     console.log("  →", r2);
 
-    console.log("▶ Proceso 3: tareas internas de hoy...");
+    console.log("▶ Proceso 3: renovación automática de servicios...");
+    const rAuto = await this.processAutoRenewals();
+    console.log("  →", rAuto);
+
+    console.log("▶ Proceso 4: tareas internas de hoy...");
     const r3 = await this.processTasksDueToday();
     console.log("  →", r3);
 
     console.log("═══ Proceso diario finalizado ═══");
-    return { ...r1, ...r2, ...r3 };
+    return { ...r1, ...r2, ...rAuto, ...r3 };
   }
 }
 
