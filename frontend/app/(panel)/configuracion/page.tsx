@@ -59,7 +59,7 @@ import {
 type Tab = "smtp" | "plantillas" | "empresa";
 
 const inputCls =
-  "border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60";
+  "border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60";
 
 const TEMPLATE_DEFS = [
   { name: "cliente_recordatorio", label: "Recordatorio a cliente", desc: "Se envía al cliente cuando un servicio está por vencer." },
@@ -88,16 +88,16 @@ function buildEmailHtml(opts: { logo: string; firma: string; companyName: string
 <body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:32px 16px;"><tr><td align="center">
   <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-    <tr><td style="background:linear-gradient(135deg,#08112F 0%,#1a2f6e 100%);padding:28px 32px;">
+    <tr><td style="background:linear-gradient(135deg,#000000 0%,#270505 100%);padding:28px 32px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td>${logo ? `<img src="${logo}" alt="${companyName}" style="max-height:48px;max-width:200px;object-fit:contain;display:block;"/>` : `<span style="color:#fff;font-size:20px;font-weight:700;">${companyName || "Tu Empresa"}</span>`}</td>
-        <td align="right"><span style="color:rgba(255,255,255,0.6);font-size:12px;">Notificación del sistema</span></td>
+        <td align="right"><span style="color:rgba(255,255,255,0.6);font-size:12px;">Notificación del systema</span></td>
       </tr></table>
     </td></tr>
-    <tr><td style="background:#3B82F6;padding:12px 32px;"><p style="margin:0;color:#fff;font-size:14px;font-weight:600;">${subject || "Asunto del correo"}</p></td></tr>
+    <tr><td style="background:#DC2626;padding:12px 32px;"><p style="margin:0;color:#fff;font-size:14px;font-weight:600;">${subject || "Asunto del correo"}</p></td></tr>
     <tr><td style="background:#ffffff;padding:36px 32px;"><div style="color:#1e293b;font-size:15px;line-height:1.7;">${bodyHtml}</div></td></tr>
     ${firma ? `<tr><td style="background:#F8FAFC;border-top:1px solid #E2E8F0;padding:24px 32px;"><p style="margin:0 0 4px;color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Firma</p><div style="color:#334155;font-size:13px;line-height:1.6;">${firma.replace(/\n/g, "<br/>")}</div></td></tr>` : ""}
-    <tr><td style="background:#08112F;padding:16px 32px;"><p style="margin:0;color:rgba(255,255,255,0.4);font-size:11px;text-align:center;">Mensaje generado automáticamente · ${companyName || "Sistema de recordatorios"}</p></td></tr>
+    <tr><td style="background:#000000;padding:16px 32px;"><p style="margin:0;color:rgba(255,255,255,0.4);font-size:11px;text-align:center;">Mensaje generado automáticamente · ${companyName || "Sistema de recordatorios"}</p></td></tr>
   </table></td></tr></table>
 </body></html>`;
 }
@@ -121,14 +121,14 @@ function buildPreviewCard(cardContent: string) {
 
   const htmlRows = rows
     .map((r, i) => {
-      const top = i === 0 ? "" : "border-top:1px solid #dbeafe;";
+      const top = i === 0 ? "" : "border-top:1px solid #fee2e2;";
       const label = r.label;
       const value = r.value;
       return `<tr><td style="padding:5px 0;width:40%;${top}">${label ? `<span style=\"color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;\">${label}</span>` : ""}</td><td style="padding:5px 0;${top}"><span style="color:#0f172a;font-size:14px;font-weight:600;">${value}</span></td></tr>`;
     })
     .join("");
 
-  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0f7ff;border-left:4px solid #3b82f6;border-radius:6px;margin:16px 0 20px;"><tr><td style="padding:16px 20px;"><table width="100%" cellpadding="0" cellspacing="0" border="0">${htmlRows}</table></td></tr></table>`;
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:6px;margin:16px 0 20px;"><tr><td style="padding:16px 20px;"><table width="100%" cellpadding="0" cellspacing="0" border="0">${htmlRows}</table></td></tr></table>`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -367,13 +367,13 @@ export default function ConfiguracionPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-1 dark:border-[#1F2A44] dark:bg-[#111E35] sm:w-fit">
+      <div className="flex flex-wrap gap-1 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-1 dark:border-[#1F2A44] dark:bg-neutral-950 sm:w-fit">
         {([
           { key: "smtp",      icon: <Mail className="h-4 w-4" />,      label: "SMTP" },
           { key: "plantillas",icon: <FileText className="h-4 w-4" />,  label: "Plantillas" },
           { key: "empresa",   icon: <Building2 className="h-4 w-4" />, label: "Empresa" }
         ] as const).map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)} className={cn("flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors", tab === t.key ? "bg-white text-[#0F172A] shadow-sm dark:bg-[#1F2A44] dark:text-[#F1F5F9]" : "text-[#64748B] hover:text-[#0F172A] dark:text-[#94A3B8] dark:hover:text-[#F1F5F9]")}>
+          <button key={t.key} onClick={() => setTab(t.key)} className={cn("flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors", tab === t.key ? "bg-white text-[#0F172A] shadow-sm dark:bg-neutral-900 dark:text-[#F1F5F9]" : "text-[#64748B] hover:text-[#0F172A] dark:text-[#94A3B8] dark:hover:text-[#F1F5F9]")}>
             {t.icon}{t.label}
           </button>
         ))}
@@ -384,7 +384,7 @@ export default function ConfiguracionPage() {
         <div className="space-y-5">
           <ConfirmDialog open={smtpDeleteOpen} title="Eliminar email SMTP" description={deletingSmtp ? `¿Seguro que deseas eliminar "${deletingSmtp.smtp_email}"?` : ""} confirmText={deletingSmtpLoading ? "Eliminando..." : "Eliminar"} cancelText="Cancelar" loading={deletingSmtpLoading} variant="danger" onConfirm={confirmDeleteSmtp} onOpenChange={(open) => { if (deletingSmtpLoading) return; setSmtpDeleteOpen(open); if (!open) setDeletingSmtp(null); }} />
 
-          <div className="flex items-start gap-3 rounded-2xl border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-sm text-blue-800 dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
+          <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/20 dark:text-red-300">
             <Mail className="mt-0.5 h-4 w-4 shrink-0" />
             El sistema usa el email marcado como <strong>Principal</strong>. Puedes tener varios configurados.
           </div>
@@ -401,15 +401,15 @@ export default function ConfiguracionPage() {
               {smtpLoading ? (
                 <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]"><Loader2 className="h-4 w-4 animate-spin" /> Cargando...</div>
               ) : smtpList.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-10 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]"><Mail className="mb-3 h-10 w-10 opacity-30" />No hay emails SMTP configurados.</div>
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-10 text-sm text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]"><Mail className="mb-3 h-10 w-10 opacity-30" />No hay emails SMTP configurados.</div>
               ) : (
                 <div className="space-y-3">
                   {smtpList.map((item) => (
-                    <div key={item.id} className={cn("overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors dark:bg-[#0B1424]", item.is_default ? "border-[#3B82F6]/30 dark:border-[#3B82F6]/40" : "border-[#E2E8F0] dark:border-[#1F2A44]")}>
+                    <div key={item.id} className={cn("overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors dark:bg-[#080808]", item.is_default ? "border-red-500/30 dark:border-red-500/40" : "border-[#E2E8F0] dark:border-neutral-900")}>
                       <div className="flex items-start gap-4 p-4">
                         {/* Icon */}
-                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", item.is_default ? "border-[#3B82F6]/30 bg-[#3B82F6]/10 dark:border-[#3B82F6]/40 dark:bg-[#3B82F6]/15" : "border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]")}>
-                          <Mail className={cn("h-5 w-5", item.is_default ? "text-[#3B82F6]" : "text-[#64748B] dark:text-[#94A3B8]")} />
+                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", item.is_default ? "border-red-500/30 bg-red-500/10 dark:border-red-500/40 dark:bg-red-950/20" : "border-[#E2E8F0] bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-950")}>
+                          <Mail className={cn("h-5 w-5", item.is_default ? "text-red-500" : "text-[#64748B] dark:text-[#94A3B8]")} />
                         </div>
 
                         {/* Info */}
@@ -471,11 +471,11 @@ export default function ConfiguracionPage() {
             {templatesLoading ? (
               <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#94A3B8]"><Loader2 className="h-4 w-4 animate-spin" /> Cargando...</div>
             ) : templates.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-4 text-center text-xs text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]"><FileText className="mx-auto mb-2 h-6 w-6 opacity-40" />Sin plantillas.</div>
+              <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-4 text-center text-xs text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]"><FileText className="mx-auto mb-2 h-6 w-6 opacity-40" />Sin plantillas.</div>
             ) : (
               <div className="space-y-1">
                 {templates.map((t) => (
-                  <button key={t.id} onClick={() => selectTemplate(t)} className={cn("group flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors", selected?.id === t.id ? "border-[#3B82F6]/30 bg-[#3B82F6]/10 dark:border-[#3B82F6]/40 dark:bg-[#3B82F6]/15" : "border-transparent hover:border-[#E2E8F0] hover:bg-[#F8FAFC] dark:hover:border-[#1F2A44] dark:hover:bg-[#111E35]")}>
+                  <button key={t.id} onClick={() => selectTemplate(t)} className={cn("group flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left text-sm transition-colors", selected?.id === t.id ? "border-red-500/30 bg-red-500/10 dark:border-red-500/40 dark:bg-red-950/20" : "border-transparent hover:border-[#E2E8F0] hover:bg-[#F8FAFC] dark:hover:border-neutral-900 dark:hover:bg-neutral-950")}>
                     <FileText className="mt-0.5 h-4 w-4 shrink-0 opacity-60" />
                     <div className="min-w-0">
                       <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{tplLabel(t.name)}</p>
@@ -486,7 +486,7 @@ export default function ConfiguracionPage() {
               </div>
             )}
             {/* Aviso: logo/firma se toman de la tab Empresa */}
-            <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
+            <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 dark:border-neutral-900 dark:bg-neutral-950">
               <p className="text-[10px] text-[#64748B] dark:text-[#94A3B8]">El logo y la firma se configuran en la pestaña <strong className="text-[#0F172A] dark:text-[#F1F5F9]">Empresa</strong>.</p>
             </div>
           </div>
@@ -494,7 +494,7 @@ export default function ConfiguracionPage() {
           {/* Editor */}
           <div className="lg:overflow-auto lg:pr-1">
             {!selected ? (
-              <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+              <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] text-sm text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]">
                 <div className="text-center"><FileText className="mx-auto mb-3 h-8 w-8 opacity-40" />Selecciona una plantilla para editarla.</div>
               </div>
             ) : (
@@ -517,7 +517,7 @@ export default function ConfiguracionPage() {
                     <div><Label htmlFor="tpl-subject">Asunto</Label><Input id="tpl-subject" placeholder="Recordatorio de vencimiento - {{servicio}}" value={tplForm.subject} onChange={(e) => setTplForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
                     <div>
                       <div className="mb-1 flex items-center justify-between"><Label htmlFor="tpl-body">Cuerpo del correo</Label></div>
-                      <textarea id="tpl-body" rows={12} placeholder="Estimado {{cliente}},..." value={tplForm.content} onChange={(e) => setTplForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" />
+                      <textarea id="tpl-body" rows={12} placeholder="Estimado {{cliente}},..." value={tplForm.content} onChange={(e) => setTplForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus:ring-red-500/25" />
 
                     </div>
                     <div>
@@ -528,7 +528,7 @@ export default function ConfiguracionPage() {
                         placeholder={"Servicio|{{servicio}}\nFecha de vencimiento|{{fecha_vencimiento}}"}
                         value={tplForm.card_content}
                         onChange={(e) => setTplForm((p) => ({ ...p, card_content: e.target.value }))}
-                        className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
+                        className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus:ring-red-500/25"
                       />
                       <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Formato: una línea por fila. Usa <strong>Etiqueta|Valor</strong> y variables como <strong>{"{{servicio}}"}</strong>.</p>
                     </div>
@@ -546,8 +546,8 @@ export default function ConfiguracionPage() {
         <div className="fixed inset-0 z-50">
           <button type="button" className="absolute inset-0 bg-black/50" onClick={() => setPreviewOpen(false)} aria-label="Cerrar" />
           <div className="relative mx-auto mt-8 w-[min(980px,calc(100vw-24px))]">
-            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-[#1F2A44] dark:bg-[#0b1220]">
-              <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-[#1F2A44] dark:bg-[#111E35]">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-neutral-900 dark:bg-neutral-950">
+              <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-neutral-900 dark:bg-[#080808]">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">Vista previa: {tplLabel(selected.name)}</p>
                   <p className="truncate text-[11px] text-[#64748B] dark:text-[#94A3B8]">Asunto: {tplForm.subject || "—"}</p>
@@ -557,7 +557,7 @@ export default function ConfiguracionPage() {
                 </Button>
               </div>
               <div className="p-4">
-                <div className="overflow-hidden rounded-xl border border-[#E2E8F0] shadow-sm dark:border-[#1F2A44]">
+                <div className="overflow-hidden rounded-xl border border-[#E2E8F0] shadow-sm dark:border-neutral-900">
                   <iframe srcDoc={emailPreviewHtml} className="h-[75vh] max-h-[720px] min-h-[420px] w-full" title="Vista previa del correo" sandbox="allow-same-origin" />
                 </div>
                 <p className="mt-2 text-center text-[10px] text-[#64748B] dark:text-[#94A3B8]">Vista previa con datos de ejemplo</p>
@@ -587,7 +587,7 @@ export default function ConfiguracionPage() {
                         <Label className="mb-2 block text-sm">Logo de la empresa</Label>
                         <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                         {companyForm.logo_base64 ? (
-                          <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-[#3B82F6]/30 bg-[#3B82F6]/5 p-3 transition-colors dark:border-[#3B82F6]/40 dark:bg-[#3B82F6]/10">
+                          <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-red-500/30 bg-red-500/5 p-3 transition-colors dark:border-red-500/40 dark:bg-red-950/20">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={companyForm.logo_base64} alt="Logo" className="mx-auto max-h-16 w-auto object-contain" />
                             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -596,7 +596,7 @@ export default function ConfiguracionPage() {
                             </div>
                           </div>
                         ) : (
-                          <button type="button" onClick={() => logoInputRef.current?.click()} className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC] py-6 text-[#64748B] transition-colors hover:border-[#3B82F6]/40 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:border-[#3B82F6]/40">
+                          <button type="button" onClick={() => logoInputRef.current?.click()} className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#E2E8F0] bg-[#F8FAFC] py-6 text-[#64748B] transition-colors hover:border-red-500/40 hover:bg-red-500/5 hover:text-red-500 dark:border-neutral-900 dark:bg-neutral-950 dark:hover:border-red-500/40">
                             <ImageIcon className="h-7 w-7 opacity-40" />
                             <span className="text-sm font-medium">Haz clic para subir el logo</span>
                             <span className="text-xs opacity-60">PNG, JPG, SVG · máx. 512 KB</span>
@@ -622,15 +622,15 @@ export default function ConfiguracionPage() {
                           placeholder={"Atentamente,\nFrancisco Domínguez\nGerente General\ncontacto@vigitec.com\n+507 000-0000"}
                           value={companyForm.firma}
                           onChange={(e) => setCompanyForm((p) => ({ ...p, firma: e.target.value }))}
-                          className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
+                          className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus:ring-red-500/25"
                         />
                         <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Texto de firma que se muestra al final de cada correo enviado.</p>
                       </div>
 
                       {/* Preview mini */}
                       {(companyForm.logo_base64 || companyForm.company_name || companyForm.firma) && (
-                        <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-[#1F2A44]">
-                          <div className="flex items-center gap-2 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                        <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-neutral-900">
+                          <div className="flex items-center gap-2 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 dark:border-neutral-900 dark:bg-[#080808]">
                             <Eye className="h-3.5 w-3.5 text-[#64748B] dark:text-[#94A3B8]" />
                             <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vista previa del encabezado y firma</span>
                           </div>
@@ -668,8 +668,8 @@ export default function ConfiguracionPage() {
       <div className={cn("fixed inset-0 z-40", smtpDrawerOpen ? "" : "pointer-events-none")}>
         <div className={cn("absolute inset-0 bg-black/50 transition-opacity", smtpDrawerOpen ? "opacity-100" : "opacity-0")} onClick={() => setSmtpDrawerOpen(false)} />
         <div className={cn("absolute inset-0 flex items-center justify-center p-4 transition-opacity", smtpDrawerOpen ? "opacity-100" : "opacity-0")}>
-          <aside className={cn("relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-[#1F2A44] dark:bg-[#0B1424]", smtpDrawerOpen ? "scale-100" : "scale-95")} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+          <aside className={cn("relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-neutral-900 dark:bg-[#080808]", smtpDrawerOpen ? "scale-100" : "scale-95")} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div><p className="text-sm font-semibold">{editingSmtp ? "Editar SMTP" : "Nueva configuración SMTP"}</p><p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Configura tu servidor de correo saliente.</p></div>
               <Button variant="ghost" size="icon" onClick={() => setSmtpDrawerOpen(false)} className="rounded-xl"><XCircle className="h-4 w-4" /></Button>
             </div>
@@ -679,7 +679,7 @@ export default function ConfiguracionPage() {
                 <div><Label htmlFor="smtp-port">Puerto</Label><Input id="smtp-port" type="number" placeholder="587" value={smtpForm.smtp_port} onChange={(e) => setSmtpForm((p) => ({ ...p, smtp_port: e.target.value }))} className={inputCls} /></div>
                 <div>
                   <Label htmlFor="smtp-enc">Cifrado</Label>
-                  <select id="smtp-enc" value={smtpForm.encryption} onChange={(e) => setSmtpForm((p) => ({ ...p, encryption: e.target.value as "tls" | "ssl" }))} className="mt-1 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm outline-none focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                  <select id="smtp-enc" value={smtpForm.encryption} onChange={(e) => setSmtpForm((p) => ({ ...p, encryption: e.target.value as "tls" | "ssl" }))} className="mt-1 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm outline-none focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                     <option value="tls">TLS</option><option value="ssl">SSL</option>
                   </select>
                 </div>
@@ -706,15 +706,15 @@ export default function ConfiguracionPage() {
       <div className={cn("fixed inset-0 z-40", createDrawerOpen ? "" : "pointer-events-none")}>
         <div className={cn("absolute inset-0 bg-black/50 transition-opacity", createDrawerOpen ? "opacity-100" : "opacity-0")} onClick={() => setCreateDrawerOpen(false)} />
         <div className={cn("absolute inset-0 flex items-center justify-center p-4 transition-opacity", createDrawerOpen ? "opacity-100" : "opacity-0")}>
-          <aside className={cn("relative z-50 flex w-full max-w-[600px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-[#1F2A44] dark:bg-[#0B1424]", createDrawerOpen ? "scale-100" : "scale-95")} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+          <aside className={cn("relative z-50 flex w-full max-w-[600px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl dark:border-neutral-900 dark:bg-[#080808]", createDrawerOpen ? "scale-100" : "scale-95")} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div><p className="text-sm font-semibold">Nueva plantilla</p><p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Elige el tipo y define el contenido.</p></div>
               <Button variant="ghost" size="icon" onClick={() => setCreateDrawerOpen(false)} className="rounded-xl"><XCircle className="h-4 w-4" /></Button>
             </div>
             <form onSubmit={onCreateTemplate} className="max-h-[calc(100dvh-12rem)] flex-1 space-y-4 overflow-auto p-5">
               <div>
                 <Label htmlFor="tpl-type">Tipo de plantilla</Label>
-                <select id="tpl-type" value={createForm.templateKey} onChange={(e) => { const k = e.target.value; setCreateForm((p) => ({ ...p, templateKey: k, name: k })); }} className="mt-1 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm outline-none focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                <select id="tpl-type" value={createForm.templateKey} onChange={(e) => { const k = e.target.value; setCreateForm((p) => ({ ...p, templateKey: k, name: k })); }} className="mt-1 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm outline-none focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                   {TEMPLATE_DEFS.map((d) => <option key={d.name} value={d.name}>{d.label}</option>)}
                   <option value="personalizada">Personalizada</option>
                 </select>
@@ -727,7 +727,7 @@ export default function ConfiguracionPage() {
                 <span className="font-semibold">Tareas internas:</span> <strong>{"{{admin}}"}</strong> · <strong>{"{{tarea}}"}</strong> · <strong>{"{{fecha_vencimiento}}"}</strong>
               </div>
               <div><Label htmlFor="tpl-new-subject">Asunto</Label><Input id="tpl-new-subject" placeholder="Asunto del correo" value={createForm.subject} onChange={(e) => setCreateForm((p) => ({ ...p, subject: e.target.value }))} className={inputCls} /></div>
-              <div><Label htmlFor="tpl-new-body">Cuerpo del correo</Label><textarea id="tpl-new-body" rows={10} placeholder="Estimado {{cliente}},..." value={createForm.content} onChange={(e) => setCreateForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]" /></div>
+              <div><Label htmlFor="tpl-new-body">Cuerpo del correo</Label><textarea id="tpl-new-body" rows={10} placeholder="Estimado {{cliente}},..." value={createForm.content} onChange={(e) => setCreateForm((p) => ({ ...p, content: e.target.value }))} className="mt-1 w-full resize-y rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 font-mono text-sm placeholder:text-[#64748B] outline-none transition focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus:ring-red-500/25" /></div>
 
               {createError ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{createError}</div> : null}
               <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">

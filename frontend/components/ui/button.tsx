@@ -11,13 +11,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/20 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-blue-400/25";
+  "inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/20 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-red-500/25";
 
 const variants: Record<ButtonVariant, string> = {
   default:
-    "bg-blue-600 text-white shadow-sm hover:bg-blue-700 dark:bg-blue-500 dark:text-white dark:hover:bg-blue-600",
+    "bg-red-600 text-white shadow-sm hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700",
   secondary:
-    "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800",
+    "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800",
   ghost:
     "bg-transparent text-neutral-900 hover:bg-neutral-100 dark:text-neutral-100 dark:hover:bg-neutral-900"
 };

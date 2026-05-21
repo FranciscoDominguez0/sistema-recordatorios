@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -96,10 +96,10 @@ function statusClasses(status?: ServiceStatus) {
   if (status === "completado") {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200";
   }
-  return "border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#1D4ED8] dark:text-[#BFDBFE]";
+  return "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200";
 }
 
-export default function ServiciosPage() {
+function ServiciosPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -609,14 +609,14 @@ export default function ServiciosPage() {
               >
                 <aside
                   className={cn(
-                    "relative z-50 flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9]",
+                    "relative z-50 flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9]",
                     renewOpen ? "scale-100" : "scale-95"
                   )}
                   role="dialog"
                   aria-modal="true"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
+                  <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-neutral-900">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10">
                         <RotateCcw className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
@@ -634,7 +634,7 @@ export default function ServiciosPage() {
                           setRenewingService(null);
                         }
                       }}
-                      className="rounded-xl p-1.5 text-[#64748B] hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:hover:bg-[#111E35]"
+                      className="rounded-xl p-1.5 text-[#64748B] hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:hover:bg-neutral-950"
                     >
                       <XCircle className="h-4 w-4" />
                     </button>
@@ -642,7 +642,7 @@ export default function ServiciosPage() {
 
                   <div className="p-5 space-y-4">
                     {renewingService && (
-                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">Vencimiento actual</p>
                         <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
                           <CalendarClock className="h-4 w-4 text-amber-500" />
@@ -664,7 +664,7 @@ export default function ServiciosPage() {
                         value={renewDate}
                         onChange={(e) => setRenewDate(e.target.value)}
                         min={new Date().toISOString().split("T")[0]}
-                        className="mt-1 h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]"
+                        className="mt-1 h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]"
                       />
                       <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Por defecto: +1 mes desde la fecha de vencimiento anterior.</p>
                     </div>
@@ -704,7 +704,7 @@ export default function ServiciosPage() {
             document.body
           )
         : null}
-      <div className="rounded-[28px] border border-[#E2E8F0] bg-white p-5 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
+      <div className="rounded-[28px] border border-[#E2E8F0] bg-white p-5 shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/20">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-lg font-semibold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">Servicios</h1>
@@ -722,16 +722,16 @@ export default function ServiciosPage() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <div className="col-span-2 rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(135deg,rgba(59,130,246,0.14)_0%,rgba(99,102,241,0.08)_40%,rgba(255,255,255,0)_75%)] p-4 dark:border-[#1F2A44] dark:bg-[linear-gradient(135deg,rgba(59,130,246,0.18)_0%,rgba(16,185,129,0.05)_55%,rgba(5,11,22,0)_78%)]">
+          <div className="col-span-2 rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(135deg,rgba(239,68,68,0.14)_0%,rgba(220,38,38,0.08)_40%,rgba(255,255,255,0)_75%)] p-4 dark:border-neutral-900 dark:bg-[linear-gradient(135deg,rgba(239,68,68,0.18)_0%,rgba(220,38,38,0.05)_55%,rgba(0,0,0,0)_78%)]">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Panorama</p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                <Sparkles className="h-4 w-4 text-blue-600 dark:text-[#BFDBFE]" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
+                <Sparkles className="h-4 w-4 text-red-600 dark:text-red-200" />
               </div>
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{totalAll}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+              <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                 Distribución
               </span>
               <span
@@ -746,24 +746,24 @@ export default function ServiciosPage() {
               </span>
             </div>
 
-            <div className="mt-3 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+            <div className="mt-3 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-neutral-900">
               <div className="flex h-2 w-full">
-                <div className="h-2 bg-[#3B82F6]" style={{ width: `${pct(activos)}%` }} />
+                <div className="h-2 bg-red-500" style={{ width: `${pct(activos)}%` }} />
                 <div className="h-2 bg-amber-500" style={{ width: `${pct(vencidos)}%` }} />
                 <div className="h-2 bg-emerald-500" style={{ width: `${pct(completados)}%` }} />
               </div>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
-              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#3B82F6]" />
+              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
                 <span>{pct(activos)}% activos</span>
               </div>
-              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
                 <span>{pct(vencidos)}% vencidos</span>
               </div>
-              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+              <div className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white/70 px-2 py-2 text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <span>{pct(completados)}% completados</span>
               </div>
@@ -779,18 +779,18 @@ export default function ServiciosPage() {
             className={cn(
               "rounded-2xl border p-4 text-left transition-colors",
               statusFilter === "activo"
-                ? "border-[#3B82F6]/40 bg-[linear-gradient(135deg,rgba(59,130,246,0.18)_0%,rgba(255,255,255,0)_65%)]"
-                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
+                ? "border-red-500/40 bg-[linear-gradient(135deg,rgba(239,68,68,0.18)_0%,rgba(255,255,255,0)_65%)]"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-[#080808] dark:hover:bg-neutral-950"
             )}
           >
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Activos</p>
-              <ChevronDown className={cn("h-4 w-4", statusFilter === "activo" ? "rotate-180 text-[#3B82F6]" : "text-[#94A3B8]")} />
+              <ChevronDown className={cn("h-4 w-4", statusFilter === "activo" ? "rotate-180 text-red-500" : "text-[#94A3B8]")} />
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{activos}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">En seguimiento</p>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
-              <div className="h-1.5 rounded-full bg-[#3B82F6]" style={{ width: `${pct(activos)}%` }} />
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-neutral-900">
+              <div className="h-1.5 rounded-full bg-red-500" style={{ width: `${pct(activos)}%` }} />
             </div>
           </button>
 
@@ -804,7 +804,7 @@ export default function ServiciosPage() {
               "rounded-2xl border p-4 text-left transition-colors",
               statusFilter === "vencido"
                 ? "border-amber-500/40 bg-[linear-gradient(135deg,rgba(245,158,11,0.20)_0%,rgba(255,255,255,0)_65%)]"
-                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-[#080808] dark:hover:bg-neutral-900"
             )}
           >
             <div className="flex items-center justify-between">
@@ -813,7 +813,7 @@ export default function ServiciosPage() {
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{vencidos}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Requieren acción</p>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-neutral-900">
               <div className="h-1.5 rounded-full bg-amber-500" style={{ width: `${pct(vencidos)}%` }} />
             </div>
           </button>
@@ -828,7 +828,7 @@ export default function ServiciosPage() {
               "rounded-2xl border p-4 text-left transition-colors",
               statusFilter === "completado"
                 ? "border-emerald-500/40 bg-[linear-gradient(135deg,rgba(16,185,129,0.18)_0%,rgba(255,255,255,0)_65%)]"
-                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#0B1424] dark:hover:bg-[#111E35]"
+                : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-[#080808] dark:hover:bg-neutral-900"
             )}
           >
             <div className="flex items-center justify-between">
@@ -837,7 +837,7 @@ export default function ServiciosPage() {
             </div>
             <p className="mt-2 text-2xl font-semibold tracking-tight">{completados}</p>
             <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Finalizados</p>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+            <div className="mt-3 h-1.5 w-full rounded-full bg-[#E2E8F0] dark:bg-neutral-900">
               <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${pct(completados)}%` }} />
             </div>
           </button>
@@ -860,15 +860,15 @@ export default function ServiciosPage() {
           ) : error ? (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</div>
           ) : services.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-neutral-900 dark:bg-black dark:text-[#94A3B8]">
               No hay servicios para mostrar.
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/20">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
-                    <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
+                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#080808]/95 dark:text-[#94A3B8]">
+                    <tr className="border-b border-[#E2E8F0] dark:border-neutral-900">
                       <th className="px-4 py-3 font-semibold">Servicio</th>
                       <th className="px-4 py-3 font-semibold">Cliente</th>
                       <th className="px-4 py-3 font-semibold">Vence</th>
@@ -876,13 +876,13 @@ export default function ServiciosPage() {
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
+                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-neutral-900">
                     {services.map((s, idx) => (
                       <tr
                         key={s.id}
                         className={cn(
-                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
-                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
+                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-neutral-950",
+                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-neutral-950" : "bg-transparent"
                         )}
                         onClick={() => openDetail(s)}
                       >
@@ -930,7 +930,7 @@ export default function ServiciosPage() {
                                 "rounded-xl border",
                                 s.status === "vencido"
                                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:border-emerald-400/25 dark:text-emerald-300"
-                                  : "border-transparent text-[#64748B] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
+                                  : "border-transparent text-[#64748B] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#94A3B8] dark:group-hover:border-neutral-900 dark:group-hover:bg-neutral-950"
                               )}
                             >
                               <RotateCcw className="h-4 w-4" />
@@ -943,7 +943,7 @@ export default function ServiciosPage() {
                                 openEdit(s);
                               }}
                               aria-label="Editar"
-                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
+                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-neutral-900 dark:group-hover:bg-neutral-950"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -967,7 +967,7 @@ export default function ServiciosPage() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-[#1F2A44] dark:text-[#94A3B8]">
+              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-neutral-900 dark:text-[#94A3B8]">
                 <span>
                   Página {page} de {totalPages}
                 </span>
@@ -1015,7 +1015,7 @@ export default function ServiciosPage() {
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[680px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[680px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               detailOpen ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -1023,7 +1023,7 @@ export default function ServiciosPage() {
             aria-label={detailService ? `Detalle servicio: ${detailService.service_name}` : "Detalle servicio"}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold">{detailService?.service_name ?? "Servicio"}</p>
@@ -1032,10 +1032,10 @@ export default function ServiciosPage() {
                     <p className="mt-1 truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{detailService.client_email}</p>
                   ) : null}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                       Servicio #{detailService?.id ?? "-"}
                     </span>
-                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                       Cliente: {detailService?.client_name ?? detailService?.client_id ?? "-"}
                     </span>
                     <span
@@ -1064,31 +1064,31 @@ export default function ServiciosPage() {
               ) : detailError ? (
                 <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{detailError}</div>
               ) : !detailService ? (
-                <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-4 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+                <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-4 text-sm text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]">
                   Sin información.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="rounded-3xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                  <div className="rounded-3xl border border-[#E2E8F0] bg-white p-4 dark:border-neutral-900 dark:bg-black">
                     <p className="text-sm font-semibold">Resumen</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Vence</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{formatDate(detailService.expiration_date)}</p>
                       </div>
-                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Recordatorio</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{Number(detailService.reminder_days ?? 5)} día(s) antes</p>
                       </div>
-                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Inicio</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.start_date ? formatDate(detailService.start_date) : "-"}</p>
                       </div>
-                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Creado</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.created_at ? formatDate(detailService.created_at) : "-"}</p>
                       </div>
-                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#64748B] dark:text-[#94A3B8]">Renovación automática</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{detailService.auto_renew ? "Sí (Mensual)" : "No"}</p>
                       </div>
@@ -1096,7 +1096,7 @@ export default function ServiciosPage() {
                   </div>
 
                   {detailService.description ? (
-                    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                    <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 dark:border-neutral-900 dark:bg-black">
                       <p className="text-xs font-semibold text-[#64748B] dark:text-[#94A3B8]">Descripción</p>
                       <p className="mt-2 text-sm leading-relaxed text-[#0F172A] dark:text-[#F1F5F9]">{detailService.description}</p>
                     </div>
@@ -1139,7 +1139,7 @@ export default function ServiciosPage() {
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[620px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[620px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               drawerOpen ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -1147,7 +1147,7 @@ export default function ServiciosPage() {
             aria-label={drawerMode === "create" ? "Crear servicio" : "Editar servicio"}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div>
                 <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo servicio" : "Editar servicio"}</p>
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
@@ -1173,7 +1173,7 @@ export default function ServiciosPage() {
                       }}
                       onFocus={() => setClientOpen(true)}
                       placeholder="Escribe para buscar cliente (mín. 2 letras)"
-                      className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                      className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                     />
                     {clientLoading ? (
                       <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[#94A3B8]" />
@@ -1181,7 +1181,7 @@ export default function ServiciosPage() {
                   </div>
 
                   {clientOpen ? (
-                    <div className="mt-2 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-lg shadow-black/10 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/30">
+                    <div className="mt-2 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-lg shadow-black/10 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/30">
                       {clientQuery.trim().length < 2 ? (
                         <div className="px-4 py-3 text-xs text-[#64748B] dark:text-[#94A3B8]">
                           Escribe al menos 2 letras para buscar.
@@ -1195,7 +1195,7 @@ export default function ServiciosPage() {
                               key={c.id}
                               type="button"
                               onClick={() => selectClient(c)}
-                              className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]"
+                              className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-[#F8FAFC] dark:hover:bg-neutral-950"
                             >
                               <span className="min-w-0">
                                 <span className="block truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</span>
@@ -1223,7 +1223,7 @@ export default function ServiciosPage() {
                     value={form.service_name}
                     onChange={(e) => setForm((p) => ({ ...p, service_name: e.target.value }))}
                     placeholder="Ej. Dominio, Hosting, Mantenimiento"
-                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -1234,7 +1234,7 @@ export default function ServiciosPage() {
                     value={form.description}
                     onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                     placeholder="Opcional"
-                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -1245,7 +1245,7 @@ export default function ServiciosPage() {
                     type="date"
                     value={form.start_date}
                     onChange={(e) => setForm((p) => ({ ...p, start_date: e.target.value }))}
-                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -1257,7 +1257,7 @@ export default function ServiciosPage() {
                     value={form.expiration_date}
                     onChange={(e) => setForm((p) => ({ ...p, expiration_date: e.target.value }))}
                     required
-                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -1269,7 +1269,7 @@ export default function ServiciosPage() {
                     min={0}
                     value={form.reminder_days}
                     onChange={(e) => setForm((p) => ({ ...p, reminder_days: e.target.value }))}
-                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="h-11 border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -1279,7 +1279,7 @@ export default function ServiciosPage() {
                     id="status"
                     value={form.status}
                     onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as ServiceStatus }))}
-                    className="h-11 w-full rounded-md border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] shadow-sm outline-none transition-colors focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus:border-[#3B82F6]/60 dark:focus:ring-[#3B82F6]/40"
+                    className="h-11 w-full rounded-md border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] shadow-sm outline-none transition-colors focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:focus:border-red-500/60 dark:focus:ring-red-500/40"
                   >
                     <option value="activo">activo</option>
                     <option value="vencido">vencido</option>
@@ -1287,13 +1287,13 @@ export default function ServiciosPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-[#1F2A44] dark:bg-[#111E35] sm:col-span-2">
+                <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 dark:border-neutral-900 dark:bg-neutral-950 sm:col-span-2">
                   <input
                     id="auto_renew"
                     type="checkbox"
                     checked={form.auto_renew}
                     onChange={(e) => setForm((p) => ({ ...p, auto_renew: e.target.checked }))}
-                    className="h-5 w-5 rounded border-[#E2E8F0] text-[#3B82F6] focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#0B1424] cursor-pointer"
+                    className="h-5 w-5 rounded border-[#E2E8F0] text-red-600 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-[#080808] cursor-pointer"
                   />
                   <div className="grid gap-0.5 leading-none">
                     <Label htmlFor="auto_renew" className="font-semibold text-sm cursor-pointer text-[#0F172A] dark:text-[#F1F5F9]">
@@ -1332,5 +1332,17 @@ export default function ServiciosPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ServiciosPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    }>
+      <ServiciosPageContent />
+    </Suspense>
   );
 }

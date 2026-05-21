@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { BriefcaseBusiness, CheckCircle2, Loader2, Mail, Pencil, Phone, Plus, Trash2, XCircle } from "lucide-react";
 
@@ -73,7 +73,7 @@ function formatUiDateTime(value?: string | null) {
   });
 }
 
-export default function ClientesPage() {
+function ClientesPageContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [clients, setClients] = useState<ClientItem[]>([]);
@@ -263,11 +263,11 @@ export default function ClientesPage() {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${esc(companyName)} · Cliente ${esc(overview.client.name)}</title>
     <style>
-      :root { --bg:#0B1424; --card:#ffffff; --muted:#64748b; --ink:#0f172a; --line:#e2e8f0; --accent:#3B82F6; }
+      :root { --bg:#000000; --card:#ffffff; --muted:#64748b; --ink:#0f172a; --line:#e2e8f0; --accent:#EF4444; }
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: var(--ink); margin: 0; background: #f1f5f9; }
       .wrap { padding: 22px; }
       .header { border-radius: 16px; overflow: hidden; box-shadow: 0 10px 28px rgba(15,23,42,.10); }
-      .hero { background: radial-gradient(1200px 400px at 20% 0%, rgba(59,130,246,.55), transparent 60%), linear-gradient(135deg, #08112F 0%, #1a2f6e 100%); padding: 22px 22px; color: #fff; }
+      .hero { background: radial-gradient(1200px 400px at 20% 0%, rgba(239,68,68,.55), transparent 60%), linear-gradient(135deg, #000000 0%, #1a0505 100%); padding: 22px 22px; color: #fff; }
       .heroTop { display:flex; align-items:center; justify-content:space-between; gap: 16px; }
       .brand { display:flex; align-items:center; gap: 12px; }
       .logo { width: 72px; height: 72px; border-radius: 18px; background: rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; overflow:hidden; border: 1px solid rgba(255,255,255,.15); }
@@ -289,10 +289,10 @@ export default function ClientesPage() {
       .itemTitle { font-size: 13px; font-weight: 900; color: #0f172a; }
       .itemMeta { font-size: 11px; color: #64748b; white-space: nowrap; }
       .itemDesc { margin-top: 6px; font-size: 12px; color: #334155; line-height: 1.55; }
-      .pill { display:inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(59,130,246,.10); border: 1px solid rgba(59,130,246,.22); color: #1d4ed8; font-size: 11px; font-weight: 700; }
+      .pill { display:inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.22); color: #dc2626; font-size: 11px; font-weight: 700; }
       .no-print { padding: 16px 22px 0; }
       .btn { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 9px 12px; cursor: pointer; font-weight: 700; }
-      .btnPrimary { border-color: rgba(59,130,246,.35); background: rgba(59,130,246,.12); }
+      .btnPrimary { border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12); }
       @media print {
         body { background: #fff; }
         .wrap { padding: 0; }
@@ -553,19 +553,19 @@ export default function ClientesPage() {
             { label: "Con teléfono", value: withPhone, sub: "Contactables", Icon: BriefcaseBusiness },
             { label: "Con notas", value: withNotes, sub: "Info adicional", Icon: CheckCircle2 },
           ].map(({ label, value, sub, Icon }) => (
-            <div key={label} className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
-              <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+            <div key={label} className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
+              <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#EF4444", filter: "blur(16px)" }} />
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">{label}</p>
                   <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{value}</p>
                   <p className="mt-1 text-xs text-[#94A3B8]">{sub}</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
-                  <Icon className="h-5 w-5" style={{ color: "#3B82F6" }} />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#EF444418", border: "1px solid #EF444430" }}>
+                  <Icon className="h-5 w-5" style={{ color: "#EF4444" }} />
                 </div>
               </div>
-              <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
+              <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #EF4444, transparent)" }} />
             </div>
           ))}
         </div>
@@ -587,34 +587,34 @@ export default function ClientesPage() {
               {error}
             </div>
           ) : clients.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-neutral-900 dark:bg-black dark:text-[#94A3B8]">
               No hay clientes registrados.
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/20">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
-                    <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
+                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#080808]/95 dark:text-[#94A3B8]">
+                    <tr className="border-b border-[#E2E8F0] dark:border-neutral-900">
                       <th className="px-4 py-3 font-semibold">Nombre</th>
                       <th className="hidden px-4 py-3 font-semibold sm:table-cell">Email</th>
                       <th className="hidden px-4 py-3 font-semibold md:table-cell">Teléfono</th>
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
+                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-neutral-900">
                     {clients.map((c, idx) => (
                       <tr
-                        key={c.id}
+                         key={c.id}
                         className={cn(
-                          "group cursor-pointer transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
-                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
+                          "group cursor-pointer transition-colors hover:bg-[#F8FAFC] dark:hover:bg-neutral-950",
+                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-neutral-950" : "bg-transparent"
                         )}
                         onClick={() => openQuick(c)}
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold text-[#0F172A] shadow-sm dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                               <span>{clientInitials(c.name)}</span>
                             </div>
                             <div className="min-w-0">
@@ -639,7 +639,7 @@ export default function ClientesPage() {
                                 openEdit(c);
                               }}
                               aria-label="Editar"
-                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
+                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-neutral-900 dark:group-hover:bg-neutral-950"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -663,7 +663,7 @@ export default function ClientesPage() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-[#1F2A44] dark:text-[#94A3B8]">
+              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-neutral-900 dark:text-[#94A3B8]">
                 <span>
                   Página {page} de {totalPages}
                 </span>
@@ -711,7 +711,7 @@ export default function ClientesPage() {
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               drawerOpen ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -719,7 +719,7 @@ export default function ClientesPage() {
             aria-label={drawerMode === "create" ? "Crear cliente" : "Editar cliente"}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div>
                 <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo cliente" : "Editar cliente"}</p>
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
@@ -737,14 +737,14 @@ export default function ClientesPage() {
             <form onSubmit={onSubmit} className="max-h-[calc(100dvh-12rem)] flex-1 overflow-auto p-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <Label htmlFor="name">Nombre</Label>
+                  <Label htmlFor="name">Nombre *</Label>
                   <Input
                     id="name"
                     placeholder="Nombre"
                     value={form.name}
                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                     required
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -757,7 +757,7 @@ export default function ClientesPage() {
                     value={form.email}
                     onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     required
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -768,7 +768,7 @@ export default function ClientesPage() {
                     placeholder="6123-4567"
                     value={form.phone}
                     onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -779,7 +779,7 @@ export default function ClientesPage() {
                     placeholder="Notas"
                     value={form.notes}
                     onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/40 dark:focus-visible:border-red-500/60"
                   />
                 </div>
               </div>
@@ -829,7 +829,7 @@ export default function ClientesPage() {
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[640px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[640px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               quickOpen ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -837,7 +837,7 @@ export default function ClientesPage() {
             aria-label={quickClient ? `Acciones rápidas: ${quickClient.name}` : "Acciones rápidas"}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div>
                 <p className="text-sm font-semibold">{quickClient?.name ?? "Cliente"}</p>
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
@@ -920,7 +920,7 @@ export default function ClientesPage() {
                 </Button>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+              <div className="mt-6 rounded-2xl border border-[#E2E8F0] bg-white p-4 dark:border-neutral-900 dark:bg-black">
                 <p className="text-sm font-semibold">Resumen</p>
 
                 {overviewLoading ? (
@@ -937,15 +937,15 @@ export default function ClientesPage() {
                 ) : (
                   <div className="mt-3 space-y-4">
                     <div className="grid gap-2 sm:grid-cols-3">
-                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[#64748B] dark:text-[#94A3B8]">Servicios</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{normalizedOverview?.services.length ?? overview.services.length}</p>
                       </div>
-                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[#64748B] dark:text-[#94A3B8]">Notificaciones</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{normalizedOverview?.notifications.length ?? overview.notifications.length}</p>
                       </div>
-                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-[#1F2A44] dark:bg-[#111E35]">
+                      <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="text-[#64748B] dark:text-[#94A3B8]">Emails</p>
                         <p className="mt-1 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{normalizedOverview?.email_logs.length ?? overview.email_logs.length}</p>
                       </div>
@@ -958,7 +958,7 @@ export default function ClientesPage() {
                       ) : (
                         <div className="mt-2 space-y-2">
                           {(normalizedOverview?.services ?? overview.services).slice(0, servicesShown).map((svc) => (
-                            <div key={svc.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
+                            <div key={svc.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-neutral-900 dark:bg-neutral-950">
                               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-xs font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{svc.service_name}</p>
                                 <p className="text-xs text-[#64748B] dark:text-[#94A3B8]">
@@ -993,7 +993,7 @@ export default function ClientesPage() {
                       ) : (
                         <div className="mt-2 space-y-2">
                           {(normalizedOverview?.activity_logs ?? overview.activity_logs).slice(0, logsShown).map((log) => (
-                            <div key={log.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
+                            <div key={log.id} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-sm dark:border-neutral-900 dark:bg-neutral-950">
                               <p className="text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">{log.action}</p>
                               <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{log.description ?? "—"}</p>
                               {(log as any)?.created_at ? (
@@ -1038,5 +1038,17 @@ export default function ClientesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ClientesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    }>
+      <ClientesPageContent />
+    </Suspense>
   );
 }

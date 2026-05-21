@@ -53,7 +53,7 @@ export default function ConfirmDialog({
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               open ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -61,7 +61,7 @@ export default function ConfirmDialog({
             aria-label={title}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <p className="text-sm font-semibold">{title}</p>
               {description ? (
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">{description}</p>

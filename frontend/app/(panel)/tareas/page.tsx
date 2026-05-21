@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
@@ -65,7 +65,7 @@ function getTaskUrgency(dueDate: string): "overdue" | "today" | "upcoming" | "fu
   return "future";
 }
 
-export default function TareasPage() {
+function TareasPageContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const search = (searchParams?.get("search") ?? "").toString();
@@ -302,13 +302,13 @@ export default function TareasPage() {
     upcoming: {
       label: "Esta semana",
       badge:
-        "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-300",
-      row: "border-l-4 border-l-blue-500"
+        "border-red-500/20 bg-red-500/5 text-red-600 dark:border-red-500/30 dark:bg-red-950/20 dark:text-red-400",
+      row: "border-l-4 border-l-red-500/70"
     },
     future: {
       label: "Próxima",
       badge:
-        "border-[#E2E8F0] bg-[#F1F5F9] text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]",
+        "border-[#E2E8F0] bg-[#F1F5F9] text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]",
       row: ""
     }
   };
@@ -350,10 +350,10 @@ export default function TareasPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-4 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-none dark:bg-[#0B1424] dark:shadow-black/20">
+        <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] p-4 shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-none dark:bg-[#080808] dark:shadow-black/20">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">Total</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] shadow-sm dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
               <ClipboardList className="h-4 w-4" />
             </div>
           </div>
@@ -363,17 +363,17 @@ export default function TareasPage() {
           <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">Tareas registradas</p>
         </div>
 
-        <div className="rounded-2xl border border-blue-500/25 bg-blue-500/10 p-4 shadow-sm shadow-black/5 dark:border-blue-400/25 dark:bg-blue-400/10">
+        <div className="rounded-2xl border border-red-500/25 bg-red-500/5 p-4 shadow-sm shadow-black/5 dark:border-red-500/20 dark:bg-red-950/20">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-medium text-blue-700 dark:text-blue-300">Pendientes</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/25 bg-white/70 text-blue-700 dark:border-blue-400/25 dark:bg-white/10 dark:text-blue-300">
+            <p className="text-xs font-medium text-red-700 dark:text-red-400">Pendientes</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/20 bg-white/70 text-red-700 dark:border-red-500/30 dark:bg-white/10 dark:text-red-400">
               <Clock className="h-4 w-4" />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-blue-800 dark:text-blue-200">
+          <p className="mt-2 text-2xl font-semibold tracking-tight text-red-800 dark:text-red-200">
             {pendingTasks.length}
           </p>
-          <p className="mt-1 text-xs text-blue-700/80 dark:text-blue-300/80">Por completar</p>
+          <p className="mt-1 text-xs text-red-700/80 dark:text-red-400/80">Por completar</p>
         </div>
 
         <div className="rounded-2xl border border-red-500/25 bg-red-500/10 p-4 shadow-sm shadow-black/5 dark:border-red-400/25 dark:bg-red-400/10">
@@ -434,7 +434,7 @@ export default function TareasPage() {
               {error}
             </div>
           ) : searchFilteredTasks.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-8 text-center text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-8 text-center text-sm text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]">
               <ClipboardList className="mx-auto mb-3 h-8 w-8 opacity-40" />
               {search.trim() ? "No se encontraron tareas con esa búsqueda." : "No hay tareas registradas. Crea una nueva."}
             </div>
@@ -447,7 +447,7 @@ export default function TareasPage() {
                       key: "todo",
                       title: "Por completar",
                       count: boardTodo.length,
-                      tone: "border-slate-200 bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]",
+                      tone: "border-slate-200 bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-950",
                       data: boardTodo
                     },
                     {
@@ -511,7 +511,7 @@ export default function TareasPage() {
                             return (
                               <div
                                 key={task.id}
-                                className="rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20"
+                                className="rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/20"
                               >
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="min-w-0">
@@ -636,7 +636,7 @@ export default function TareasPage() {
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[480px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[480px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               drawerOpen ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -644,7 +644,7 @@ export default function TareasPage() {
             aria-label="Nueva tarea"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div>
                 <p className="text-sm font-semibold">Nueva tarea interna</p>
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
@@ -665,7 +665,7 @@ export default function TareasPage() {
                   value={form.title}
                   onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                   required
-                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-500/25 focus-visible:border-red-500/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60"
                 />
               </div>
 
@@ -677,7 +677,7 @@ export default function TareasPage() {
                   value={form.description}
                   onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                   rows={3}
-                  className="mt-1 w-full resize-none rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-[#3B82F6]/40 focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8]"
+                  className="mt-1 w-full resize-none rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#64748B] outline-none transition focus:border-red-500/40 focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus:ring-red-500/25"
                 />
               </div>
 
@@ -689,7 +689,7 @@ export default function TareasPage() {
                   value={form.due_date}
                   onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
                   required
-                  className="border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:border-[#3B82F6]/40 focus-visible:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:border-[#3B82F6]/60 dark:focus-visible:ring-[#3B82F6]/40"
+                  className="border-[#E2E8F0] bg-white text-[#0F172A] focus-visible:border-red-500/40 focus-visible:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:focus-visible:border-red-500/60 dark:focus-visible:ring-red-500/40"
                 />
               </div>
 
@@ -720,5 +720,17 @@ export default function TareasPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TareasPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    }>
+      <TareasPageContent />
+    </Suspense>
   );
 }

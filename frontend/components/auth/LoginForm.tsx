@@ -71,7 +71,7 @@ export default function LoginForm() {
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute left-0 top-0 flex h-full w-11 items-center justify-center">
-              <Mail className="h-[18px] w-[18px] text-[#3D4F6A] transition-colors group-focus-within:text-[#5A77DF]" />
+              <Mail className="h-[18px] w-[18px] text-[#3D4F6A] transition-colors group-focus-within:text-red-500" />
             </div>
             <input
               id="login-email"
@@ -81,7 +81,7 @@ export default function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] pl-11 pr-4 text-sm text-white placeholder:text-[#3D4F6A] outline-none transition-all focus:border-[#5A77DF]/30 focus:bg-white/[0.05] focus:ring-2 focus:ring-[#5A77DF]/10 disabled:opacity-50"
+              className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] pl-11 pr-4 text-sm text-white placeholder:text-[#3D4F6A] outline-none transition-all focus:border-red-500/30 focus:bg-white/[0.05] focus:ring-2 focus:ring-red-500/10 disabled:opacity-50"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function LoginForm() {
           </label>
           <div className="group relative">
             <div className="pointer-events-none absolute left-0 top-0 flex h-full w-11 items-center justify-center">
-              <Lock className="h-[18px] w-[18px] text-[#3D4F6A] transition-colors group-focus-within:text-[#5A77DF]" />
+              <Lock className="h-[18px] w-[18px] text-[#3D4F6A] transition-colors group-focus-within:text-red-500" />
             </div>
             <input
               id="login-password"
@@ -103,7 +103,7 @@ export default function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] pl-11 pr-12 text-sm text-white placeholder:text-[#3D4F6A] outline-none transition-all focus:border-[#5A77DF]/30 focus:bg-white/[0.05] focus:ring-2 focus:ring-[#5A77DF]/10 disabled:opacity-50"
+              className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] pl-11 pr-12 text-sm text-white placeholder:text-[#3D4F6A] outline-none transition-all focus:border-red-500/30 focus:bg-white/[0.05] focus:ring-2 focus:ring-red-500/10 disabled:opacity-50"
             />
             <button
               type="button"
@@ -123,7 +123,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="group relative mt-2 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#5A77DF] text-sm font-semibold text-white shadow-lg shadow-[#5A77DF]/15 transition-all hover:bg-[#4D68CC] hover:shadow-[#5A77DF]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A77DF]/40 disabled:opacity-60"
+          className="group relative mt-2 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-red-600 text-sm font-semibold text-white shadow-lg shadow-red-600/15 transition-all hover:bg-red-700 hover:shadow-red-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/40 disabled:opacity-60"
         >
           {/* Shine effect */}
           <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.08] to-transparent transition-transform duration-700 group-hover:translate-x-full" />

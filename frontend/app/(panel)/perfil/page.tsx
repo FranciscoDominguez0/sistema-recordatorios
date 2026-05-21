@@ -200,7 +200,7 @@ export default function PerfilPage() {
         <Button
           onClick={fetchMe}
           variant="secondary"
-          className="w-full rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844] sm:w-auto"
+          className="w-full rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:hover:bg-neutral-900 sm:w-auto"
         >
           Actualizar
         </Button>
@@ -219,7 +219,7 @@ export default function PerfilPage() {
             <div className="flex items-center gap-4">
               <div
                 className={cn(
-                  "relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-lg font-bold text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]",
+                  "relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-lg font-bold text-[#0F172A] shadow-sm dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]",
                   user?.avatar_url ? "" : ""
                 )}
               >
@@ -255,7 +255,7 @@ export default function PerfilPage() {
                     onClick={onPickAvatar}
                     disabled={savingAvatar}
                     variant="secondary"
-                    className="w-full rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844] sm:w-auto"
+                    className="w-full rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:hover:bg-neutral-900 sm:w-auto"
                   >
                     Elegir archivo
                   </Button>

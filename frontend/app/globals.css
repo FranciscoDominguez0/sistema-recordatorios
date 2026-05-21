@@ -15,13 +15,25 @@
 }
 
 html.dark {
-  --background: #050B16;
+  --background: #000000;
   --foreground: #F1F5F9;
+  color-scheme: dark !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme: dark !important;
+}
+
+.dark ::-webkit-calendar-picker-indicator {
+  opacity: 1 !important;
+  cursor: pointer;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.dark):not(.light) {
-    --background: #050B16;
+    --background: #000000;
     --foreground: #F1F5F9;
   }
 }

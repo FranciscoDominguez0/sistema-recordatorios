@@ -23,7 +23,7 @@ import { getDashboardData, type DashboardData } from "@/services/dashboardServic
 const DONUT_COLORS: Record<string, { fill: string; light: string }> = {
   activo:     { fill: "#22C55E", light: "#dcfce7" },
   vencido:    { fill: "#EF4444", light: "#fee2e2" },
-  completado: { fill: "#3B82F6", light: "#dbeafe" },
+  completado: { fill: "#EF4444", light: "#fee2e2" },
 };
 const DONUT_LABELS: Record<string, string> = {
   activo: "Activos", vencido: "Vencidos", completado: "Completados",
@@ -63,7 +63,7 @@ function DonutChart({ data }: { data: { status: string; total: number }[] }) {
         {/* track */}
         <circle cx={CX} cy={CY} r={R} fill="none"
           stroke="currentColor" strokeWidth={SW}
-          className="text-[#E2E8F0] dark:text-[#1F2A44]" />
+          className="text-[#E2E8F0] dark:text-neutral-900" />
         {slices.map((s, i) => (
           <circle key={i} cx={CX} cy={CY} r={R} fill="none"
             stroke={DONUT_COLORS[s.status]?.fill ?? "#64748B"}
@@ -92,7 +92,7 @@ function DonutChart({ data }: { data: { status: string; total: number }[] }) {
               </div>
               <span className="font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{s.total}</span>
             </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-neutral-900">
               <div className="h-full rounded-full transition-all duration-700"
                 style={{ width: `${s.pct * 100}%`, background: DONUT_COLORS[s.status]?.fill ?? "#64748B" }} />
             </div>
@@ -118,14 +118,14 @@ function WeeklyBars({ data }: { data: { day_name: string; actions: number }[] })
     <div className="flex h-28 items-end gap-1.5">
       {data.map((d, i) => {
         const pct = d.actions / max;
-        const colors = ["#3B82F6","#8B5CF6","#06B6D4","#22C55E","#F59E0B","#EF4444","#EC4899"];
+        const colors = ["#EF4444", "#DC2626", "#B91C1C", "#991B1B", "#7F1D1D", "#6B7280", "#374151"];
         const color = colors[i % colors.length];
         return (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
             <span className="text-[9px] font-semibold" style={{ color }}>
               {d.actions > 0 ? d.actions : ""}
             </span>
-            <div className="w-full overflow-hidden rounded-t-lg bg-[#E2E8F0] dark:bg-[#1F2A44]"
+            <div className="w-full overflow-hidden rounded-t-lg bg-[#E2E8F0] dark:bg-neutral-900"
               style={{ height: 72 }}>
               <div className="w-full rounded-t-lg transition-all duration-700"
                 style={{ height: `${Math.max(pct * 100, d.actions > 0 ? 6 : 0)}%`, background: color, marginTop: "auto" }} />
@@ -163,23 +163,23 @@ function ClientsLine({ data }: { data: { week: string; new_clients: number }[] }
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
       <defs>
         <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#22C55E" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#22C55E" stopOpacity="0" />
+          <stop offset="0%" stopColor="#EF4444" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#EF4444" stopOpacity="0" />
         </linearGradient>
       </defs>
       {/* grid lines */}
       {[0, max / 2, max].map((v, i) => (
         <line key={i} x1={PL} y1={toY(v)} x2={W - PR} y2={toY(v)}
           stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3"
-          className="stroke-[#E2E8F0] dark:stroke-[#1F2A44]" />
+          className="stroke-[#E2E8F0] dark:stroke-neutral-900" />
       ))}
       <polygon points={area} fill="url(#lg1)" />
-      <polyline points={pts} fill="none" stroke="#22C55E" strokeWidth="2"
+      <polyline points={pts} fill="none" stroke="#EF4444" strokeWidth="2"
         strokeLinejoin="round" strokeLinecap="round" />
       {data.map((d, i) => (
         <circle key={i} cx={toX(i)} cy={toY(d.new_clients)} r="3.5"
-          fill="#22C55E" stroke="white" strokeWidth="1.5"
-          className="[stroke:theme(colors.white)] dark:[stroke:#0B1424]" >
+          fill="#EF4444" stroke="white" strokeWidth="1.5"
+          className="[stroke:theme(colors.white)] dark:[stroke:#080808]" >
           <title>{d.week}: {d.new_clients}</title>
         </circle>
       ))}
@@ -196,17 +196,17 @@ function ClientsLine({ data }: { data: { week: string; new_clients: number }[] }
 
 // ─── KPI Card (estilo coherente con el resto de la app) ───────────────────────
 const KPI_CONFIGS = [
-  { key: "total_clients",        label: "Clientes",         icon: Users,           color: "#3B82F6" },
-  { key: "active_services",      label: "Servicios activos",icon: BriefcaseBusiness,color: "#8B5CF6" },
-  { key: "pending_tasks",        label: "Tareas pendientes",icon: ClipboardList,   color: "#F59E0B" },
-  { key: "actions_today",        label: "Acciones hoy",     icon: Zap,             color: "#22C55E" },
+  { key: "total_clients",        label: "Clientes",         icon: Users,           color: "#EF4444" },
+  { key: "active_services",      label: "Servicios activos",icon: BriefcaseBusiness,color: "#EF4444" },
+  { key: "pending_tasks",        label: "Tareas pendientes",icon: ClipboardList,   color: "#EF4444" },
+  { key: "actions_today",        label: "Acciones hoy",     icon: Zap,             color: "#EF4444" },
 ] as const;
 
 function KpiCard({ label, value, icon: Icon, color, sub }: {
   label: string; value: number; icon: React.ElementType; color: string; sub?: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+    <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
       {/* Glow de fondo */}
       <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10"
         style={{ background: color, filter: "blur(16px)" }} />
@@ -231,7 +231,7 @@ function KpiCard({ label, value, icon: Icon, color, sub }: {
 // ─── Section container ────────────────────────────────────────────────────────
 function Panel({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]", className)}>
+    <div className={cn("rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]", className)}>
       <p className="mb-4 text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{title}</p>
       {children}
     </div>
@@ -272,20 +272,20 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex h-64 items-center justify-center gap-2 text-[#64748B]">
-          <Loader2 className="h-5 w-5 animate-spin text-[#3B82F6]" />
+          <Loader2 className="h-5 w-5 animate-spin text-red-600" />
           <span className="text-sm">Cargando...</span>
         </div>
       ) : (
         <>
           {/* KPI Cards */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <KpiCard label="Clientes" value={s?.total_clients ?? 0} icon={Users} color="#3B82F6"
+            <KpiCard label="Clientes" value={s?.total_clients ?? 0} icon={Users} color="#EF4444"
               sub={`${s?.total_services ?? 0} servicios`} />
-            <KpiCard label="Servicios activos" value={s?.active_services ?? 0} icon={BriefcaseBusiness} color="#3B82F6"
+            <KpiCard label="Servicios activos" value={s?.active_services ?? 0} icon={BriefcaseBusiness} color="#EF4444"
               sub={`${s?.services_expiring_soon ?? 0} vencen pronto`} />
-            <KpiCard label="Tareas pendientes" value={s?.pending_tasks ?? 0} icon={ClipboardList} color="#3B82F6"
+            <KpiCard label="Tareas pendientes" value={s?.pending_tasks ?? 0} icon={ClipboardList} color="#EF4444"
               sub={`${s?.completed_tasks_today ?? 0} completadas hoy`} />
-            <KpiCard label="Acciones hoy" value={s?.actions_today ?? 0} icon={Zap} color="#3B82F6"
+            <KpiCard label="Acciones hoy" value={s?.actions_today ?? 0} icon={Zap} color="#EF4444"
               sub="en el sistema" />
           </div>
 
@@ -338,7 +338,7 @@ export default function DashboardPage() {
                       startOfDay(new Date())
                     );
                     return (
-                      <div key={sv.id} className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                      <div key={sv.id} className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 dark:border-neutral-900 dark:bg-neutral-950">
                         <div className="min-w-0">
                           <p className="truncate text-xs font-semibold">{sv.name}</p>
                           <p className="truncate text-[10px] text-[#64748B]">{sv.client_name}</p>
@@ -368,12 +368,12 @@ export default function DashboardPage() {
                       startOfDay(new Date())
                     );
                     return (
-                      <div key={t.id} className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 dark:border-[#1F2A44] dark:bg-[#070F1E]">
+                      <div key={t.id} className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2.5 dark:border-neutral-900 dark:bg-neutral-950">
                         <p className="min-w-0 flex-1 truncate text-xs font-semibold">{t.title}</p>
                         <span className={cn("ml-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold",
                           days < 0 ? "bg-red-500/15 text-red-600 dark:text-red-400" :
                           days === 0 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" :
-                          "bg-blue-500/15 text-blue-600 dark:text-blue-400")}>
+                          "bg-red-500/15 text-red-600 dark:text-red-400")}>
                           {days < 0 ? "Venc." : days === 0 ? "Hoy" : `${days}d`}
                         </span>
                       </div>
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   {data.top_clients.map((c, i) => {
                     const maxSv = data.top_clients[0]?.total_services ?? 1;
-                    const colors = ["#F59E0B", "#94A3B8", "#CD7C2A", "#3B82F6", "#22C55E"];
+                    const colors = ["#EF4444", "#DC2626", "#B91C1C", "#991B1B", "#7F1D1D"];
                     return (
                       <div key={c.id}>
                         <div className="flex items-center justify-between text-xs">
@@ -404,7 +404,7 @@ export default function DashboardPage() {
                           </div>
                           <span className="text-[#64748B]">{c.total_services}</span>
                         </div>
-                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-[#1F2A44]">
+                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-neutral-900">
                           <div className="h-full rounded-full transition-all duration-700"
                             style={{ width: `${(c.total_services / maxSv) * 100}%`, background: colors[i] ?? "#475569" }} />
                         </div>

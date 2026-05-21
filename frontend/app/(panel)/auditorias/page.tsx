@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Activity,
@@ -32,21 +32,21 @@ import {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const ACTION_COLORS: Record<string, string> = {
-  CREATE_TASK: "#3B82F6",
-  UPDATE_TASK: "#60A5FA",
+  CREATE_TASK: "#EF4444",
+  UPDATE_TASK: "#F87171",
   COMPLETE_TASK: "#22C55E",
-  DELETE_TASK: "#EF4444",
-  CREATE_CLIENT: "#8B5CF6",
+  DELETE_TASK: "#DC2626",
+  CREATE_CLIENT: "#EC4899",
   UPDATE_CLIENT: "#F59E0B",
-  DELETE_CLIENT: "#EF4444",
-  CREATE_SERVICE: "#06B6D4",
+  DELETE_CLIENT: "#DC2626",
+  CREATE_SERVICE: "#E11D48",
   UPDATE_SERVICE: "#F59E0B",
-  DELETE_SERVICE: "#EF4444",
+  DELETE_SERVICE: "#DC2626",
   LOGIN: "#10B981",
   LOGOUT: "#6B7280",
-  CREATE_USER: "#8B5CF6",
+  CREATE_USER: "#EF4444",
   UPDATE_USER: "#F59E0B",
-  DELETE_USER: "#EF4444",
+  DELETE_USER: "#DC2626",
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -120,7 +120,7 @@ function LineChart({ data }: { data: { date: string; total: number }[] }) {
         {/* Grid */}
         {yTicks.map((tick) => (
           <g key={tick}>
-            <line x1={PL} y1={toY(tick)} x2={W - PR} y2={toY(tick)} stroke="#1F2A44" strokeWidth="1" strokeDasharray="4 3" />
+            <line x1={PL} y1={toY(tick)} x2={W - PR} y2={toY(tick)} stroke="#E5E7EB" className="dark:stroke-neutral-800" strokeWidth="1" strokeDasharray="4 3" />
             <text x={PL - 6} y={toY(tick) + 4} textAnchor="end" fontSize="9" fill="#64748B">{tick}</text>
           </g>
         ))}
@@ -128,18 +128,18 @@ function LineChart({ data }: { data: { date: string; total: number }[] }) {
         {/* Area */}
         <defs>
           <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+            <stop offset="0%" stopColor="#EF4444" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#EF4444" stopOpacity="0" />
           </linearGradient>
         </defs>
         <polygon points={areaPoints} fill="url(#areaGrad)" />
 
         {/* Line */}
-        <polyline points={points} fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        <polyline points={points} fill="none" stroke="#EF4444" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
         {/* Dots */}
         {data.map((d, i) => (
-          <circle key={i} cx={toX(i)} cy={toY(d.total)} r="3" fill="#3B82F6" stroke="#0B1424" strokeWidth="1.5">
+          <circle key={i} cx={toX(i)} cy={toY(d.total)} r="3" fill="#EF4444" stroke="#000000" strokeWidth="1.5">
             <title>{`${d.date}: ${d.total} acciones`}</title>
           </circle>
         ))}
@@ -169,10 +169,10 @@ function BarChart({ data }: { data: { label: string; total: number; color?: stri
       {data.map((d, i) => (
         <div key={i} className="flex items-center gap-3">
           <span className="w-28 shrink-0 truncate text-right text-xs text-[#64748B] dark:text-[#94A3B8]" title={d.label}>{d.label}</span>
-          <div className="flex-1 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-[#0B1424]" style={{ height: 8 }}>
+          <div className="flex-1 overflow-hidden rounded-full bg-[#E2E8F0] dark:bg-neutral-900" style={{ height: 8 }}>
             <div
               className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${(d.total / max) * 100}%`, background: d.color ?? "#3B82F6" }}
+              style={{ width: `${(d.total / max) * 100}%`, background: d.color ?? "#EF4444" }}
             />
           </div>
           <span className="w-8 shrink-0 text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">{d.total}</span>
@@ -185,7 +185,7 @@ function BarChart({ data }: { data: { label: string; total: number; color?: stri
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: number | string; color: string }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+    <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">{label}</p>
@@ -202,7 +202,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 20;
 
-export default function AuditoriasPage() {
+function AuditoriasPageContent() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [chart, setChart] = useState<ChartData | null>(null);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
@@ -263,7 +263,7 @@ export default function AuditoriasPage() {
     });
   }, [logs, topbarSearch]);
 
-  const inputCls = "h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#3B82F6]/50 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/25 dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9] dark:placeholder:text-[#475569]";
+  const inputCls = "h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-red-500/50 focus:outline-none focus:ring-2 focus:ring-red-500/25 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#475569]";
 
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
@@ -281,22 +281,22 @@ export default function AuditoriasPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Activity}   label="Hoy"            value={stats?.actions_today ?? "—"}      color="#3B82F6" />
+        <StatCard icon={Activity}   label="Hoy"            value={stats?.actions_today ?? "—"}      color="#EF4444" />
         <StatCard icon={TrendingUp} label="Esta semana"    value={stats?.actions_this_week ?? "—"}  color="#22C55E" />
-        <StatCard icon={ShieldCheck} label="Total logs"    value={pagination.total}                 color="#8B5CF6" />
+        <StatCard icon={ShieldCheck} label="Total logs"    value={pagination.total}                 color="#DC2626" />
         <StatCard icon={Users}      label="Usuarios activos" value={stats?.top_users?.length ?? "—"} color="#F59E0B" />
       </div>
 
       {/* Charts Row */}
       <div className="grid min-w-0 gap-4 lg:grid-cols-3">
         {/* Line chart — actividad diaria */}
-        <Card className="min-w-0 max-w-full overflow-hidden border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424] lg:col-span-2">
+        <Card className="min-w-0 max-w-full overflow-hidden border-[#E2E8F0] bg-white dark:border-neutral-900 dark:bg-[#080808] lg:col-span-2">
           <CardHeader className="flex flex-row items-start justify-between pb-2">
             <CardTitle className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Actividad diaria</CardTitle>
             <select
               value={chartDays}
               onChange={(e) => setChartDays(Number(e.target.value))}
-              className="rounded-lg border border-[#E2E8F0] bg-white px-2 py-1 text-xs text-[#0F172A] outline-none dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9]"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2 py-1 text-xs text-[#0F172A] outline-none dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]"
             >
               <option value={7}>7 días</option>
               <option value={14}>14 días</option>
@@ -306,7 +306,7 @@ export default function AuditoriasPage() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-[#3B82F6]" /></div>
+              <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-red-600" /></div>
             ) : (
               <LineChart data={chart?.daily ?? []} />
             )}
@@ -314,13 +314,13 @@ export default function AuditoriasPage() {
         </Card>
 
         {/* Bar chart — top acciones */}
-        <Card className="min-w-0 max-w-full overflow-hidden border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]">
+        <Card className="min-w-0 max-w-full overflow-hidden border-[#E2E8F0] bg-white dark:border-neutral-900 dark:bg-[#080808]">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Top acciones</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-[#3B82F6]" /></div>
+              <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-red-600" /></div>
             ) : (
               <BarChart
                 data={(chart?.by_action ?? []).map((a) => ({
@@ -335,7 +335,7 @@ export default function AuditoriasPage() {
       </div>
 
       {/* Filters */}
-      <Card className="border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]">
+      <Card className="border-[#E2E8F0] bg-white dark:border-neutral-900 dark:bg-[#080808]">
         <CardHeader className="flex flex-row items-center gap-2 pb-3">
           <Filter className="h-4 w-4 text-[#64748B]" />
           <CardTitle className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">Filtros</CardTitle>
@@ -345,7 +345,7 @@ export default function AuditoriasPage() {
             <div>
               <label className="mb-1 block text-xs text-[#64748B]">Acción</label>
               <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)}
-                className="h-9 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9]">
+                className="h-9 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                 <option value="">Todas</option>
                 {actionTypes.map((a) => <option key={a} value={a}>{actionLabel(a)}</option>)}
               </select>
@@ -353,7 +353,7 @@ export default function AuditoriasPage() {
             <div>
               <label className="mb-1 block text-xs text-[#64748B]">Entidad</label>
               <select value={filterEntity} onChange={(e) => setFilterEntity(e.target.value)}
-                className="h-9 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none dark:border-[#1F2A44] dark:bg-[#070F1E] dark:text-[#F1F5F9]">
+                className="h-9 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
                 <option value="">Todas</option>
                 {(chart?.by_entity ?? []).map((e) => <option key={e.entity_type} value={e.entity_type ?? ""}>{e.entity_type}</option>)}
               </select>
@@ -377,11 +377,11 @@ export default function AuditoriasPage() {
       </Card>
 
       {/* Table */}
-      <Card className="border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]">
+      <Card className="border-[#E2E8F0] bg-white dark:border-neutral-900 dark:bg-[#080808]">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">
             Registro de actividad
-            <span className="ml-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-xs text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#64748B]">
+            <span className="ml-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-xs text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#64748B]">
               {pagination.total} registros
             </span>
           </CardTitle>
@@ -400,7 +400,7 @@ export default function AuditoriasPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#E2E8F0] text-xs text-[#64748B] dark:border-[#1F2A44]">
+                    <tr className="border-b border-[#E2E8F0] text-xs text-[#64748B] dark:border-neutral-900">
                       <th className="px-4 py-3 text-left font-medium">Fecha</th>
                       <th className="px-4 py-3 text-left font-medium">Usuario</th>
                       <th className="px-4 py-3 text-left font-medium">Acción</th>
@@ -411,7 +411,7 @@ export default function AuditoriasPage() {
                   </thead>
                   <tbody>
                     {displayedLogs.map((log, i) => (
-                      <tr key={log.id} className={cn("border-b border-[#E2E8F0] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44]/50 dark:hover:bg-[#111E35]", i % 2 === 0 ? "" : "bg-[#F8FAFC] dark:bg-[#070F1E]/30")}>
+                      <tr key={log.id} className={cn("border-b border-[#E2E8F0] transition-colors hover:bg-[#F8FAFC] dark:border-neutral-900/50 dark:hover:bg-neutral-900", i % 2 === 0 ? "" : "bg-[#F8FAFC] dark:bg-[#070F1E]/30")}>
                         <td className="whitespace-nowrap px-4 py-3 text-xs text-[#64748B] dark:text-[#94A3B8]">
                           {log.created_at ? format(parseISO(String(log.created_at)), "dd MMM yyyy HH:mm", { locale: es }) : "—"}
                         </td>
@@ -427,7 +427,7 @@ export default function AuditoriasPage() {
                         </td>
                         <td className="px-4 py-3 text-xs text-[#94A3B8]">
                           {log.entity_type ? (
-                            <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-[#475569] dark:bg-[#111E35] dark:text-[#94A3B8]">
+                            <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-[#475569] dark:bg-neutral-900 dark:text-[#94A3B8]">
                               {log.entity_type}{log.entity_id ? ` #${log.entity_id}` : ""}
                             </span>
                           ) : "—"}
@@ -444,7 +444,7 @@ export default function AuditoriasPage() {
 
               {/* Pagination */}
               {pagination.total_pages > 1 && (
-                <div className="flex items-center justify-between border-t border-[#1F2A44] px-4 py-3">
+                <div className="flex items-center justify-between border-t border-neutral-200 dark:border-neutral-900 px-4 py-3">
                   <p className="text-xs text-[#64748B]">
                     Página {pagination.page} de {pagination.total_pages} · {pagination.total} registros
                   </p>
@@ -459,7 +459,7 @@ export default function AuditoriasPage() {
                       return (
                         <button key={p} onClick={() => goPage(p)}
                           className={cn("h-8 w-8 rounded-xl text-xs font-medium transition-colors",
-                            p === page ? "bg-[#3B82F6] text-white" : "text-[#64748B] hover:bg-[#111E35]")}>
+                            p === page ? "bg-red-600 text-white" : "text-[#64748B] hover:bg-neutral-900")}>
                           {p}
                         </button>
                       );
@@ -475,5 +475,17 @@ export default function AuditoriasPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AuditoriasPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    }>
+      <AuditoriasPageContent />
+    </Suspense>
   );
 }

@@ -31,7 +31,7 @@ function typeIcon(type: NotificationType) {
   switch (type) {
     case "service_expiring": return <CalendarClock className="h-4 w-4 text-amber-500" />;
     case "service_expired":  return <ServerCrash   className="h-4 w-4 text-red-500" />;
-    case "task_due":         return <CheckCircle2  className="h-4 w-4 text-blue-500" />;
+    case "task_due":         return <CheckCircle2  className="h-4 w-4 text-red-500" />;
     case "email_sent":       return <Mail          className="h-4 w-4 text-emerald-500" />;
     default:                 return <Bell          className="h-4 w-4 text-slate-400" />;
   }
@@ -152,13 +152,13 @@ export default function NotificationsPanel({
         aria-modal="true"
         aria-label="Notificaciones"
         onClick={(e) => e.stopPropagation()}
-        className="fixed right-4 top-20 z-50 flex w-[92vw] max-w-[420px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl shadow-black/10 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/40"
+        className="fixed right-4 top-20 z-50 flex w-[92vw] max-w-[420px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-2xl shadow-black/10 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/40"
       >
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
+        <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-4 dark:border-neutral-900">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]">
-              <BellRing className="h-4 w-4 text-[#3B82F6]" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900">
+              <BellRing className="h-4 w-4 text-red-600" />
             </div>
             <div>
               <p className="text-sm font-semibold text-[#0F172A] dark:text-[#F1F5F9]">Notificaciones</p>
@@ -171,7 +171,7 @@ export default function NotificationsPanel({
             <button
               type="button"
               onClick={load}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#94A3B8] dark:hover:bg-neutral-800"
               title="Recargar"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -179,7 +179,7 @@ export default function NotificationsPanel({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#94A3B8] dark:hover:bg-neutral-800"
               aria-label="Cerrar"
             >
               <X className="h-3.5 w-3.5" />
@@ -211,8 +211,8 @@ export default function NotificationsPanel({
                   className={cn(
                     "group relative flex items-start gap-3 rounded-2xl border p-3 transition-colors",
                     n.is_read
-                      ? "border-[#E2E8F0] bg-white dark:border-[#1F2A44] dark:bg-[#0B1424]"
-                      : "border-[#3B82F6]/20 bg-[#3B82F6]/5 dark:border-[#3B82F6]/30 dark:bg-[#3B82F6]/10"
+                      ? "border-[#E2E8F0] bg-white dark:border-neutral-900 dark:bg-[#080808]"
+                      : "border-red-500/20 bg-red-950/10 dark:border-red-500/30 dark:bg-red-950/20"
                   )}
                   role={(n.type === "service_expiring" || n.type === "service_expired") && n.service_id ? "button" : undefined}
                   tabIndex={(n.type === "service_expiring" || n.type === "service_expired") && n.service_id ? 0 : undefined}
@@ -225,11 +225,11 @@ export default function NotificationsPanel({
                 >
                   {/* Dot indicador */}
                   {!n.is_read && (
-                    <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[#3B82F6]" />
+                    <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-red-600" />
                   )}
 
                   {/* Icon */}
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900">
                     {typeIcon(n.type)}
                   </div>
 
@@ -257,7 +257,7 @@ export default function NotificationsPanel({
                           e.stopPropagation();
                           handleMarkRead(n.id);
                         }}
-                        className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-[#3B82F6] hover:bg-[#3B82F6]/10 dark:border-[#1F2A44] dark:bg-[#111E35]"
+                        className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-red-500 hover:bg-red-500/10 dark:border-neutral-900 dark:bg-neutral-900"
                         title="Marcar como leída"
                       >
                         <CheckCheck className="h-3 w-3" />
@@ -269,7 +269,7 @@ export default function NotificationsPanel({
                         e.stopPropagation();
                         handleDelete(n.id);
                       }}
-                      className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-red-500 hover:bg-red-500/10 dark:border-[#1F2A44] dark:bg-[#111E35]"
+                      className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-red-500 hover:bg-red-500/10 dark:border-neutral-900 dark:bg-neutral-900"
                       title="Eliminar"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -283,12 +283,12 @@ export default function NotificationsPanel({
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-[#E2E8F0] p-3 dark:border-[#1F2A44]">
+          <div className="border-t border-[#E2E8F0] p-3 dark:border-neutral-900">
             <button
               type="button"
               onClick={handleMarkAllRead}
               disabled={items.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-white disabled:opacity-40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-medium text-[#0F172A] transition-colors hover:bg-white disabled:opacity-40 dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#F1F5F9] dark:hover:bg-neutral-800"
             >
               <CheckCheck className="h-4 w-4" />
               Marcar y limpiar

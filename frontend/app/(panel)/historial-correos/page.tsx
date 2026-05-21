@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
@@ -40,10 +40,10 @@ function KpiCard({
   icon: React.ElementType;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+    <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
       <div
         className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10"
-        style={{ background: "#3B82F6", filter: "blur(16px)" }}
+        style={{ background: "#EF4444", filter: "blur(16px)" }}
       />
       <div className="flex items-start justify-between">
         <div>
@@ -53,14 +53,14 @@ function KpiCard({
         </div>
         <div
           className="flex h-10 w-10 items-center justify-center rounded-xl"
-          style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}
+          style={{ background: "#EF444418", border: "1px solid #EF444430" }}
         >
-          <Icon className="h-5 w-5" style={{ color: "#3B82F6" }} />
+          <Icon className="h-5 w-5" style={{ color: "#EF4444" }} />
         </div>
       </div>
       <div
         className="absolute bottom-0 left-0 h-0.5 w-full opacity-60"
-        style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }}
+        style={{ background: "linear-gradient(to right, #EF4444, transparent)" }}
       />
     </div>
   );
@@ -87,7 +87,7 @@ function StatusBadge({ status }: { status: string }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const LIMIT = 10;
 
-export default function HistorialCorreosPage() {
+function HistorialCorreosPageContent() {
   const searchParams = useSearchParams();
   const topbarQ = searchParams?.get("search") ?? "";
   const statusParam = (searchParams?.get("status") ?? "").toString();
@@ -189,13 +189,13 @@ export default function HistorialCorreosPage() {
       </div>
 
       {/* Tabla */}
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
+      <div className="rounded-2xl border border-[#E2E8F0] bg-white shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
         {/* Header de tabla */}
-        <div className="flex items-center justify-between border-b border-[#E2E8F0] px-5 py-4 dark:border-[#1F2A44]">
+        <div className="flex items-center justify-between border-b border-[#E2E8F0] px-5 py-4 dark:border-neutral-900">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[#3B82F6]" />
+            <Mail className="h-4 w-4 text-red-500" />
             <span className="text-sm font-semibold">Registro de correos</span>
-            <span className="ml-1 rounded-full bg-[#3B82F6]/10 px-2 py-0.5 text-xs font-bold text-[#3B82F6]">
+            <span className="ml-1 rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-bold text-red-500">
               {total}
             </span>
           </div>
@@ -204,7 +204,7 @@ export default function HistorialCorreosPage() {
             <select
               value={cleanupDays}
               onChange={(e) => setCleanupDays(parseInt(e.target.value, 10))}
-              className="h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#0F172A] shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]"
+              className="h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#0F172A] shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]"
               aria-label="Rango de limpieza"
             >
               <option value={7}>Borrar últimos 7 días</option>
@@ -227,7 +227,7 @@ export default function HistorialCorreosPage() {
 
         {loading ? (
           <div className="flex h-40 items-center justify-center gap-2 text-sm text-[#64748B]">
-            <Loader2 className="h-5 w-5 animate-spin text-[#3B82F6]" />
+            <Loader2 className="h-5 w-5 animate-spin text-red-500" />
             Cargando correos...
           </div>
         ) : logs.length === 0 ? (
@@ -239,8 +239,8 @@ export default function HistorialCorreosPage() {
           <>
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
-                <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#64748B] dark:bg-[#070F1E] dark:text-[#94A3B8]">
-                  <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
+                <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#64748B] dark:bg-neutral-950 dark:text-[#94A3B8]">
+                  <tr className="border-b border-[#E2E8F0] dark:border-neutral-900">
                     <th className="px-4 py-3">Destinatario</th>
                     <th className="px-4 py-3">Asunto</th>
                     <th className="px-4 py-3">Cliente</th>
@@ -248,20 +248,20 @@ export default function HistorialCorreosPage() {
                     <th className="px-4 py-3">Fecha</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
+                <tbody className="divide-y divide-[#E2E8F0] dark:divide-neutral-900">
                   {logs.map((log, i) => (
                     <tr
-                      key={log.id}
-                      className={cn(
-                        "transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
-                        i % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#070F1E]" : ""
+                       key={log.id}
+                       className={cn(
+                        "transition-colors hover:bg-[#F8FAFC] dark:hover:bg-neutral-900/60",
+                        i % 2 === 1 ? "bg-[#F8FAFC] dark:bg-neutral-950/40" : ""
                       )}
                     >
                       {/* Destinatario */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#3B82F6]/10">
-                            <Mail className="h-3.5 w-3.5 text-[#3B82F6]" />
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
+                            <Mail className="h-3.5 w-3.5 text-red-500" />
                           </div>
                           <span className="truncate max-w-[160px] text-xs font-medium text-[#0F172A] dark:text-[#F1F5F9]">
                             {log.email}
@@ -304,7 +304,7 @@ export default function HistorialCorreosPage() {
             </div>
 
             {/* Paginación */}
-            <div className="flex flex-col gap-2 border-t border-[#E2E8F0] px-5 py-3 dark:border-[#1F2A44] sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 border-t border-[#E2E8F0] px-5 py-3 dark:border-neutral-900 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-xs text-[#64748B]">
                 Página <strong>{page}</strong> de <strong>{totalPages}</strong> · {total} registros
               </span>
@@ -328,8 +328,8 @@ export default function HistorialCorreosPage() {
                       className={cn(
                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold transition-colors",
                         p === page
-                          ? "bg-[#3B82F6] text-white"
-                          : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] dark:bg-[#1F2A44] dark:text-[#94A3B8] dark:hover:bg-[#2D3E5C]"
+                          ? "bg-red-600 text-white"
+                          : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] dark:bg-[#080808] dark:text-[#94A3B8] dark:hover:bg-neutral-800"
                       )}
                     >
                       {p}
@@ -351,5 +351,17 @@ export default function HistorialCorreosPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function HistorialCorreosPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    }>
+      <HistorialCorreosPageContent />
+    </Suspense>
   );
 }

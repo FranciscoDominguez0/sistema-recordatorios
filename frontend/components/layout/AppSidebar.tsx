@@ -142,7 +142,7 @@ export default function AppSidebar(props: AppSidebarProps) {
       type="button"
       onClick={handleAvatarClick}
       disabled={uploading}
-      className="group/avatar relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#5A77DF]/40 bg-gradient-to-br from-[#5A77DF]/20 to-[#3E53A0]/30 text-lg font-bold text-white shadow-lg shadow-[#5A77DF]/10 transition-all hover:border-[#5A77DF]/70 hover:shadow-[#5A77DF]/25"
+      className="group/avatar relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-red-500/40 bg-gradient-to-br from-red-600/20 to-red-950/30 text-lg font-bold text-white shadow-lg shadow-red-600/10 transition-all hover:border-red-500/70 hover:shadow-red-600/25"
       title="Cambiar imagen de perfil"
     >
       {avatarUrl ? (
@@ -181,7 +181,7 @@ export default function AppSidebar(props: AppSidebarProps) {
       {fileInput}
 
       {/* ━━━ Desktop sidebar ━━━ */}
-      <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] lg:flex lg:flex-col xl:w-80">
+      <aside className="fixed left-0 top-0 hidden h-screen w-72 border-r border-white/5 bg-black text-[#ECEEF0] lg:flex lg:flex-col xl:w-80">
         {/* ── User profile at top ── */}
         <div className="px-6 py-5">
           <div className="flex flex-col items-center gap-3">
@@ -215,7 +215,7 @@ export default function AppSidebar(props: AppSidebarProps) {
                     : "text-[#CCD4DE] hover:bg-white/5 hover:text-white"
                 )}
               >
-                <Icon className={cn("h-4 w-4", active ? "text-[#5A77DF]" : "text-[#CCD4DE]/80")} />
+                <Icon className={cn("h-4 w-4", active ? "text-red-500" : "text-[#CCD4DE]/80")} />
                 <span className="truncate">{item.label}</span>
               </Link>
             );
@@ -224,10 +224,10 @@ export default function AppSidebar(props: AppSidebarProps) {
 
         {/* ── Vigitec logo at bottom ── */}
         <div className="px-6 py-4">
-          <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-[#5A77DF]/30 to-transparent" />
+          <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-red-600/30 to-transparent" />
           <div className="flex items-center justify-center">
             <div className="relative">
-              <div className="absolute -inset-2 rounded-xl bg-[#5A77DF]/5 blur-md" />
+              <div className="absolute -inset-2 rounded-xl bg-red-600/5 blur-md" />
               <Image
                 src="/brand/logo.png"
                 alt="Vigitec"
@@ -248,7 +248,7 @@ export default function AppSidebar(props: AppSidebarProps) {
       {/* ━━━ Mobile sidebar ━━━ */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 border-r border-white/10 bg-[#08112F] text-[#ECEEF0] transition-transform duration-200 lg:hidden flex flex-col",
+          "fixed inset-y-0 left-0 z-50 w-72 border-r border-white/5 bg-black text-[#ECEEF0] transition-transform duration-200 lg:hidden flex flex-col",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -286,7 +286,7 @@ export default function AppSidebar(props: AppSidebarProps) {
                     : "text-[#CCD4DE] hover:bg-white/5 hover:text-white"
                 )}
               >
-                <Icon className={cn("h-4 w-4", active ? "text-[#5A77DF]" : "text-[#CCD4DE]/80")} />
+                <Icon className={cn("h-4 w-4", active ? "text-red-500" : "text-[#CCD4DE]/80")} />
                 <span className="truncate">{item.label}</span>
               </Link>
             );
@@ -295,10 +295,10 @@ export default function AppSidebar(props: AppSidebarProps) {
 
         {/* ── Vigitec logo at bottom ── */}
         <div className="px-6 py-4">
-          <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-[#5A77DF]/30 to-transparent" />
+          <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-red-600/30 to-transparent" />
           <div className="flex items-center justify-center">
             <div className="relative">
-              <div className="absolute -inset-2 rounded-xl bg-[#5A77DF]/5 blur-md" />
+              <div className="absolute -inset-2 rounded-xl bg-red-600/5 blur-md" />
               <Image
                 src="/brand/logo.png"
                 alt="Vigitec"

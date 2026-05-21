@@ -55,7 +55,7 @@ const VARIANT_CONFIG: Record<ToastVariant, {
     icon: CheckCircle2,
     bar: "#22C55E",
     icon_color: "#22C55E",
-    bg: "bg-white dark:bg-[#0B1424]",
+    bg: "bg-white dark:bg-[#080808]",
     border: "border-emerald-400/30",
     title: "text-[#0F172A] dark:text-[#F1F5F9]",
     desc: "text-[#64748B] dark:text-[#94A3B8]",
@@ -64,17 +64,17 @@ const VARIANT_CONFIG: Record<ToastVariant, {
     icon: XCircle,
     bar: "#EF4444",
     icon_color: "#EF4444",
-    bg: "bg-white dark:bg-[#0B1424]",
+    bg: "bg-white dark:bg-[#080808]",
     border: "border-red-400/30",
     title: "text-[#0F172A] dark:text-[#F1F5F9]",
     desc: "text-[#64748B] dark:text-[#94A3B8]",
   },
   info: {
     icon: Info,
-    bar: "#3B82F6",
-    icon_color: "#3B82F6",
-    bg: "bg-white dark:bg-[#0B1424]",
-    border: "border-blue-400/30",
+    bar: "#EF4444",
+    icon_color: "#EF4444",
+    bg: "bg-white dark:bg-[#080808]",
+    border: "border-red-400/30",
     title: "text-[#0F172A] dark:text-[#F1F5F9]",
     desc: "text-[#64748B] dark:text-[#94A3B8]",
   },
@@ -252,7 +252,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
               <button
                 type="button"
                 onClick={() => onDismiss(t.id, "manual")}
-                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-2xl text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:hover:bg-[#1F2A44] dark:hover:text-[#F1F5F9]"
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-2xl text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:hover:bg-neutral-900 dark:hover:text-[#F1F5F9]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -268,7 +268,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
                         onDismiss(t.id, "manual");
                       }
                     }}
-                    className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#0B1424]"
+                    className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#F1F5F9] dark:hover:bg-neutral-800"
                   >
                     {t.actionLabel}
                   </button>
@@ -315,7 +315,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
               <button
                 type="button"
                 onClick={() => onDismiss(t.id, "manual")}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:hover:bg-[#1F2A44] dark:hover:text-[#F1F5F9]"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] dark:hover:bg-neutral-900 dark:hover:text-[#F1F5F9]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -332,7 +332,7 @@ function Toaster({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: str
                       onDismiss(t.id, "manual");
                     }
                   }}
-                  className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#0B1424]"
+                  className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition-colors hover:bg-white dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#F1F5F9] dark:hover:bg-neutral-800"
                 >
                   {t.actionLabel}
                 </button>

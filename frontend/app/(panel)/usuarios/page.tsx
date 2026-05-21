@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Bell, BellOff, CheckCircle2, Loader2, Pencil, Plus, ShieldCheck, Trash2, User2, XCircle } from "lucide-react";
 
@@ -59,7 +59,7 @@ function userInitials(name: string) {
   return `${first}${second ?? ""}`.toUpperCase();
 }
 
-export default function UsuariosPage() {
+function UsuariosPageContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -287,67 +287,67 @@ export default function UsuariosPage() {
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {/* Total */}
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
-            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#EF4444", filter: "blur(16px)" }} />
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Total</p>
                 <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{totalUsers}</p>
                 <p className="mt-1 text-xs text-[#94A3B8]">Registrados</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
-                <User2 className="h-5 w-5" style={{ color: "#3B82F6" }} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#EF444418", border: "1px solid #EF444430" }}>
+                <User2 className="h-5 w-5" style={{ color: "#EF4444" }} />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #EF4444, transparent)" }} />
           </div>
 
           {/* Activos */}
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
-            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#EF4444", filter: "blur(16px)" }} />
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Activos</p>
                 <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{activeCount}</p>
                 <p className="mt-1 text-xs text-[#94A3B8]">Con acceso</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
-                <CheckCircle2 className="h-5 w-5" style={{ color: "#3B82F6" }} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#EF444418", border: "1px solid #EF444430" }}>
+                <CheckCircle2 className="h-5 w-5" style={{ color: "#EF4444" }} />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #EF4444, transparent)" }} />
           </div>
 
           {/* Admins */}
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
-            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#EF4444", filter: "blur(16px)" }} />
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Admins</p>
                 <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{adminCount}</p>
                 <p className="mt-1 text-xs text-[#94A3B8]">Permisos elevados</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
-                <ShieldCheck className="h-5 w-5" style={{ color: "#3B82F6" }} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#EF444418", border: "1px solid #EF444430" }}>
+                <ShieldCheck className="h-5 w-5" style={{ color: "#EF4444" }} />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #EF4444, transparent)" }} />
           </div>
 
           {/* Empleados */}
-          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-[#1F2A44] dark:bg-[#0B1424]">
-            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#3B82F6", filter: "blur(16px)" }} />
+          <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm dark:border-neutral-900 dark:bg-[#080808]">
+            <div className="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-10" style={{ background: "#EF4444", filter: "blur(16px)" }} />
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-[#64748B]">Empleados</p>
                 <p className="mt-2 text-3xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{staffCount}</p>
                 <p className="mt-1 text-xs text-[#94A3B8]">Rol staff</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#3B82F618", border: "1px solid #3B82F630" }}>
-                <User2 className="h-5 w-5" style={{ color: "#3B82F6" }} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "#EF444418", border: "1px solid #EF444430" }}>
+                <User2 className="h-5 w-5" style={{ color: "#EF4444" }} />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #3B82F6, transparent)" }} />
+            <div className="absolute bottom-0 left-0 h-0.5 w-full opacity-60" style={{ background: "linear-gradient(to right, #EF4444, transparent)" }} />
           </div>
         </div>
       </div>
@@ -368,15 +368,15 @@ export default function UsuariosPage() {
               {error}
             </div>
           ) : users.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]">
+            <div className="rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] p-6 text-sm text-[#64748B] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#94A3B8]">
               No hay administradores registrados.
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/20">
+            <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/20">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-[#0B1424]/95 dark:text-[#94A3B8]">
-                    <tr className="border-b border-[#E2E8F0] dark:border-[#1F2A44]">
+                  <thead className="sticky top-0 z-10 bg-white text-xs text-[#64748B] backdrop-blur dark:bg-neutral-950/95 dark:text-[#94A3B8]">
+                    <tr className="border-b border-[#E2E8F0] dark:border-neutral-900">
                       <th className="px-4 py-3 font-semibold">Nombre</th>
                       <th className="hidden px-4 py-3 font-semibold sm:table-cell">Email</th>
                       <th className="hidden px-4 py-3 font-semibold md:table-cell">Rol</th>
@@ -384,18 +384,18 @@ export default function UsuariosPage() {
                       <th className="px-4 py-3 text-right font-semibold">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1F2A44]">
+                  <tbody className="divide-y divide-[#E2E8F0] dark:divide-neutral-900">
                     {users.map((u, idx) => (
                       <tr
                         key={u.id}
                         className={cn(
-                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-[#111E35]",
-                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-[#111E35]" : "bg-transparent"
+                          "group transition-colors hover:bg-[#F8FAFC] dark:hover:bg-neutral-900",
+                          idx % 2 === 1 ? "bg-[#F8FAFC] dark:bg-neutral-900/40" : "bg-transparent"
                         )}
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold text-[#0F172A] shadow-sm dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9]">
+                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold text-[#0F172A] shadow-sm dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#F1F5F9]">
                               {u.avatar_url ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={u.avatar_url} alt={u.name} className="h-full w-full object-cover" />
@@ -417,8 +417,8 @@ export default function UsuariosPage() {
                             className={cn(
                               "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
                               u.role === "admin"
-                                ? "border-[#3B82F6]/25 bg-[#3B82F6]/10 text-[#0F172A] dark:border-[#3B82F6]/30 dark:text-[#F1F5F9]"
-                                : "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8]"
+                                ? "border-red-500/25 bg-red-500/10 text-red-600 dark:border-red-500/30 dark:text-red-400"
+                                : "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#94A3B8]"
                             )}
                           >
                             <ShieldCheck className="h-3.5 w-3.5" />
@@ -427,12 +427,12 @@ export default function UsuariosPage() {
                         </td>
                         <td className="hidden px-4 py-3 lg:table-cell">
                           {u.receive_notifications !== false ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3B82F6]/25 bg-[#3B82F6]/10 px-2.5 py-1 text-xs font-semibold text-[#3B82F6]">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/25 bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400">
                               <Bell className="h-3 w-3" />
                               Activas
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1 text-xs font-semibold text-[#94A3B8] dark:border-[#1F2A44] dark:bg-[#111E35]">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1 text-xs font-semibold text-[#94A3B8] dark:border-neutral-900 dark:bg-neutral-900">
                               <BellOff className="h-3 w-3" />
                               Omitir
                             </span>
@@ -441,11 +441,11 @@ export default function UsuariosPage() {
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEdit(u)}
-                              aria-label="Editar"
-                              className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-[#1F2A44] dark:group-hover:bg-[#111E35]"
+                               variant="ghost"
+                               size="icon"
+                               onClick={() => openEdit(u)}
+                               aria-label="Editar"
+                               className="rounded-xl border border-transparent text-[#0F172A] group-hover:border-[#E2E8F0] group-hover:bg-[#F8FAFC] dark:text-[#F1F5F9] dark:group-hover:border-neutral-900 dark:group-hover:bg-neutral-900"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -466,7 +466,7 @@ export default function UsuariosPage() {
                 </table>
               </div>
 
-              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-[#1F2A44] dark:text-[#94A3B8]">
+              <div className="flex items-center justify-between gap-3 border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#64748B] dark:border-neutral-900 dark:text-[#94A3B8]">
                 <span>
                   Página {page} de {totalPages}
                 </span>
@@ -514,7 +514,7 @@ export default function UsuariosPage() {
         >
           <aside
             className={cn(
-              "relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-[#1F2A44] dark:bg-[#0B1424] dark:text-[#F1F5F9] dark:shadow-black/30",
+              "relative z-50 flex w-full max-w-[520px] flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-2xl shadow-black/10 transition-transform dark:border-neutral-900 dark:bg-[#080808] dark:text-[#F1F5F9] dark:shadow-black/30",
               drawerOpen ? "scale-100" : "scale-95"
             )}
             role="dialog"
@@ -522,7 +522,7 @@ export default function UsuariosPage() {
             aria-label={drawerMode === "create" ? "Crear administrador" : "Editar administrador"}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-[#1F2A44]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E2E8F0] px-5 py-5 dark:border-neutral-900">
               <div>
                 <p className="text-sm font-semibold">{drawerMode === "create" ? "Nuevo administrador" : "Editar administrador"}</p>
                 <p className="mt-1 text-xs text-[#64748B] dark:text-[#94A3B8]">
@@ -547,7 +547,7 @@ export default function UsuariosPage() {
                     value={form.name}
                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                     required
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-600/25 focus-visible:border-red-600/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -560,7 +560,7 @@ export default function UsuariosPage() {
                     value={form.email}
                     onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     required
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-600/25 focus-visible:border-red-600/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -573,7 +573,7 @@ export default function UsuariosPage() {
                     value={form.password}
                     onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                     required={drawerMode === "create"}
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-600/25 focus-visible:border-red-600/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -586,7 +586,7 @@ export default function UsuariosPage() {
                     value={form.confirm_password}
                     onChange={(e) => setForm((p) => ({ ...p, confirm_password: e.target.value }))}
                     required={drawerMode === "create"}
-                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-red-600/25 focus-visible:border-red-600/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60"
                   />
                 </div>
 
@@ -596,7 +596,7 @@ export default function UsuariosPage() {
                     id="role"
                     value={form.role}
                     onChange={(e) => setForm((p) => ({ ...p, role: e.target.value as UserRole }))}
-                    className="h-11 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#3B82F6]/25 focus-visible:border-[#3B82F6]/40 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+                    className="h-11 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-red-600/25 focus-visible:border-red-600/40 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9] dark:focus-visible:ring-red-500/45 dark:focus-visible:border-red-500/60"
                   >
                     <option value="staff">Empleado</option>
                     <option value="admin">Administrador</option>
@@ -605,7 +605,7 @@ export default function UsuariosPage() {
 
                 <div className="sm:col-span-1">
                   <Label>Usuario activo</Label>
-                  <label className="mt-2 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-sm dark:border-[#1F2A44] dark:bg-[#111E35]">
+                  <label className="mt-2 inline-flex cursor-pointer items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-sm dark:border-neutral-900 dark:bg-neutral-950">
                     <input
                       type="checkbox"
                       checked={form.is_active}
@@ -625,12 +625,12 @@ export default function UsuariosPage() {
                   <label className={cn(
                     "inline-flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors",
                     form.receive_notifications
-                      ? "border-[#3B82F6]/30 bg-[#3B82F6]/5 dark:bg-[#3B82F6]/10"
-                      : "border-[#E2E8F0] bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35]"
+                      ? "border-red-500/30 bg-red-500/5 dark:bg-red-500/10"
+                      : "border-[#E2E8F0] bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-950"
                   )}>
                     <div className={cn(
                       "relative h-5 w-9 rounded-full transition-colors",
-                      form.receive_notifications ? "bg-[#3B82F6]" : "bg-[#94A3B8]/40"
+                      form.receive_notifications ? "bg-red-600" : "bg-[#94A3B8]/40"
                     )}>
                       <div className={cn(
                         "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform",
@@ -680,5 +680,17 @@ export default function UsuariosPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UsuariosPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    }>
+      <UsuariosPageContent />
+    </Suspense>
   );
 }

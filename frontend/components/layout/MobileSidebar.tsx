@@ -173,7 +173,7 @@ export default function MobileSidebar({
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 flex h-dvh w-[82vw] max-w-[320px] flex-col border-r border-white/10 bg-[#08112F] text-[#ECEEF0] shadow-2xl transition-transform",
+          "fixed left-0 top-0 z-50 flex h-dvh w-[82vw] max-w-[320px] flex-col border-r border-white/5 bg-black text-[#ECEEF0] shadow-2xl transition-transform",
           open ? "translate-x-0" : "-translate-x-full"
         )}
         role="dialog"
@@ -188,7 +188,7 @@ export default function MobileSidebar({
               type="button"
               onClick={handleAvatarClick}
               disabled={uploading}
-              className="group/avatar relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#5A77DF]/40 bg-gradient-to-br from-[#5A77DF]/20 to-[#3E53A0]/30 text-sm font-bold text-white shadow-lg shadow-[#5A77DF]/10 transition-all hover:border-[#5A77DF]/70 hover:shadow-[#5A77DF]/25"
+              className="group/avatar relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-red-500/40 bg-gradient-to-br from-red-600/20 to-red-950/30 text-sm font-bold text-white shadow-lg shadow-red-600/10 transition-all hover:border-red-500/70 hover:shadow-red-600/25"
               title="Cambiar imagen de perfil"
             >
               {avatarUrl ? (
@@ -239,11 +239,11 @@ export default function MobileSidebar({
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
                   active
-                    ? "bg-[#ECEEF0] text-[#08112F] shadow-sm"
+                    ? "bg-white/10 text-white"
                     : "text-[#CCD4DE] hover:bg-white/5 hover:text-white"
                 )}
               >
-                <Icon className={cn("h-4 w-4", active ? "text-[#3E53A0]" : "text-[#CCD4DE]/80")} />
+                <Icon className={cn("h-4 w-4", active ? "text-red-500" : "text-[#CCD4DE]/80")} />
                 <span className="truncate">{item.label}</span>
               </Link>
             );
@@ -252,10 +252,10 @@ export default function MobileSidebar({
 
         {/* ── Vigitec logo at bottom ── */}
         <div className="px-5 py-4">
-          <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-[#5A77DF]/30 to-transparent" />
+          <div className="mb-3 h-px w-full bg-gradient-to-r from-transparent via-red-600/30 to-transparent" />
           <div className="flex items-center justify-center">
             <div className="relative">
-              <div className="absolute -inset-2 rounded-xl bg-[#5A77DF]/5 blur-md" />
+              <div className="absolute -inset-2 rounded-xl bg-red-600/5 blur-md" />
               <Image
                 src="/brand/logo.png"
                 alt="Vigitec"

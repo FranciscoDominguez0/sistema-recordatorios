@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BellRing, LogOut, Menu, Moon, Search, SlidersHorizontal, Sun, XCircle } from "lucide-react";
 
@@ -32,7 +32,7 @@ function SlashLogoMark({ className }: { className?: string }) {
   );
 }
 
-export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
+function AppTopbarInner({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -148,12 +148,12 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
   }, [globalSearch, pathname]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-[#F8FAFC]/80 backdrop-blur dark:border-[#1F2A44] dark:bg-[#0B1424]/80">
+    <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-[#F8FAFC]/80 backdrop-blur dark:border-neutral-900 dark:bg-black/80">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-3 px-4 sm:px-6 2xl:max-w-[1800px] 2xl:px-8">
         <button
           type="button"
           onClick={() => onOpenSidebar?.()}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition-colors hover:bg-red-100 dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-red-400 dark:hover:bg-[#162844] lg:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition-colors hover:bg-red-100 dark:border-neutral-900 dark:bg-[#080808] dark:text-red-400 dark:hover:bg-neutral-900 lg:hidden"
           aria-label="Abrir menú"
         >
           <SlashLogoMark className="h-5 w-5" />
@@ -164,14 +164,14 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
             <div className="pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center">
               <Search className="h-4 w-4 text-[#475569] dark:text-[#CBD5E1]" />
             </div>
-            <div className="absolute -inset-[1px] rounded-full bg-[linear-gradient(90deg,rgba(59,130,246,0.28),rgba(16,185,129,0.14),rgba(245,158,11,0.10))] opacity-70 blur-[8px]" />
+            <div className="absolute -inset-[1px] rounded-full bg-[linear-gradient(90deg,rgba(239,68,68,0.28),rgba(0,0,0,0.14),rgba(220,38,38,0.10))] opacity-70 blur-[8px]" />
             <Input
               value={globalSearch}
               onChange={(e) => {
                 setGlobalSearch(e.target.value);
               }}
               placeholder={placeholder}
-              className="relative h-9 w-full rounded-full border-[#E2E8F0] bg-white/95 pl-10 pr-20 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm shadow-black/5 backdrop-blur focus-visible:ring-[#4F46E5]/15 focus-visible:border-[#4F46E5]/35 dark:border-[#1F2A44] dark:bg-[#111E35]/80 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:shadow-black/20 dark:focus-visible:ring-[#3B82F6]/40 dark:focus-visible:border-[#3B82F6]/60"
+              className="relative h-9 w-full rounded-full border-[#E2E8F0] bg-white/95 pl-10 pr-20 text-sm text-[#0F172A] placeholder:text-[#64748B] shadow-sm shadow-black/5 backdrop-blur focus-visible:ring-red-600/15 focus-visible:border-red-600/35 dark:border-neutral-900 dark:bg-neutral-950/80 dark:text-[#F1F5F9] dark:placeholder:text-[#94A3B8] dark:shadow-black/20 dark:focus-visible:ring-red-600/40 dark:focus-visible:border-red-600/60"
             />
 
             <div className="absolute inset-y-0 right-2 flex items-center gap-1">
@@ -182,7 +182,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
                     setGlobalSearch("");
                     applySearchToUrl("");
                   }}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] bg-white/70 text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] bg-white/70 text-[#64748B] transition-colors hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#94A3B8] dark:hover:bg-neutral-800"
                   aria-label="Limpiar búsqueda"
                 >
                   <XCircle className="h-4 w-4" />
@@ -192,7 +192,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
               <button
                 type="button"
                 onClick={() => setAdvancedOpen((v) => !v)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] bg-white/70 text-[#0F172A] transition-colors hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#E2E8F0] bg-white/70 text-[#0F172A] transition-colors hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#F1F5F9] dark:hover:bg-neutral-800"
                 aria-label="Búsqueda avanzada"
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -200,7 +200,7 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
             </div>
 
             {advancedOpen ? (
-              <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-xl shadow-black/10 dark:border-[#1F2A44] dark:bg-[#0B1424] dark:shadow-black/30">
+              <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-3 shadow-xl shadow-black/10 dark:border-neutral-900 dark:bg-[#080808] dark:shadow-black/30">
                 <p className="text-xs font-semibold text-[#0F172A] dark:text-[#F1F5F9]">Búsqueda avanzada</p>
 
                 {pathname === "/servicios" ? (
@@ -223,8 +223,8 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
                           className={cn(
                             "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                             (servicesStatus || "") === opt.key
-                              ? "border-[#3B82F6]/40 bg-[#3B82F6]/10 text-[#0F172A] dark:text-[#F1F5F9]"
-                              : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+                              ? "border-red-500/40 bg-red-950/20 text-red-600 dark:text-red-400"
+                              : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#94A3B8] dark:hover:bg-neutral-800"
                           )}
                         >
                           {opt.label}
@@ -251,8 +251,8 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
                           className={cn(
                             "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                             (servicesStatus || "") === opt.key
-                              ? "border-[#3B82F6]/40 bg-[#3B82F6]/10 text-[#0F172A] dark:text-[#F1F5F9]"
-                              : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#94A3B8] dark:hover:bg-[#162844]"
+                              ? "border-red-500/40 bg-red-950/20 text-red-600 dark:text-red-400"
+                              : "border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#94A3B8] dark:hover:bg-neutral-800"
                           )}
                         >
                           {opt.label}
@@ -272,34 +272,34 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
           <button
             type="button"
             onClick={() => setNotificationsOpen(true)}
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 transition-colors hover:bg-red-100 dark:border-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800"
             aria-label="Notificaciones"
           >
             {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#3B82F6] text-[9px] font-bold text-white">
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
-            <BellRing className="h-4 w-4 text-[#2563EB] dark:text-[#F1F5F9]" />
+            <BellRing className="h-4 w-4 text-red-600 dark:text-[#F1F5F9]" />
           </button>
 
           <button
             type="button"
             onClick={toggleDark}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] transition-colors hover:bg-[#DBEAFE] dark:border-[#1F2A44] dark:bg-[#111E35] dark:hover:bg-[#162844]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 transition-colors hover:bg-red-100 dark:border-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800"
             aria-label="Cambiar modo oscuro"
           >
             {isDark ? (
               <Sun className="h-4 w-4 text-[#0F172A] dark:text-[#F1F5F9]" />
             ) : (
-              <Moon className="h-4 w-4 text-[#2563EB] dark:text-[#F1F5F9]" />
+              <Moon className="h-4 w-4 text-red-600 dark:text-[#F1F5F9]" />
             )}
           </button>
 
           <Button
             variant="secondary"
             onClick={onLogout}
-            className="rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-[#1F2A44] dark:bg-[#111E35] dark:text-[#F1F5F9] dark:hover:bg-[#162844]"
+            className="rounded-xl border border-[#E2E8F0] bg-white text-[#0F172A] shadow-sm shadow-black/5 hover:bg-[#F8FAFC] dark:border-neutral-900 dark:bg-neutral-900 dark:text-[#F1F5F9] dark:hover:bg-neutral-800"
           >
             <LogOut className="h-4 w-4" />
             <span className="hidden md:inline">Cerrar Sesión</span>
@@ -316,5 +316,19 @@ export default function AppTopbar({ onOpenSidebar }: { onOpenSidebar?: () => voi
         />
       ) : null}
     </header>
+  );
+}
+
+export default function AppTopbar(props: { onOpenSidebar?: () => void }) {
+  return (
+    <Suspense fallback={
+      <header className="sticky top-0 z-20 border-b border-[#E2E8F0] bg-[#F8FAFC]/80 backdrop-blur dark:border-neutral-900 dark:bg-black/80">
+        <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-3 px-4 sm:px-6 2xl:max-w-[1800px] 2xl:px-8">
+          <div className="h-6 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-850" />
+        </div>
+      </header>
+    }>
+      <AppTopbarInner {...props} />
+    </Suspense>
   );
 }
