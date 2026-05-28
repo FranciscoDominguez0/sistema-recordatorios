@@ -252,7 +252,8 @@ class ReminderService {
         const fallbackSubject = isLastDay ? `Último día: ${serviceName}` : `Recordatorio: ${serviceName}`;
         const { subject } = await fallbackBuilder({ clientName, serviceName, expirationDate })
           .catch(() => ({ subject: fallbackSubject }));
-        await this.logEmailFailed({ clientId, serviceId, email: clientEmail, subject, errorMessage: err.message });
+        await this.logEmailFailed({ clientId, serviceId, email: clientEmail, subject, errorMessage: err.message })
+          .catch(e => console.error(`  [DB-LOG ERROR] No se pudo guardar logEmailFailed:`, e.message));
         await notificationsService.broadcastToAgents({
           client_id: clientId,
           service_id: serviceId,
@@ -286,7 +287,8 @@ class ReminderService {
           console.log(`  [OK] Email admin: ${admin.email}`);
         } catch (err) {
           const { subject } = await buildAdminReminderEmail({ adminName: admin.name, clientName, serviceName, expirationDate }).catch(() => ({ subject: `[Aviso] ${serviceName}` }));
-          await this.logEmailFailed({ clientId: null, serviceId, email: admin.email, subject, errorMessage: err.message });
+          await this.logEmailFailed({ clientId: null, serviceId, email: admin.email, subject, errorMessage: err.message })
+            .catch(e => console.error(`  [DB-LOG ERROR] No se pudo guardar logEmailFailed (admin):`, e.message));
           await notificationsService.broadcastToAgents({
             client_id: clientId,
             service_id: serviceId,
