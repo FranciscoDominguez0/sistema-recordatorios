@@ -16,7 +16,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10
+  connectionLimit: 10,
+  timezone: '-05:00'  // America/Panama (UTC-5) — asegura que CURDATE()/NOW() usen hora local
 });
 
 export default pool;

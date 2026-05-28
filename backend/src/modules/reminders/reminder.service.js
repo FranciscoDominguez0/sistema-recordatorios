@@ -28,6 +28,10 @@ class ReminderService {
   // ─────────────────────────────────────────────────────────────────────────
 
   async findServicesDueToday() {
+    // Log de diagnóstico: qué fecha ve MySQL
+    const [[dateInfo]] = await pool.query("SELECT CURDATE() AS today, NOW() AS now, @@session.time_zone AS tz");
+    console.log(`  [DIAG] MySQL CURDATE()=${dateInfo.today}, NOW()=${dateInfo.now}, timezone=${dateInfo.tz}`);
+
     const [rows] = await pool.query(`
       SELECT s.*, c.email AS client_email, c.name AS client_name, c.id AS client_id_fk,
              (DATE(s.expiration_date) = CURDATE()) AS is_last_day
@@ -37,6 +41,10 @@ class ReminderService {
         AND s.expiration_date >= CURDATE()
         AND DATE_SUB(s.expiration_date, INTERVAL s.reminder_days DAY) <= CURDATE()
     `);
+    console.log(`  [DIAG] Servicios encontrados para recordatorio: ${rows.length}`);
+    for (const r of rows) {
+      console.log(`    → ID=${r.id} "${r.service_name}" vence=${r.expiration_date} reminder_days=${r.reminder_days} isLastDay=${r.is_last_day}`);
+    }
     return rows;
   }
 
@@ -187,7 +195,7 @@ class ReminderService {
       SET status = 'vencido'
       WHERE status = 'activo'
         AND expiration_date < CURDATE()
-        AND DATEDIFF(CURDATE(), expiration_date) >= 3
+        AND DATEDIFF(CURDATE(), expiration_date) >= 1
     `);
     return result.affectedRows;
   }
@@ -309,7 +317,7 @@ class ReminderService {
       const [expired] = await pool.query(
         `SELECT s.id, s.service_name, c.id AS client_id, c.name AS client_name
          FROM services s JOIN clients c ON s.client_id = c.id
-         WHERE s.status = 'vencido' AND DATE(s.expiration_date) = DATE_SUB(CURDATE(), INTERVAL 3 DAY)`
+         WHERE s.status = 'vencido' AND DATE(s.expiration_date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)`
       );
       for (const svc of expired) {
         const already = await notificationsService.hasServiceNotificationToday(svc.id);
@@ -464,8 +472,25 @@ class ReminderService {
   // ─────────────────────────────────────────────────────────────────────────
   // Punto de entrada del cron job
   // ─────────────────────────────────────────────────────────────────────────
+  /** Diagnóstico de zona horaria (para endpoint de debug) */
+  async getTimezoneDiagnostics() {
+    const [[dbInfo]] = await pool.query(
+      "SELECT CURDATE() AS curdate, NOW() AS now, @@global.time_zone AS global_tz, @@session.time_zone AS session_tz"
+    );
+    return {
+      mysql: dbInfo,
+      node: {
+        date: new Date().toISOString(),
+        localDate: new Date().toLocaleString("es-PA", { timeZone: "America/Panama" }),
+        tzOffset: new Date().getTimezoneOffset(),
+        TZ_env: process.env.TZ || '(not set)'
+      }
+    };
+  }
+
   async processDailyReminders() {
     console.log("═══ Iniciando proceso diario ═══");
+    console.log(`  [NODE] Hora local: ${new Date().toLocaleString("es-PA", { timeZone: "America/Panama" })} | ISO: ${new Date().toISOString()}`);
 
     console.log("▶ Proceso 1: recordatorios de servicios...");
     const r1 = await this.processReminders();

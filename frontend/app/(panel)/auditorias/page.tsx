@@ -428,7 +428,7 @@ function AuditoriasPageContent() {
                         <td className="px-4 py-3 text-xs text-[#94A3B8]">
                           {log.entity_type ? (
                             <span className="rounded-md bg-[#F1F5F9] px-2 py-0.5 text-[#475569] dark:bg-neutral-900 dark:text-[#94A3B8]">
-                              {log.entity_type}{log.entity_id ? ` #${log.entity_id}` : ""}
+                              {log.entity_type}
                             </span>
                           ) : "—"}
                         </td>

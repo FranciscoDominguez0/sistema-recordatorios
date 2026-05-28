@@ -901,7 +901,6 @@ function ServiciosPageContent() {
                         </td>
                         <td className="px-4 py-3">
                           <p className="truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{s.client_name ?? "-"}</p>
-                          <p className="truncate text-xs text-[#64748B] dark:text-[#94A3B8]">ID: {s.client_id}</p>
                         </td>
                         <td className="px-4 py-3 text-[#64748B] dark:text-[#94A3B8]">{formatDate(s.expiration_date)}</td>
                         <td className="px-4 py-3">
@@ -1033,10 +1032,7 @@ function ServiciosPageContent() {
                   ) : null}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
-                      Servicio #{detailService?.id ?? "-"}
-                    </span>
-                    <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[#0F172A] dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]">
-                      Cliente: {detailService?.client_name ?? detailService?.client_id ?? "-"}
+                      Cliente: {detailService?.client_name ?? "-"}
                     </span>
                     <span
                       className={cn(
@@ -1201,7 +1197,7 @@ function ServiciosPageContent() {
                                 <span className="block truncate font-medium text-[#0F172A] dark:text-[#F1F5F9]">{c.name}</span>
                                 <span className="block truncate text-xs text-[#64748B] dark:text-[#94A3B8]">{c.email}</span>
                               </span>
-                              <span className="text-xs text-[#64748B] dark:text-[#94A3B8]">#{c.id}</span>
+
                             </button>
                           ))}
                         </div>
