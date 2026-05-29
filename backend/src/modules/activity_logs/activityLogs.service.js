@@ -178,6 +178,14 @@ class ActivityLogsService {
     );
     return rows.map((r) => r.action);
   }
+  async cleanup(days) {
+    const safeDays = Math.max(Number(days) || 30, 0);
+    const [result] = await pool.query(
+      "DELETE FROM activity_logs WHERE created_at < DATE_SUB(CURDATE(), INTERVAL ? DAY)",
+      [safeDays]
+    );
+    return result.affectedRows;
+  }
 }
 
 export default new ActivityLogsService();

@@ -25,10 +25,13 @@ import {
   getActivityDashboard,
   getActivityLogs,
   getActionTypes,
+  cleanupActivityLogs,
   type ActivityLog,
   type ChartData,
   type DashboardStats,
 } from "@/services/activityLogsService";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const ACTION_COLORS: Record<string, string> = {
@@ -213,6 +216,11 @@ function AuditoriasPageContent() {
   const searchParams = useSearchParams();
   const topbarSearch = (searchParams?.get("search") ?? "").toLowerCase().trim();
 
+  const { toast } = useToast();
+  const [cleanupDays, setCleanupDays] = useState(90);
+  const [cleanupOpen, setCleanupOpen] = useState(false);
+  const [cleanupLoading, setCleanupLoading] = useState(false);
+
   // Filters
   const [filterAction, setFilterAction] = useState("");
   const [filterEntity, setFilterEntity] = useState("");
@@ -268,15 +276,64 @@ function AuditoriasPageContent() {
   return (
     <div className="space-y-6 text-[#0F172A] dark:text-[#F1F5F9]">
 
+      <ConfirmDialog
+        open={cleanupOpen}
+        title="Limpiar auditorías"
+        description={`¿Seguro que deseas borrar del historial de actividad los registros de hace más de ${cleanupDays} días? Esta acción no se puede deshacer.`}
+        confirmText={cleanupLoading ? "Limpiando..." : "Limpiar"}
+        cancelText="Cancelar"
+        loading={cleanupLoading}
+        variant="danger"
+        onConfirm={async () => {
+          setCleanupLoading(true);
+          try {
+            const res = await cleanupActivityLogs(cleanupDays);
+            toast({ title: "Historial limpiado", description: `Registros eliminados: ${res.deleted}` });
+            setCleanupOpen(false);
+            await loadAll(1);
+          } catch {
+            toast({ title: "Error", description: "No se pudo limpiar el historial", variant: "error" });
+          } finally {
+            setCleanupLoading(false);
+          }
+        }}
+        onOpenChange={(open) => {
+          if (cleanupLoading) return;
+          setCleanupOpen(open);
+        }}
+      />
+
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">Auditorías</h1>
           <p className="mt-0.5 text-sm text-[#64748B]">Registro de actividad del sistema</p>
         </div>
-        <Button variant="secondary" onClick={() => loadAll(page)} disabled={loading} className="gap-2">
-          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />Actualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          <select
+            value={cleanupDays}
+            onChange={(e) => setCleanupDays(parseInt(e.target.value, 10))}
+            className="h-9 rounded-xl border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#0F172A] shadow-sm shadow-black/5 dark:border-neutral-900 dark:bg-neutral-950 dark:text-[#F1F5F9]"
+            aria-label="Rango de limpieza"
+          >
+            <option value={7}>Borrar de más de 7 días</option>
+            <option value={30}>Borrar de más de 30 días</option>
+            <option value={60}>Borrar de más de 60 días</option>
+            <option value={90}>Borrar de más de 90 días</option>
+            <option value={180}>Borrar de más de 180 días</option>
+          </select>
+          <Button
+            variant="secondary"
+            className="h-9 gap-2 text-red-600 dark:text-red-400"
+            disabled={loading || cleanupLoading}
+            onClick={() => setCleanupOpen(true)}
+          >
+            Limpiar
+          </Button>
+          <Button variant="secondary" onClick={() => loadAll(page)} disabled={loading} className="h-9 gap-2">
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}

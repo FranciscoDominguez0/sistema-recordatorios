@@ -57,6 +57,15 @@ class ActivityLogsController {
       return res.status(500).json({ message: error.message });
     }
   }
+  async cleanup(req, res) {
+    try {
+      const { days } = req.body ?? {};
+      const deleted = await activityLogsService.cleanup(days);
+      return res.json({ deleted });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 export default new ActivityLogsController();

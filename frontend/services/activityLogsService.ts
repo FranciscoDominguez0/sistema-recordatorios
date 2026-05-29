@@ -66,3 +66,10 @@ export async function getActionTypes(): Promise<string[]> {
   const res = await api.get<string[]>("/activity-logs/action-types", { headers: authHeaders() });
   return res.data;
 }
+
+export async function cleanupActivityLogs(days: number): Promise<{ deleted: number }> {
+  const res = await api.post<{ deleted: number }>("/activity-logs/cleanup", { days }, {
+    headers: authHeaders(),
+  });
+  return res.data;
+}

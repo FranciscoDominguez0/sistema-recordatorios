@@ -8,5 +8,6 @@ router.get("/",             verifyToken, (req, res) => activityLogsController.ge
 router.get("/dashboard",    verifyToken, (req, res) => activityLogsController.dashboard(req, res));
 router.get("/chart",        verifyToken, (req, res) => activityLogsController.chart(req, res));
 router.get("/action-types", verifyToken, (req, res) => activityLogsController.getActionTypes(req, res));
+router.post("/cleanup",     verifyToken, (req, res) => activityLogsController.cleanup(req, res));
 
 export default router;
