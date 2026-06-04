@@ -17,3 +17,4 @@ export function startReminderJob() {
 
   console.log("✅ Cron job de recordatorios iniciado (todos los días 8:00 AM hora Panamá).");
 }
+
