@@ -47,6 +47,13 @@ services:
       - BACKEND_URL=http://backend:3000
     depends_on:
       - backend
+    networks:
+      - default
+      - vigicloud_net
 
 volumes:
   db_data:
+
+networks:
+  vigicloud_net:
+    external: true
