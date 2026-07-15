@@ -10,6 +10,19 @@ import {
 
 class ReminderService {
   _emailLogRetryCols = null;
+  _autoRenewCol = null;
+
+  async hasAutoRenewColumn() {
+    if (this._autoRenewCol !== null) return this._autoRenewCol;
+    try {
+      const [cols] = await pool.query("SHOW COLUMNS FROM services LIKE 'auto_renew'");
+      this._autoRenewCol = Array.isArray(cols) && cols.length > 0;
+      return this._autoRenewCol;
+    } catch {
+      this._autoRenewCol = false;
+      return false;
+    }
+  }
 
   async hasEmailLogRetryColumns() {
     if (this._emailLogRetryCols !== null) return this._emailLogRetryCols;
@@ -39,7 +52,10 @@ class ReminderService {
       JOIN clients c ON s.client_id = c.id
       WHERE s.status = 'activo'
         AND s.expiration_date >= CURDATE()
-        AND DATE_SUB(s.expiration_date, INTERVAL s.reminder_days DAY) <= CURDATE()
+        AND (
+          DATE_SUB(s.expiration_date, INTERVAL s.reminder_days DAY) = CURDATE()
+          OR DATE(s.expiration_date) = CURDATE()
+        )
     `);
     console.log(`  [DIAG] Servicios encontrados para recordatorio: ${rows.length}`);
     for (const r of rows) {
@@ -59,15 +75,6 @@ class ReminderService {
 
     const [rows] = await pool.query(sql);
     return rows;
-  }
-
-  // Verifica si YA se envió el recordatorio en cualquier fecha anterior (no solo hoy)
-  async hasAnyReminderHistory(serviceId) {
-    const [[row]] = await pool.query(
-      "SELECT id FROM reminder_history WHERE service_id = ? LIMIT 1",
-      [serviceId]
-    );
-    return Boolean(row);
   }
 
   async hasReminderHistoryToday(serviceId) {
@@ -215,57 +222,25 @@ class ReminderService {
     const servicesDue = await this.findServicesDueToday();
     const admins = await this.getAdmins();
 
-    let sent = 0, skipped = 0, failed = 0;
+    let notified = 0, skipped = 0, adminEmailFailed = 0;
 
     for (const service of servicesDue) {
-      const serviceId     = service.id;
-      const clientId      = service.client_id;
-      const clientName    = service.client_name;
-      const clientEmail   = service.client_email;
-      const serviceName   = service.service_name;
+      const serviceId      = service.id;
+      const clientId       = service.client_id;
+      const clientName     = service.client_name;
+      const serviceName    = service.service_name;
       const expirationDate = service.expiration_date;
+      const isLastDay      = Boolean(service.is_last_day);
 
-      const isLastDay = Boolean(service.is_last_day);
-
-      if (isLastDay) {
-        const alreadySentToday = await this.hasReminderHistoryToday(serviceId);
-        if (alreadySentToday) { skipped++; continue; }
-      } else {
-        const alreadySentAny = await this.hasAnyReminderHistory(serviceId);
-        if (alreadySentAny) { skipped++; continue; }
+      if (await this.hasReminderHistoryToday(serviceId)) {
+        skipped++;
+        continue;
       }
 
-      let clientOk = false;
+      const notifTitle = isLastDay ? `Vence hoy: ${serviceName}` : `Vence pronto: ${serviceName}`;
+      const phaseLabel = isLastDay ? "día de vencimiento" : `${service.reminder_days} día(s) antes`;
 
-      // ── Email al cliente ──
-      try {
-        const builder = isLastDay ? buildClientLastDayEmail : buildClientReminderEmail;
-        const { subject, html, attachments } = await builder({ clientName, serviceName, expirationDate });
-        await emailService.sendSystemMail({ to: clientEmail, subject, html, attachments });
-        await this.logEmailSent({ clientId, serviceId, email: clientEmail, subject });
-        clientOk = true;
-        sent++;
-        console.log(`  [OK] Email cliente: ${clientEmail}`);
-      } catch (err) {
-        failed++;
-        const fallbackBuilder = isLastDay ? buildClientLastDayEmail : buildClientReminderEmail;
-        const fallbackSubject = isLastDay ? `Último día: ${serviceName}` : `Recordatorio: ${serviceName}`;
-        const { subject } = await fallbackBuilder({ clientName, serviceName, expirationDate })
-          .catch(() => ({ subject: fallbackSubject }));
-        await this.logEmailFailed({ clientId, serviceId, email: clientEmail, subject, errorMessage: err.message })
-          .catch(e => console.error(`  [DB-LOG ERROR] No se pudo guardar logEmailFailed:`, e.message));
-        await notificationsService.broadcastToAgents({
-          client_id: clientId,
-          service_id: serviceId,
-          task_id: null,
-          type: "email_sent",
-          title: "Error enviando correo",
-          message: `Falló el envío del correo a ${clientEmail} para el servicio "${serviceName}" (${clientName}). ${String(err.message || "").slice(0, 120)}`
-        }).catch(() => {});
-        console.error(`  [FAIL] Email cliente:`, err.message);
-      }
-
-      // ── Notificación in-app para cada admin (service_expiring) ──
+      // ── Notificación in-app a admins ──
       const alreadyNotified = await notificationsService.hasServiceNotificationToday(serviceId);
       if (!alreadyNotified) {
         await notificationsService.broadcastToAdmins({
@@ -273,7 +248,7 @@ class ReminderService {
           service_id: serviceId,
           task_id: null,
           type: "service_expiring",
-          title: `Vence pronto: ${serviceName}`,
+          title: notifTitle,
           message: clientName
         });
       }
@@ -286,6 +261,7 @@ class ReminderService {
           await this.logEmailSent({ clientId: null, serviceId, email: admin.email, subject });
           console.log(`  [OK] Email admin: ${admin.email}`);
         } catch (err) {
+          adminEmailFailed++;
           const { subject } = await buildAdminReminderEmail({ adminName: admin.name, clientName, serviceName, expirationDate }).catch(() => ({ subject: `[Aviso] ${serviceName}` }));
           await this.logEmailFailed({ clientId: null, serviceId, email: admin.email, subject, errorMessage: err.message })
             .catch(e => console.error(`  [DB-LOG ERROR] No se pudo guardar logEmailFailed (admin):`, e.message));
@@ -297,15 +273,16 @@ class ReminderService {
             title: "Error enviando correo",
             message: `Falló el envío del correo a ${admin.email} (admin) para el servicio "${serviceName}" (${clientName}). ${String(err.message || "").slice(0, 120)}`
           }).catch(() => {});
+          console.error(`  [FAIL] Email admin ${admin.email}:`, err.message);
         }
       }
 
-      if (clientOk) {
-        await this.createReminderHistory(serviceId).catch(() => {});
-      }
+      await this.createReminderHistory(serviceId).catch(() => {});
+      notified++;
+      console.log(`  [OK] Recordatorio (${phaseLabel}): ID=${serviceId} "${serviceName}" — ${clientName}`);
     }
 
-    return { services_found: servicesDue.length, skipped, sent, failed };
+    return { services_found: servicesDue.length, skipped, notified, admin_email_failed: adminEmailFailed };
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -393,7 +370,12 @@ class ReminderService {
   // ─────────────────────────────────────────────────────────────────────────
   async processAutoRenewals() {
     console.log("▶ Proceso 4: Renovación automática de servicios...");
-    
+
+    if (!(await this.hasAutoRenewColumn())) {
+      console.log("  [SKIP] Columna auto_renew no existe — ejecute database/migracion02.sql");
+      return { auto_renewed: 0, skipped: true };
+    }
+
     // Buscar servicios con auto_renovación activa, estado activo/vencido y fecha expiración <= hoy
     const [services] = await pool.query(`
       SELECT s.*, c.name AS client_name, c.email AS client_email
