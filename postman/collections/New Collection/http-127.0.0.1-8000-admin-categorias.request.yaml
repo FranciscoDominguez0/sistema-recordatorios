@@ -1,0 +1,29 @@
+$kind: http-request
+name: http://127.0.0.1:8000/admin/categorias
+description: ""
+url: http://127.0.0.1:8000/admin/categorias
+method: GET
+headers:
+  - key: Accept
+    value: text/html
+    disabled: true
+    description: ""
+body:
+  type: formdata
+  content:
+    - type: text
+      key: _token
+      value: gNA9ipi9IDO4SNDxO1PaNhr3qGGM8IMWGhzgfbJm
+      description: ""
+      disabled: false
+    - type: text
+      key: email
+      value: dominguezf225@gmail.com
+      description: ""
+      disabled: false
+    - type: text
+      key: password
+      value: 4e369CBEAD
+      description: ""
+      disabled: false
+order: 1786223041859

@@ -12,6 +12,8 @@ RUN npm ci
 COPY . .
 
 # Build the Next.js app
+ARG BACKEND_URL
+ENV BACKEND_URL=$BACKEND_URL
 RUN npm run build
 
 # Runner stage
