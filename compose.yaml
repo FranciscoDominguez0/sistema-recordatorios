@@ -26,6 +26,8 @@ services:
       - DB_NAME=reminder_app
       - JWT_SECRET=super_secret_key_123
       - PORT=3000
+    ports:
+      - "3000:3000"
     depends_on:
       - db
     networks:
@@ -41,6 +43,8 @@ services:
     restart: always
     environment:
       - BACKEND_URL=http://backend:3000
+    ports:
+      - "3001:3001" # Accede al frontend con http://IP_DEL_SERVIDOR:3001
     depends_on:
       - backend
     networks:
